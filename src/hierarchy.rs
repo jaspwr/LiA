@@ -67,7 +67,7 @@ impl Arg {
     fn codegen (&self) -> String {
         match &self.arg_type {
             ArgType::Curly => format!{"{{{}}}",codegen_nodelist(&self.arg)},
-            ArgType::Square => { println!("codegen"); format!{"[{}]",codegen_nodelist(&self.arg)} }
+            ArgType::Square => format!{"[{}]",codegen_nodelist(&self.arg)}
         }
     }
 }

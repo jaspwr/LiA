@@ -13,12 +13,12 @@ pub fn is_whitespace (char: char) -> bool {
     char == ' ' || char == '\t' || char == '\n' || char == '\r' || char == '\x0C' || char == '\x0B'
 }
 
-pub fn parse_args (tokens: &TokenList) -> (ArgList, usize) {
+pub fn parse_args (tokens: &TokenList, start: usize, end: usize) -> ArgList {
     let mut ret: ArgList = Vec::new();
     let mut bracket_depths = BrackDepths::default();
     let mut arg_type: Option<ArgType> = None;
     let mut arg_start = 0;
-    for i in 0..tokens.len() {
+    for i in start..end {
 
         let delta = delta_bracket_depth(&tokens[i]);
         if bracket_depths.curly == 0 && bracket_depths.square == 0 {
@@ -41,7 +41,7 @@ pub fn parse_args (tokens: &TokenList) -> (ArgList, usize) {
             }
         }
     }
-    (ret, tokens.len())
+    ret
 }
 
 pub fn delta_bracket_depth (token: &Token) -> BrackDepths {

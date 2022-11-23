@@ -28,7 +28,7 @@ impl NodeParser for TexCommandParser {
         }.to_string();
         vec!{Rc::new( TexCommand {
             command,
-            args: parse_args(&tokens).0
+            args: parse_args(&tokens, 1, tokens.len())
         })}
     }
 }

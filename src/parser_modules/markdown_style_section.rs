@@ -24,7 +24,7 @@ impl NodeParser for LiaMarkDownSections {
         }
     }
 
-    fn is_closer(&self, token: &Token, next_token: &Token, bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(&self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool {
         match token {
             Token::Newline => { bracket_depths.curly == 0 },
             _ => { false }
@@ -57,7 +57,7 @@ impl NodeParser for LiaMarkDownSections {
                                 break;
                             }
                         }
-                        node_list(tokens, start, len)
+                        node_list(tokens, start, len-1)
                     },
                     arg_type: ArgType::Curly
                 }]

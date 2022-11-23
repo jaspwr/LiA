@@ -2,10 +2,13 @@ use std::rc::Rc;
 
 use crate::parser_modules::environments::LiaEnvParser;
 use crate::parser_modules::imports::LiaUseParser;
+use crate::parser_modules::markdown_style_list::LiaMardownListParser;
 use crate::parser_modules::markdown_style_section::LiaMarkDownSections;
 use crate::parser_modules::tex_command::TexCommandParser;
+use crate::parser_modules::variables::LiaVariableParser;
 use crate::tokeniser::*;
 use crate::hierarchy::*;
+use crate::utils::count_whitespace;
 use crate::utils::delta_bracket_depth;
 
 pub fn contruct_doc(tokens: TokenList) -> Doc {
@@ -16,11 +19,13 @@ pub fn contruct_doc(tokens: TokenList) -> Doc {
 
 pub fn node_list (tokens: TokenList, start: usize, end: usize) -> NodeList {
     // TODO: split into multiple functions
-    let node_parsers: [Rc<dyn NodeParser>; 4] = [
+    let node_parsers: [Rc<dyn NodeParser>; 6] = [
         Rc::new(LiaMarkDownSections::default()),
         Rc::new(TexCommandParser::default()),
         Rc::new(LiaEnvParser::default()),
         Rc::new(LiaUseParser::default()),
+        Rc::new(LiaVariableParser::default()),
+        Rc::new(LiaMardownListParser::default()),
     ];
 
     let mut items: NodeList = Vec::new();
@@ -38,7 +43,9 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize) -> NodeList {
         
         if let Some(m) = in_parser_module {
             let next_token = &tokens[if i + 1 < tokens.len() { i + 1 } else { i }];
-            if node_parsers[m].is_closer(&tokens[i], next_token, &bracket_depths) {
+            let whitespace = count_whitespace(&tokens, i);
+            let next_token_no_whitespace = &tokens[if i + whitespace < tokens.len() { i + whitespace } else { i }];
+            if node_parsers[m].is_closer(&tokens[i], next_token, next_token_no_whitespace, &bracket_depths) {
                 println!("END {:?}", tokens[i]);
                 child_tokens_buffer.push(tokens[i].clone());
                 pushed_token_flag = true;
@@ -61,7 +68,9 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize) -> NodeList {
                     in_parser_module = Some(j);
                     if let Some(m) = in_parser_module {
                         let next_token = &tokens[if i + 1 < tokens.len() { i + 1 } else { i }];
-                        if node_parsers[m].is_closer(&tokens[i], next_token, &bracket_depths) {
+                        let whitespace = count_whitespace(&tokens, i);
+                        let next_token_no_whitespace = &tokens[if i + whitespace < tokens.len() { i + whitespace } else { i }];
+                        if node_parsers[m].is_closer(&tokens[i], next_token, next_token_no_whitespace, &bracket_depths) {
                             child_tokens_buffer.push(tokens[i].clone());
                             pushed_token_flag = true;
                             println!("END {:?}", tokens[i]);
@@ -83,18 +92,18 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize) -> NodeList {
 
 fn text_node (tokens: &TokenList) -> Rc<dyn Node> {
     let mut text = String::new();
-    println!("WOOFING {:?}", text);
-
     for token in tokens {
         match token {
             Token::Nothing(text_) => { text.push_str(&text_); },
-            Token::Whitespace(text_) => { text.push_str(&text_); },
-            Token::Newline => { text.push_str(&" ".to_string()); },
+            Token::Whitespace(space) => { if space.contains(" ") { text.push_str(&" ".to_string()); }},
+            Token::Newline => { text.push_str(&"\n".to_string()); },
             _ => { }
         }
     }
     Rc::new( Text { text })
 }
+
+
 
 use std::ops::Add;
 use std::ops::AddAssign;
@@ -128,6 +137,6 @@ impl AddAssign for BrackDepths {
 
 pub trait NodeParser {
     fn is_target(&self, token: &Token) -> bool;
-    fn is_closer(&self, token: &Token, next_token: &Token, bracket_depths: &BrackDepths) -> bool;
+    fn is_closer(&self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool;
     fn parse (&self, tokens: TokenList) -> Vec<Rc<dyn Node>>;
 }

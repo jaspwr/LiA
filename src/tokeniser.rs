@@ -25,7 +25,8 @@ pub fn to_tokens (input_lia: String) -> TokenList {
     let mut pre_char_group = CharGroup::Whitespace;
     let mut first_of_line = true;
     input_lia.chars().for_each(|c| {
-        if c == '\n' || c == ';' || c == '\r' { first_of_line = true; 
+        if c == '\r' { return; }
+        if c == '\n' || c == ';' { first_of_line = true; 
             let token = parse_token(&current_token, first_of_line);
             ret.push(token);
             current_token.clear();
@@ -47,7 +48,6 @@ pub fn to_tokens (input_lia: String) -> TokenList {
         current_token.push(c);
         pre_char_group = char_group;
     });
-    ret.push(Token::Newline);
     ret
 }
 

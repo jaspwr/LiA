@@ -13,7 +13,7 @@ impl NodeParser for TexCommandParser {
         }
     }
 
-    fn is_closer(&self, token: &Token, next_token: &Token, bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(&self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool {
         bracket_depths.curly == 0 && bracket_depths.square == 0
         && match next_token {
             Token::Nothing(t) => { t != "{" && t != "[" },

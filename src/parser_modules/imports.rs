@@ -13,7 +13,7 @@ impl NodeParser for LiaUseParser {
         }
     }
 
-    fn is_closer(&self, token: &Token, next_token: &Token, bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(&self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool {
         match token {
             Token::Newline => { bracket_depths.curly == 0 },
             _ => { false }
@@ -52,7 +52,6 @@ impl NodeParser for LiaUseParser {
 fn parse_to_args (tokens: TokenList, start: usize) -> ArgList {
     let len = tokens.len();
     let mut start = start;
-    
     while start < len {
         if let Token::Whitespace(_) = tokens[start] { start += 1; } else { break; }
     }
@@ -78,10 +77,7 @@ fn parse_to_args (tokens: TokenList, start: usize) -> ArgList {
             end += 1;
         }
     }
-    
-
     let mut args = parse_args(&tokens, start, end);
-
     if end + 1 > len {
         panic!("No package name");
     }

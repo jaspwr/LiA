@@ -13,8 +13,7 @@ impl NodeParser for LiaEnvParser {
         }
     }
 
-    fn is_closer(&self, token: &Token, next_token: &Token, bracket_depths: &BrackDepths) -> bool {
-        println!("is_closer: {:?} {:?}", token, bracket_depths.curly );
+    fn is_closer(&self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool {
         match token {
             Token::Nothing(t) => { t == "}" && bracket_depths.curly == 0 },
             _ => { false }

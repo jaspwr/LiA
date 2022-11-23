@@ -63,3 +63,20 @@ pub fn delta_bracket_depth (token: &Token) -> BrackDepths {
     }
     bracket_depths
 }
+
+pub fn count_whitespace (tokens: &TokenList, start: usize) -> usize {
+    let mut count = 1;
+    let len = tokens.len();
+    while start + count < len {
+        if let Token::Whitespace(_) = tokens[start + count] {
+            count += 1;
+        } else {
+            if let Token::Newline = tokens[start + count] {
+                count += 1;
+            } else {
+                break;
+            }
+        }
+    }
+    count
+}

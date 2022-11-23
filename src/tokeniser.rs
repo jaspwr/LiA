@@ -1,13 +1,5 @@
 use crate::utils::*;
 
-#[derive(Debug)]
-pub struct token {
-    string: String,
-    id: u32
-}
-
-type token_index = usize;
-
 #[derive(PartialEq)]
 enum CharGroup {
     Whitespace,
@@ -25,33 +17,43 @@ fn classify_char (c: &char) -> CharGroup {
     }
 }
 
-pub fn to_tokens (input_lia: String) -> Vec<token_index> {
-    let mut ret = Vec::<token_index>::new();
+pub type TokenList = Vec<Token>;
+
+pub fn to_tokens (input_lia: String) -> TokenList {
+    let mut ret = Vec::<Token>::new();
     let mut current_token = String::new();
     let mut pre_char_group = CharGroup::Whitespace;
     let mut first_of_line = true;
     input_lia.chars().for_each(|c| {
-        if c == '\n' || c == ';' { first_of_line = true; println!("Token: {:?}", Token::Newline); }
+        if c == '\n' || c == ';' || c == '\r' { first_of_line = true; 
+            let token = parse_token(&current_token, first_of_line);
+            ret.push(token);
+            current_token.clear();
+            ret.push(Token::Newline); 
+            return; 
+        }
         let char_group = classify_char(&c);
         if char_group != pre_char_group || pre_char_group == CharGroup::Bracket {
             if !current_token.is_empty() {
                 let token = parse_token(&current_token, first_of_line);
-                first_of_line = false;
-                println!("Token: {:?}", token);
+                match token {
+                    Token::Whitespace(_) => {},
+                    _ => { first_of_line = false; }
+                };
+                ret.push(token);
                 current_token.clear();
             }
         }
         current_token.push(c);
         pre_char_group = char_group;
     });
-    print!("\n");
+    ret.push(Token::Newline);
     ret
 }
 
-#[derive(Debug)]
-enum Token {
+#[derive(Debug, Clone)]
+pub enum Token {
     TexCommand(String),
-    TexBracket(String),
     LiaVariable(String),
     LiaKeyword(String),
     LiaMarkDown(String),
@@ -61,8 +63,12 @@ enum Token {
 }
 
 fn parse_token (token: &String, begins_line: bool) -> Token {
+    let last = match token.chars().last() {
+        Some(c) => { c },
+        None => { ' ' }
+    };
     if begins_line {
-        if token == "#" {
+        if token.starts_with("#") {
             return Token::LiaMarkDown(token.clone());
         } else if token == "*" {
             return Token::LiaMarkDown(token.clone());
@@ -73,7 +79,7 @@ fn parse_token (token: &String, begins_line: bool) -> Token {
         Token::TexCommand(token.clone())
     } else if token.starts_with('@') {
         Token::LiaVariable(token.clone())
-    } else if is_whitespace(token.chars().last().unwrap()) {
+    } else if is_whitespace(last) {
         Token::Whitespace(token.clone())
     } else if lia_keywords.contains(&token.as_str()) {
         Token::LiaKeyword(token.clone())
@@ -81,8 +87,3 @@ fn parse_token (token: &String, begins_line: bool) -> Token {
         Token::Nothing(token.clone())
     }
 }
-
-// fn construct_heirarchy (tokens: Vec<token_index>) -> Vec<token_index> {
-//     let mut ret = Vec::<token_index>::new();
-//     ret
-// }

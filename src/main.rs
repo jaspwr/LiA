@@ -1,10 +1,12 @@
 use std::env;
-use crate::utils::*;
+use crate::{utils::*, hierarchy::Node};
 
 mod codegen;
 mod utils;
-mod lang_modules;
+mod parser_modules;
 mod tokeniser;
+mod hierarchy;
+mod hierachy_construction;
 
 
 fn main() {
@@ -21,5 +23,6 @@ fn main() {
         Err(e) => { println!("FILE ERROR: {}. Aborted.",e); return; },
     };
     let tokens = tokeniser::to_tokens(lia_file);
-    println!("{:?}", tokens);
+    let doc = hierachy_construction::contruct_doc(tokens);
+    println!("{}", doc.codegen());
 }

@@ -6,32 +6,24 @@ use crate::{hierachy_construction::*, tokeniser::{Token, TokenList}, hierarchy::
 pub struct LiaMarkDownSections {}
 
 impl NodeParser for LiaMarkDownSections {
-    fn is_target(&self, token: &Token) -> bool {
+    fn is_target(&mut self, token: &Token, identation: i32) -> bool {
         match token {
             Token::LiaMarkDown(text) => { 
-                println!("LiaMarkDown: {}", text);
-                if text == "###" {
-                    true
-                } else if text == "##" {
-                    true
-                } else if text == "#" {
-                    true
-                } else {
-                    false
-                }    
+                //println!("LiaMarkDown: {}", text);
+                text.starts_with("#")
             },
             _ => { false }
         }
     }
 
-    fn is_closer(&self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(&mut self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool {
         match token {
             Token::Newline => { bracket_depths.curly == 0 },
             _ => { false }
         }
     }
 
-    fn parse (&self, tokens: TokenList) -> Vec<Rc<dyn Node>> {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> Vec<Rc<dyn Node>> {
         println!("meow {:?}", tokens[0]);
         let command = match &tokens[0] {
             Token::LiaMarkDown(hash) => { 
@@ -39,6 +31,9 @@ impl NodeParser for LiaMarkDownSections {
                     "#" => { "section" },
                     "##" => { "subsection" },
                     "###" => { "subsubsection" },
+                    "#*" => { "section*" },
+                    "##*" => { "subsection*" },
+                    "###*" => { "subsubsection*" },
                     _ => { todo!() }
                 }
             },

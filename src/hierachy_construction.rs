@@ -8,6 +8,7 @@ use crate::parser_modules::tex_command::TexCommandParser;
 use crate::parser_modules::variables::LiaVariableParser;
 use crate::tokeniser::*;
 use crate::hierarchy::*;
+use crate::utils::count_indentation;
 use crate::utils::count_whitespace;
 use crate::utils::delta_bracket_depth;
 
@@ -19,13 +20,13 @@ pub fn contruct_doc(tokens: TokenList) -> Doc {
 
 pub fn node_list (tokens: TokenList, start: usize, end: usize) -> NodeList {
     // TODO: split into multiple functions
-    let node_parsers: [Rc<dyn NodeParser>; 6] = [
-        Rc::new(LiaMarkDownSections::default()),
-        Rc::new(TexCommandParser::default()),
-        Rc::new(LiaEnvParser::default()),
-        Rc::new(LiaUseParser::default()),
-        Rc::new(LiaVariableParser::default()),
-        Rc::new(LiaMardownListParser::default()),
+    let mut node_parsers: [Box<dyn NodeParser>; 6] = [
+        Box::new(LiaMarkDownSections::default()),
+        Box::new(TexCommandParser::default()),
+        Box::new(LiaEnvParser::default()),
+        Box::new(LiaUseParser::default()),
+        Box::new(LiaVariableParser::default()),
+        Box::new(LiaMardownListParser::default()),
     ];
 
     let mut items: NodeList = Vec::new();
@@ -35,53 +36,63 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize) -> NodeList {
     if start > tokens.len() || end > tokens.len() {
         panic!("start or end is out of bounds");
     }
+    let mut indentation = 0;
+    let mut indentation_type: Option<IndentationType> = None;
     for i in start..end {
-        println!("AAA: {:?}", tokens[i]);
-
+        // TODO: refactor
         let mut pushed_token_flag = false;
         bracket_depths += delta_bracket_depth(&tokens[i]);
-        
+
+        count_indentation(&tokens, i, &mut indentation, &mut indentation_type);
         if let Some(m) = in_parser_module {
-            let next_token = &tokens[if i + 1 < tokens.len() { i + 1 } else { i }];
+
             let whitespace = count_whitespace(&tokens, i);
-            let next_token_no_whitespace = &tokens[if i + whitespace < tokens.len() { i + whitespace } else { i }];
-            if node_parsers[m].is_closer(&tokens[i], next_token, next_token_no_whitespace, &bracket_depths) {
-                println!("END {:?}", tokens[i]);
-                child_tokens_buffer.push(tokens[i].clone());
-                pushed_token_flag = true;
-                items.extend(node_parsers[m].parse(child_tokens_buffer.clone()));
-                child_tokens_buffer.clear();
-                in_parser_module = None;
-                for module in &node_parsers {
-                    if (*module).is_target(&tokens[i]) {
-                        println!("START {:?}", tokens[i]);
-                        in_parser_module = Some(i);
+            if node_parsers[m].is_closer(&tokens[i], 
+                &tokens[if i + 1 < tokens.len() { i + 1 } else { i }],
+                &tokens[if i + whitespace < tokens.len() { i + whitespace } else { i }],
+                &bracket_depths) {
+
+                    child_tokens_buffer.push(tokens[i].clone()); pushed_token_flag = true;
+                    items.extend(node_parsers[m].parse(child_tokens_buffer.clone(), indentation_type));
+                    child_tokens_buffer.clear(); in_parser_module = None;
+
+                // For single token commands
+                for j in 0..node_parsers.len() {
+
+                    if (node_parsers[j]).is_target(&tokens[i], indentation as i32) {
+
+                        items.push(text_node(&child_tokens_buffer));
+                        child_tokens_buffer.clear();
+                        in_parser_module = Some(j);
                     }
                 }
             }
         } else {
             for j in 0..node_parsers.len() {
-                if (node_parsers[j]).is_target(&tokens[i]) {
+                if (node_parsers[j]).is_target(&tokens[i], indentation as i32) {
+
                     items.push(text_node(&child_tokens_buffer));
                     child_tokens_buffer.clear();
-                    println!("START {:?}", tokens[i]);
                     in_parser_module = Some(j);
+                    
+                    // For commands that start at the end of another token
                     if let Some(m) = in_parser_module {
-                        let next_token = &tokens[if i + 1 < tokens.len() { i + 1 } else { i }];
+
                         let whitespace = count_whitespace(&tokens, i);
-                        let next_token_no_whitespace = &tokens[if i + whitespace < tokens.len() { i + whitespace } else { i }];
-                        if node_parsers[m].is_closer(&tokens[i], next_token, next_token_no_whitespace, &bracket_depths) {
-                            child_tokens_buffer.push(tokens[i].clone());
-                            pushed_token_flag = true;
-                            println!("END {:?}", tokens[i]);
-                            items.extend(node_parsers[m].parse(child_tokens_buffer.clone()));
-                            child_tokens_buffer.clear();
-                            in_parser_module = None;
+                        if node_parsers[m].is_closer(&tokens[i], 
+                            &tokens[if i + 1 < tokens.len() { i + 1 } else { i }],
+                            &tokens[if i + whitespace < tokens.len() { i + whitespace } else { i }],
+                            &bracket_depths) {
+                                
+                                child_tokens_buffer.push(tokens[i].clone()); pushed_token_flag = true;
+                                items.extend(node_parsers[m].parse(child_tokens_buffer.clone(), indentation_type));
+                                child_tokens_buffer.clear(); in_parser_module = None;
                         }
                     }
                 }
             }
         }
+        // This control flow is scuffed need to refactor.
         if !pushed_token_flag {
             child_tokens_buffer.push(tokens[i].clone());
         }
@@ -102,8 +113,6 @@ fn text_node (tokens: &TokenList) -> Rc<dyn Node> {
     }
     Rc::new( Text { text })
 }
-
-
 
 use std::ops::Add;
 use std::ops::AddAssign;
@@ -136,7 +145,13 @@ impl AddAssign for BrackDepths {
 }
 
 pub trait NodeParser {
-    fn is_target(&self, token: &Token) -> bool;
-    fn is_closer(&self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool;
-    fn parse (&self, tokens: TokenList) -> Vec<Rc<dyn Node>>;
+    fn is_target(&mut self, token: &Token, identation: i32) -> bool;
+    fn is_closer(&mut self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool;
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> Vec<Rc<dyn Node>>;
+}
+
+#[derive(Clone, Copy)]
+pub enum IndentationType {
+    Space(u8),
+    Tab
 }

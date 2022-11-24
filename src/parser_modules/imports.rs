@@ -6,21 +6,21 @@ use crate::{hierachy_construction::*, tokeniser::{Token, TokenList}, hierarchy::
 pub struct LiaUseParser {}
 
 impl NodeParser for LiaUseParser {
-    fn is_target(&self, token: &Token) -> bool {
+    fn is_target(&mut self, token: &Token, identation: i32) -> bool {
         match token {
             Token::LiaKeyword(k) => { k == "use" },
             _ => { false }
         }
     }
 
-    fn is_closer(&self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(&mut self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool {
         match token {
             Token::Newline => { bracket_depths.curly == 0 },
             _ => { false }
         }
     }
 
-    fn parse (&self, tokens: TokenList) -> Vec<Rc<dyn Node>> {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> Vec<Rc<dyn Node>> {
         let mut imports: Vec<ArgList> = Vec::new();
 
         let len = tokens.len();

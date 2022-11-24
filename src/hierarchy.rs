@@ -33,13 +33,21 @@ impl Node for Text {
 
 impl Node for TexCommand {
     fn codegen (&self) -> String {
-        format!("\\{}{} ", self.command, (&self.args).into_iter().map(|arg| -> String { arg.codegen() }).collect::<String>())
+        format!("\\{}{}", self.command, (&self.args).into_iter().map(|arg| -> String { 
+            arg.codegen() 
+        }).collect::<String>())
     }
 }
 
 impl Node for TexEnvironment {
     fn codegen (&self) -> String {
-        format!("\\begin{{{}}}{}{}\\end{{{}}}", self.name, (&self.args).into_iter().map(|arg| -> String { arg.codegen() }).collect::<String>(), (&self.children).into_iter().map(|child| -> String { child.codegen() }).collect::<String>(), self.name)
+        format!("\\begin{{{}}}{}{}\\end{{{}}}", self.name, 
+        (&self.args).into_iter().map(|arg| -> String { 
+            arg.codegen() 
+        }).collect::<String>(), 
+        (&self.children).into_iter().map(|child| -> String { 
+            child.codegen() 
+        }).collect::<String>(), self.name)
     }
 }
 
@@ -60,7 +68,9 @@ pub struct Arg {
 }
 
 fn codegen_nodelist (list: &NodeList) -> String {
-    list.into_iter().map(|node| -> String { node.codegen().clone() }).collect::<String>()
+    list.into_iter().map(|node| -> String { 
+        node.codegen().clone() 
+    }).collect::<String>()
 }
 
 impl Arg {

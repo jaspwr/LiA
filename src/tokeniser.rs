@@ -48,6 +48,8 @@ pub fn to_tokens (input_lia: String) -> TokenList {
         current_token.push(c);
         pre_char_group = char_group;
     });
+    let token = parse_token(&current_token, first_of_line);
+    ret.push(token);
     ret
 }
 
@@ -74,14 +76,15 @@ fn parse_token (token: &String, begins_line: bool) -> Token {
             return Token::LiaMarkDown(token.clone());
         }
     }
-    let lia_keywords = vec!["use", "env"];
     if token.starts_with('\\') {
         Token::TexCommand(token.clone())
     } else if token.starts_with('@') {
         Token::LiaVariable(token.clone())
     } else if is_whitespace(last) {
         Token::Whitespace(token.clone())
-    } else if lia_keywords.contains(&token.as_str()) {
+    } else if token.as_str() == "env" {
+        Token::LiaKeyword(token.clone())
+    } else if token.as_str() == "use" && begins_line {
         Token::LiaKeyword(token.clone())
     } else {
         Token::Nothing(token.clone())

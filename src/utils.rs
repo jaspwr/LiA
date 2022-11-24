@@ -1,6 +1,6 @@
 use std::{fs::File, io::Read};
 
-use crate::{tokeniser::{TokenList, Token}, hierarchy::{ArgList, ArgType, Arg}, hierachy_construction::{BrackDepths, node_list}};
+use crate::{tokeniser::{TokenList, Token}, hierarchy::{ArgList, ArgType, Arg}, hierachy_construction::{BrackDepths, node_list, IndentationType}};
 
 pub fn load_utf8_file (path: String) -> Result<String, std::io::Error> {
     let mut file = File::open(path)?;
@@ -79,4 +79,29 @@ pub fn count_whitespace (tokens: &TokenList, start: usize) -> usize {
         }
     }
     count
+}
+
+pub fn count_indentation (tokens: &TokenList, i: usize, indentation: &mut usize, indentation_type: &mut Option<IndentationType>) {
+    if let Token::Newline = &tokens[if i > 0 { i - 1 } else { 0 }] {
+        *indentation = 0;
+        if let Token::Whitespace(whitespace) = &tokens[i] {
+            if indentation_type.clone().is_none() {
+                if whitespace.contains('\t') {
+                    *indentation_type = Some(IndentationType::Tab);
+                } else {
+                    // TODO: Do this properly.
+                    *indentation_type = Some(IndentationType::Space(if whitespace.len() % 4 == 0 { 4 } else { 2 }));
+                }
+            }
+            match indentation_type.unwrap() {
+                IndentationType::Tab => {
+                    *indentation = whitespace.chars().filter(|c| *c == '\t').count();
+                }
+                IndentationType::Space(space_count) => {
+                    *indentation = (whitespace.chars().filter(|c| *c == ' ').count() as f32 / space_count as f32).floor() as usize;
+                }
+            }
+
+        }
+    }
 }

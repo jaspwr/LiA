@@ -1,26 +1,26 @@
 use std::rc::Rc;
 
-use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list}, hierarchy::{Node, TexCommand, Arg, ArgType, TexEnvironment}};
+use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType}, hierarchy::{Node, TexCommand, Arg, ArgType, TexEnvironment}};
 
 #[derive(Default)]
 pub struct LiaEnvParser {}
 
 impl NodeParser for LiaEnvParser {
-    fn is_target(&self, token: &Token) -> bool {
+    fn is_target(&mut self, token: &Token, identation: i32) -> bool {
         match token {
             Token::LiaKeyword(k) => { k == "env" },
             _ => { false }
         }
     }
 
-    fn is_closer(&self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(&mut self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool {
         match token {
             Token::Nothing(t) => { t == "}" && bracket_depths.curly == 0 },
             _ => { false }
         }
     }
 
-    fn parse (&self, tokens: TokenList) -> Vec<Rc<dyn Node>> {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> Vec<Rc<dyn Node>> {
         let mut command_pos = 1;
         let len = tokens.len();
         while command_pos < len {

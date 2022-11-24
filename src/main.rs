@@ -1,7 +1,9 @@
 use std::env;
-use crate::{utils::*, hierarchy::Node};
+use compiler::*;
+use owo_colors::OwoColorize;
 
-mod codegen;
+mod compiler;
+mod cli;
 mod utils;
 mod parser_modules;
 mod tokeniser;
@@ -11,18 +13,19 @@ mod hierachy_construction;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    // TODO: parse args properly
-    let temp_path = args.last();
-    if temp_path.is_none() || args.len() < 2 {
-        println!("Not enough arguments were provided. Aborted");
-        return;
-    }
-    let temp_path = temp_path.unwrap();
-    let lia_file = match load_utf8_file(temp_path.clone()) {
-        Ok(contents) => { contents },
-        Err(e) => { println!("FILE ERROR: {}. Aborted.",e); return; },
+    
+    let jobs = match cli::parse_args(args) {
+        Ok(jobs) => { jobs },
+        Err(e) => {
+            println!("[{}] {}", "Error".red(), e);
+            return;
+        }
     };
-    let tokens = tokeniser::to_tokens(lia_file);
-    let doc = hierachy_construction::contruct_doc(tokens);
-    println!("{}", doc.codegen());
+    for job in jobs {
+        match compile(job.clone()) {
+            Ok(_) => { println!("[{}] Ouput \"{}\".", "Success".green(), job.output_path.clone());},
+            Err(e) => { println!("[{}] \"{}\" {}","Compiler Error".red(), job.input_path.clone(), e); }
+        };
+    }
+
 }

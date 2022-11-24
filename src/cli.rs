@@ -1,0 +1,87 @@
+use std::rc::Rc;
+
+use crate::compiler::Job;
+
+#[derive(Clone)]
+enum Flag {
+    TakesNextArg(Rc<dyn Fn(&mut Job, String) -> Result<(), String>>),
+    OnlySelf(Rc<dyn Fn(&mut Job) -> Result<(), String>>)
+}
+
+fn parse_flag (flag: &str) -> Result<Flag, String> {
+    // TODO: Compound small flags. Not needed for now.
+    match flag {
+        "-o" => {
+            Ok(Flag::TakesNextArg(Rc::new(|job: &mut Job, arg: String| -> Result<(), String> {
+                job.output_path = arg;
+                Ok(())
+            })))
+        },
+        "--debug-printing" => {
+            Ok(Flag::OnlySelf(Rc::new(|job: &mut Job| -> Result<(), String> {
+                job.debug_printing = true;
+                Ok(())
+            })))
+        },
+        _ => {
+            Err(format!("Unrecognised flag: {}", flag))
+        }
+    }
+}
+
+
+pub fn parse_args(args: Vec<String>) -> Result<Vec<Job>, String> {
+    // This returns a vec beacuase eventually it may be possible to compile multiple files at once.
+    let mut ret: Vec<Job> = Vec::new();
+    let mut working_job = Job::default();
+    let mut flag: Option<Flag> = None;
+    let mut first = true;
+    let mut file_count = 0;
+
+    for arg in args {
+        if first { first = false; continue; }
+        if arg[0..1] == *"-" {
+            if flag.is_some() { return Err(format!{"Expected value after flag; got {}.", arg}); }
+            let fl = parse_flag(&arg)?;
+            flag = Some(fl.clone());
+            match fl {
+                Flag::OnlySelf(f) => { f(&mut working_job)?; flag = None; },
+                _ => {}
+            }
+        } else {
+            match flag.clone() {
+                Some(fl) => {
+                    match fl {
+                        Flag::TakesNextArg(f) => { f(&mut working_job, arg)?; flag = None; },
+                        _ => { panic!("Should never be here.") }
+                    }
+                },
+                None => {
+                    // Flagless arg
+                    working_job.input_path = arg.clone();
+                    file_count += 1;
+                    // Remove if adding mulitple file support
+                    if file_count > 1 {
+                        return Err(format!{"Unexpected argument \"{}\".", arg});
+                    }
+                }
+            }
+        }
+    }
+    if flag.is_some() { return Err("Expected value after last flag. Aborted.".to_string()); }
+    if file_count == 0 {
+        return Err("No file was provided. Aborted.".to_string());
+    }
+    // Default output path if not specified
+    if working_job.output_path == "" {
+        let input = working_job.input_path.clone();
+        if input[input.len()-4..] == *".lia" {
+            working_job.output_path = input[0..input.len()-4].to_string() + ".tex";
+        } else {
+            working_job.output_path = input + ".tex";
+        }
+    }
+    ret.push(working_job);
+    Ok(ret)
+}
+

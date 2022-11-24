@@ -1,14 +1,15 @@
-use std::{rc::Rc, str::EncodeUtf16};
+use std::rc::Rc;
 
 use crate::{hierachy_construction::*, tokeniser::{Token, TokenList}, hierarchy::*, utils::{delta_bracket_depth, parse_args}};
 
 #[derive(Default)]
 pub struct LiaUseParser {}
 
+#[allow(unused)]
 impl NodeParser for LiaUseParser {
     fn is_target(&mut self, token: &Token, identation: i32) -> bool {
         match token {
-            Token::LiaKeyword(k) => { k == "use" },
+            Token::LiaKeyword(k, _) => { k == "use" },
             _ => { false }
         }
     }
@@ -20,18 +21,18 @@ impl NodeParser for LiaUseParser {
         }
     }
 
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> Vec<Rc<dyn Node>> {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> ParseResult {
         let mut imports: Vec<ArgList> = Vec::new();
 
         let len = tokens.len();
         
-        imports.push(parse_to_args(tokens.clone(), 1));
+        imports.push(parse_to_args(tokens.clone(), 1)?);
         let mut start = 1;
         while start < len {
             match &tokens[start] {
-                Token::Nothing(sym) => {
+                Token::Nothing(sym, _) => {
                     if sym == "," {
-                        imports.push(parse_to_args(tokens.clone(), start+1));
+                        imports.push(parse_to_args(tokens.clone(), start+1)?);
                     }
                 },
                 _ => {}
@@ -39,17 +40,19 @@ impl NodeParser for LiaUseParser {
             start += 1; 
         }
 
-
-        imports.into_iter().map(|args| {
-            Rc::new( TexCommand {
+        let mut ret: NodeList = Vec::new();
+        imports.into_iter().for_each(|args| {
+            ret.push(Rc::new( TexCommand {
                 command: "usepackage".to_string(),
                 args
-            }) as Rc<dyn Node>
-        }).collect()
+            }) as Rc<dyn Node>);
+            ret.push(Rc::new(Text { text: "\n".to_string() }));
+        });
+        Ok(ret)
     }
 }
 
-fn parse_to_args (tokens: TokenList, start: usize) -> ArgList {
+fn parse_to_args (tokens: TokenList, start: usize) -> Result<ArgList, String> {
     let len = tokens.len();
     let mut start = start;
     while start < len {
@@ -60,8 +63,8 @@ fn parse_to_args (tokens: TokenList, start: usize) -> ArgList {
     while end < len {
         bracket_depth += delta_bracket_depth(&tokens[end]);
         if bracket_depth.curly == 0 && bracket_depth.square == 0 {
-            if end + 1 > len { break; }
-            if let Token::Nothing(s) = &tokens[end+1] {
+            if end + 1 >= len { break; }
+            if let Token::Nothing(s, _) = &tokens[end+1] {
                 if s == "[" || s == "{" {
                     end += 1;
                     continue;
@@ -77,13 +80,13 @@ fn parse_to_args (tokens: TokenList, start: usize) -> ArgList {
             end += 1;
         }
     }
-    let mut args = parse_args(&tokens, start, end);
+    let mut args: ArgList = parse_args(&tokens, start, end)?;
     if end + 1 > len {
         panic!("No package name");
     }
     if args.len() == 0 {
         end -= 1;
     }
-    args.push(Arg { arg: node_list(tokens, end, end+1), arg_type: ArgType::Curly });
-    args
+    args.push(Arg { arg: node_list(tokens, end, end+1)?, arg_type: ArgType::Curly });
+    Ok(args)
 }

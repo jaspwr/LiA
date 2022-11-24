@@ -1,0 +1,26 @@
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+
+\newcommand{\img}{(src, desc) => {
+ \begin{center}
+ \image{\{"images/" + src}, 10cm}
+ \linebreak
+ \begin{textit}
+ \desc
+ \end{textit}
+ }
+\end{center}}
+\section{Cool Cat Image}
+\img{cat.png}{ Meow 🐈!}
+
+\newcommand{\muliplication}{(a: Number, b: Number) => $@a \times \newcommand{\b}{\{a * b}$
+}}\newcommand{\two}{2
+}\begin{itemize}\item  \muliplication{\two}{ 3}
+\item  \muliplication{6}{ 7}
+\item  \muliplication{9}{ 9}
+ \begin{itemize}
+\item  I'm indented
+\end{itemize}
+\item  {I'm a multiline
+ list item} 
+\end{itemize}

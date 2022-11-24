@@ -5,11 +5,11 @@ use crate::{hierachy_construction::*, tokeniser::{Token, TokenList}, hierarchy::
 #[derive(Default)]
 pub struct LiaMarkDownSections {}
 
+#[allow(unused)]
 impl NodeParser for LiaMarkDownSections {
     fn is_target(&mut self, token: &Token, identation: i32) -> bool {
         match token {
-            Token::LiaMarkDown(text) => { 
-                //println!("LiaMarkDown: {}", text);
+            Token::LiaMarkDown(text, _) => { 
                 text.starts_with("#")
             },
             _ => { false }
@@ -23,10 +23,9 @@ impl NodeParser for LiaMarkDownSections {
         }
     }
 
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> Vec<Rc<dyn Node>> {
-        println!("meow {:?}", tokens[0]);
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> ParseResult {
         let command = match &tokens[0] {
-            Token::LiaMarkDown(hash) => { 
+            Token::LiaMarkDown(hash, _) => { 
                 match hash.as_str() {
                     "#" => { "section" },
                     "##" => { "subsection" },
@@ -39,7 +38,7 @@ impl NodeParser for LiaMarkDownSections {
             },
             _ => { todo!() }
         }.to_string();
-        vec!{Rc::new( TexCommand {
+        Ok(vec![Rc::new(TexCommand {
             command,
             args: vec![Arg {
                     arg: {
@@ -52,10 +51,11 @@ impl NodeParser for LiaMarkDownSections {
                                 break;
                             }
                         }
-                        node_list(tokens, start, len-1)
+                        node_list(tokens, start, len-1)?
                     },
                     arg_type: ArgType::Curly
                 }]
-        })}
+        }), Rc::new(Text { text: "\n".to_string() })
+        ])
     }
 }

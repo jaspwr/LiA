@@ -1,26 +1,27 @@
 use std::rc::Rc;
 
-use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType}, hierarchy::{Node, TexCommand, Arg, ArgType, TexEnvironment}};
+use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult}, hierarchy::TexEnvironment};
 
 #[derive(Default)]
 pub struct LiaEnvParser {}
 
+#[allow(unused)]
 impl NodeParser for LiaEnvParser {
     fn is_target(&mut self, token: &Token, identation: i32) -> bool {
         match token {
-            Token::LiaKeyword(k) => { k == "env" },
+            Token::LiaKeyword(k, _) => { k == "env" },
             _ => { false }
         }
     }
 
     fn is_closer(&mut self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool {
         match token {
-            Token::Nothing(t) => { t == "}" && bracket_depths.curly == 0 },
+            Token::Nothing(t, _) => { t == "}" && bracket_depths.curly == 0 },
             _ => { false }
         }
     }
 
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> Vec<Rc<dyn Node>> {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> ParseResult {
         let mut command_pos = 1;
         let len = tokens.len();
         while command_pos < len {
@@ -31,7 +32,7 @@ impl NodeParser for LiaEnvParser {
             }
         }
         let command = match &tokens[command_pos] {
-            Token::Nothing(command) => { command },
+            Token::Nothing(command, _) => { command },
             _ => { todo!() }
         }.to_string();
         command_pos += 1;
@@ -43,10 +44,10 @@ impl NodeParser for LiaEnvParser {
             }
         }
         command_pos += 1;
-        vec!{Rc::new( TexEnvironment {
+        Ok(vec!{Rc::new( TexEnvironment {
             name: command,
             args: vec![],
-            children: node_list(tokens, command_pos, len-1)
-        })}
+            children: node_list(tokens, command_pos, len-1)?
+        })})
     }
 }

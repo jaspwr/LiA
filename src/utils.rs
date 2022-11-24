@@ -1,6 +1,6 @@
-use std::{fs::File, io::Read};
+use std::{fs::File, io::{Read, Write}};
 
-use crate::{tokeniser::{TokenList, Token}, hierarchy::{ArgList, ArgType, Arg}, hierachy_construction::{BrackDepths, node_list, IndentationType}};
+use crate::{tokeniser::{TokenList, Token, Location}, hierarchy::{ArgList, ArgType, Arg}, hierachy_construction::{BrackDepths, node_list, IndentationType, ParseResult}};
 
 pub fn load_utf8_file (path: String) -> Result<String, std::io::Error> {
     let mut file = File::open(path)?;
@@ -9,11 +9,17 @@ pub fn load_utf8_file (path: String) -> Result<String, std::io::Error> {
     Ok(contents)
 }
 
+pub fn write_utf8_file (path: String, contents: String) -> Result<(), std::io::Error> {
+    let mut file = File::create(path)?;
+    file.write_all(contents.as_bytes())?;
+    Ok(())
+}
+
 pub fn is_whitespace (char: char) -> bool {
     char == ' ' || char == '\t' || char == '\n' || char == '\r' || char == '\x0C' || char == '\x0B'
 }
 
-pub fn parse_args (tokens: &TokenList, start: usize, end: usize) -> ArgList {
+pub fn parse_args (tokens: &TokenList, start: usize, end: usize) -> Result<ArgList, String> {
     let mut ret: ArgList = Vec::new();
     let mut bracket_depths = BrackDepths::default();
     let mut arg_type: Option<ArgType> = None;
@@ -35,18 +41,18 @@ pub fn parse_args (tokens: &TokenList, start: usize, end: usize) -> ArgList {
             if arg_type.is_some() {
                 ret.push(Arg {
                     arg_type: arg_type.unwrap(),
-                    arg: node_list(tokens.clone(), arg_start, i)
+                    arg: node_list(tokens.clone(), arg_start, i)?
                 });
                 arg_type = None;
             }
         }
     }
-    ret
+    Ok(ret)
 }
 
 pub fn delta_bracket_depth (token: &Token) -> BrackDepths {
     let mut bracket_depths = BrackDepths::default();
-    if let Token::Nothing(str) = token {
+    if let Token::Nothing(str, _) = token {
         if str == "{" {
             bracket_depths.curly += 1;
         } else if str == "}" {
@@ -65,6 +71,7 @@ pub fn delta_bracket_depth (token: &Token) -> BrackDepths {
 }
 
 pub fn count_whitespace (tokens: &TokenList, start: usize) -> usize {
+    //let mut count = 0;
     let mut count = 1;
     let len = tokens.len();
     while start + count < len {
@@ -101,7 +108,10 @@ pub fn count_indentation (tokens: &TokenList, i: usize, indentation: &mut usize,
                     *indentation = (whitespace.chars().filter(|c| *c == ' ').count() as f32 / space_count as f32).floor() as usize;
                 }
             }
-
         }
     }
+}
+
+pub fn format_error_string (message: String, location: Location) -> ParseResult {
+    Err(format!{"{} {}", location.stringify(), message})
 }

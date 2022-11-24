@@ -19,8 +19,4 @@ use graphicx, [utf8]inputenc
 * @muliplication(9, 9)
     * I'm indented
 * {I'm a multiline
-    list item}
-
-
-
- 
+    list item} 

@@ -4,6 +4,7 @@ use crate::{utils::{load_utf8_file, write_utf8_file}, hierachy_construction, tok
 pub struct Job {
     pub input_path: String,
     pub output_path: String,
+    pub watches: bool,
     pub debug_printing: bool
 }
 

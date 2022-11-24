@@ -61,7 +61,7 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize) -> Result<NodeLis
 
                     if (node_parsers[j]).is_target(&tokens[i], indentation as i32) {
 
-                        items.push(text_node(&child_tokens_buffer));
+                        items.push(text_node(&child_tokens_buffer)?);
                         child_tokens_buffer.clear();
                         in_parser_module = Some(j);
                     }
@@ -71,7 +71,7 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize) -> Result<NodeLis
             for j in 0..node_parsers.len() {
                 if (node_parsers[j]).is_target(&tokens[i], indentation as i32) {
 
-                    items.push(text_node(&child_tokens_buffer));
+                    items.push(text_node(&child_tokens_buffer)?);
                     child_tokens_buffer.clear();
                     in_parser_module = Some(j);
                     
@@ -97,21 +97,24 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize) -> Result<NodeLis
             child_tokens_buffer.push(tokens[i].clone());
         }
     }
-    items.push(text_node(&child_tokens_buffer));
+    items.push(text_node(&child_tokens_buffer)?);
     Ok(items)
 }
 
-fn text_node (tokens: &TokenList) -> Rc<dyn Node> {
+fn text_node (tokens: &TokenList) -> Result<Rc<dyn Node>, String> {
     let mut text = String::new();
     for token in tokens {
         match token {
             Token::Nothing(text_, _) => { text.push_str(&text_); },
             Token::Whitespace(space) => { if space.contains(" ") { text.push_str(&" ".to_string()); }},
             Token::Newline => { text.push_str(&"\n".to_string()); },
+            Token::LiaKeyword(s, loc) => { return Err(format!{"{} Malformed {} statement.", loc.stringify(), s})},
+            Token::LiaMarkDown(s, loc) => { return Err(format!{"{} Malformed {} expression.", loc.stringify(), s})},
+            Token::LiaVariable(s, loc) => { return Err(format!{"{} Malformed variable expression for \"{}\".", loc.stringify(), s})},
             _ => { }
         }
     }
-    Rc::new( Text { text })
+    Ok(Rc::new( Text { text }))
 }
 
 use std::ops::Add;

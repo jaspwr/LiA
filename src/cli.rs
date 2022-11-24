@@ -1,26 +1,54 @@
 use std::rc::Rc;
 
 use crate::compiler::Job;
+use owo_colors::OwoColorize;
 
 #[derive(Clone)]
 enum Flag {
-    TakesNextArg(Rc<dyn Fn(&mut Job, String) -> Result<(), String>>),
-    OnlySelf(Rc<dyn Fn(&mut Job) -> Result<(), String>>)
+    TakesNextArg(Rc<dyn Fn(&mut Job, String) -> ShouldContinue>),
+    OnlySelf(Rc<dyn Fn(&mut Job) -> ShouldContinue>)
 }
 
 fn parse_flag (flag: &str) -> Result<Flag, String> {
     // TODO: Compound small flags. Not needed for now.
     match flag {
         "-o" => {
-            Ok(Flag::TakesNextArg(Rc::new(|job: &mut Job, arg: String| -> Result<(), String> {
+            Ok(Flag::TakesNextArg(Rc::new(|job: &mut Job, arg: String| -> ShouldContinue {
                 job.output_path = arg;
-                Ok(())
+                ShouldContinue::Continues
+            })))
+        },
+        "--watch" | "-w" => {
+            Ok(Flag::OnlySelf(Rc::new(|job: &mut Job| -> ShouldContinue {
+                job.watches = true;
+                println!("Watching \"{}\" for new changes...", job.input_path.clone());
+                ShouldContinue::Continues
             })))
         },
         "--debug-printing" => {
-            Ok(Flag::OnlySelf(Rc::new(|job: &mut Job| -> Result<(), String> {
+            Ok(Flag::OnlySelf(Rc::new(|job: &mut Job| -> ShouldContinue {
                 job.debug_printing = true;
-                Ok(())
+                ShouldContinue::Continues
+            })))
+        },
+        "--help" | "-h" => {
+            Ok(Flag::OnlySelf(Rc::new(|_job: &mut Job| -> ShouldContinue {
+                println!("[{}] LiA Compiler Help", "?".blink());
+                println!("--------------------------------");
+                println!("Usage: lia [flags] [input files]");
+                println!("Flags:");
+                println!("-o [output file] - Sets the output file.");
+                println!("--help - Prints this help message.");
+                println!("--version - Prints the version of the LiA.");
+                println!("--watch - Watch file for changes and automatically recompile.");
+                println!("Input file - The file to compile.");
+                ShouldContinue::Aborts
+            })))
+        },
+        "--version" | "-v" => {
+            Ok(Flag::OnlySelf(Rc::new(|_job: &mut Job| -> ShouldContinue {
+                println!("LiA Compiler Version {}", env!("CARGO_PKG_VERSION"));
+                ShouldContinue::Aborts
             })))
         },
         _ => {
@@ -29,6 +57,10 @@ fn parse_flag (flag: &str) -> Result<Flag, String> {
     }
 }
 
+enum ShouldContinue {
+    Continues,
+    Aborts
+}
 
 pub fn parse_args(args: Vec<String>) -> Result<Vec<Job>, String> {
     // This returns a vec beacuase eventually it may be possible to compile multiple files at once.
@@ -45,14 +77,20 @@ pub fn parse_args(args: Vec<String>) -> Result<Vec<Job>, String> {
             let fl = parse_flag(&arg)?;
             flag = Some(fl.clone());
             match fl {
-                Flag::OnlySelf(f) => { f(&mut working_job)?; flag = None; },
+                Flag::OnlySelf(f) => { match f(&mut working_job) {
+                    ShouldContinue::Continues => {},
+                    ShouldContinue::Aborts => { return Ok(vec![]); }
+                }; flag = None; },
                 _ => {}
             }
         } else {
             match flag.clone() {
                 Some(fl) => {
                     match fl {
-                        Flag::TakesNextArg(f) => { f(&mut working_job, arg)?; flag = None; },
+                        Flag::TakesNextArg(f) => { match f(&mut working_job, arg) {
+                            ShouldContinue::Continues => {},
+                            ShouldContinue::Aborts => { return Ok(vec![]); }
+                        }; flag = None; },
                         _ => { panic!("Should never be here.") }
                     }
                 },

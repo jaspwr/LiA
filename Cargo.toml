@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 owo-colors = "3.5.0"
+notify = "5.0.0"
+sha256 = "1.1.1"

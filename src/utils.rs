@@ -1,4 +1,4 @@
-use std::{fs::File, io::{Read, Write}};
+use std::{fs::{File, remove_file}, io::{Read, Write}};
 
 use crate::{tokeniser::{TokenList, Token, Location}, hierarchy::{ArgList, ArgType, Arg}, hierachy_construction::{BrackDepths, node_list, IndentationType, ParseResult}};
 
@@ -10,6 +10,7 @@ pub fn load_utf8_file (path: String) -> Result<String, std::io::Error> {
 }
 
 pub fn write_utf8_file (path: String, contents: String) -> Result<(), std::io::Error> {
+    let _ = remove_file(path.clone());
     let mut file = File::create(path)?;
     file.write_all(contents.as_bytes())?;
     Ok(())
@@ -114,4 +115,10 @@ pub fn count_indentation (tokens: &TokenList, i: usize, indentation: &mut usize,
 
 pub fn format_error_string (message: String, location: Location) -> ParseResult {
     Err(format!{"{} {}", location.stringify(), message})
+}
+
+pub fn hash_file(path: &String) -> String {
+    let bytes: &[u8] = &std::fs::read(path).unwrap();  // Vec<u8>
+    let hash = sha256::digest(bytes);
+    hash
 }

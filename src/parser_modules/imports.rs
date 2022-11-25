@@ -48,7 +48,7 @@ impl NodeParser for LiaUseParser {
             }) as Rc<dyn Node>);
             ret.push(Rc::new(Text { text: "\n".to_string() }));
         });
-        Ok(ret)
+        Ok((ret, DocSection::Imports))
     }
 }
 

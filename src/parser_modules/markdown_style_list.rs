@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::{tokeniser::{Token, TokenList, Location}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult}, hierarchy::TexEnvironment, utils::{count_indentation, format_error_string}};
+use crate::{tokeniser::{Token, TokenList, Location}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult, DocSection}, hierarchy::TexEnvironment, utils::{count_indentation, format_error_string}};
 
 #[derive(Default)]
 pub struct LiaMardownListParser {
@@ -83,10 +83,10 @@ impl NodeParser for LiaMardownListParser {
             inner_nodes.push(Token::Newline);
             pre_indentation -= 1;
         }
-        Ok(vec!{Rc::new( TexEnvironment {
+        Ok((vec!{Rc::new( TexEnvironment {
             name: "itemize".to_string(),
             args: vec![],
             children: node_list(inner_nodes.clone(), 0, inner_nodes.len())?
-        })})
+        })}, DocSection::Document))
     }
 }

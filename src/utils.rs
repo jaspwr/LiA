@@ -122,3 +122,52 @@ pub fn hash_file(path: &String) -> String {
     let hash = sha256::digest(bytes);
     hash
 }
+
+pub fn indent(string: String, indentation: usize, indentation_type: IndentationType) -> String {
+    let mut ret = String::new();
+    for line in string.lines() {
+        // Remove random single leading space.
+        let mut line = line;
+        match line.chars().nth(0) {
+            Some(c) => {
+                match line.chars().nth(1) {
+                    Some(c2) => {
+                        if c == ' ' && c2 != ' ' {
+                            line = &line[1..];
+                        }
+                    }
+                    None => {}
+                }
+            }, 
+            None => {}
+        }
+        for _ in 0..indentation {
+            match indentation_type {
+                IndentationType::Tab => {
+                    ret.push('\t');
+                }
+                IndentationType::Space(space_count) => {
+                    for _ in 0..space_count {
+                        ret.push(' ');
+                    }
+                }
+            }
+        }
+        ret.push_str(line);
+        ret.push_str("\n");
+    }
+    ret
+}
+
+// pub fn remove_indentation(string: String) -> String {
+//     let mut ret = String::new();
+//     for line in string.lines() {
+//         if first {
+//             first = false;
+//         } else {
+//             ret.push_str("\n");
+//         }
+//         ret.push_str(line.trim_start());
+//     }
+//     ret
+// }

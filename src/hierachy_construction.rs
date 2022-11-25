@@ -12,9 +12,22 @@ use crate::utils::count_indentation;
 use crate::utils::count_whitespace;
 use crate::utils::delta_bracket_depth;
 
+// TODO: NOT THIS.
+static mut imps: NodeList = vec![];
+static mut decs: NodeList = vec![];
+
 pub fn contruct_doc(tokens: TokenList) -> Result<Doc, String> {
     let len = tokens.len();
-    let doc = Doc { children: node_list(tokens, 0, len)? };
+    unsafe {
+        imps = vec![];
+        decs = vec![];
+    }
+    let doc = node_list(tokens, 0, len)?;
+    let doc = Doc {
+        imports: unsafe { imps.clone() },
+        declarations: unsafe { decs.clone() },
+        document: doc
+    };
     Ok(doc)
 }
 
@@ -53,7 +66,12 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize) -> Result<NodeLis
                 &bracket_depths) {
 
                     child_tokens_buffer.push(tokens[i].clone()); pushed_token_flag = true;
-                    items.extend(node_parsers[m].parse(child_tokens_buffer.clone(), indentation_type)?);
+                    let node = node_parsers[m].parse(child_tokens_buffer.clone(), indentation_type)?;
+                    match node.1 {
+                        DocSection::Document => { items.extend(node.0) },
+                        DocSection::Declarations => { unsafe { decs.extend(node.0) } },
+                        DocSection::Imports => { unsafe { imps.extend(node.0) } },
+                    }
                     child_tokens_buffer.clear(); in_parser_module = None;
 
                 // For single token commands
@@ -85,7 +103,12 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize) -> Result<NodeLis
                             &bracket_depths) {
                                 
                                 child_tokens_buffer.push(tokens[i].clone()); pushed_token_flag = true;
-                                items.extend(node_parsers[m].parse(child_tokens_buffer.clone(), indentation_type)?);
+                                let node = node_parsers[m].parse(child_tokens_buffer.clone(), indentation_type)?;
+                                match node.1 {
+                                    DocSection::Document => { items.extend(node.0) },
+                                    DocSection::Declarations => { unsafe { decs.extend(node.0) } },
+                                    DocSection::Imports => { unsafe { imps.extend(node.0) } },
+                                }
                                 child_tokens_buffer.clear(); in_parser_module = None;
                         }
                     }
@@ -148,7 +171,7 @@ impl AddAssign for BrackDepths {
 }
 
 
-pub type ParseResult = Result<Vec<Rc<dyn Node>>, String>;
+pub type ParseResult = Result<(Vec<Rc<dyn Node>>, DocSection), String>;
 pub trait NodeParser {
     fn is_target(&mut self, token: &Token, identation: i32) -> bool;
     fn is_closer(&mut self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool;
@@ -159,4 +182,10 @@ pub trait NodeParser {
 pub enum IndentationType {
     Space(u8),
     Tab
+}
+
+pub enum DocSection {
+    Imports,
+    Declarations,
+    Document
 }

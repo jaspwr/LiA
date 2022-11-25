@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult}, hierarchy::TexEnvironment};
+use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult, DocSection}, hierarchy::TexEnvironment};
 
 #[derive(Default)]
 pub struct LiaEnvParser {}
@@ -44,10 +44,10 @@ impl NodeParser for LiaEnvParser {
             }
         }
         command_pos += 1;
-        Ok(vec!{Rc::new( TexEnvironment {
+        Ok((vec!{Rc::new( TexEnvironment {
             name: command,
             args: vec![],
             children: node_list(tokens, command_pos, len-1)?
-        })})
+        })}, DocSection::Document))
     }
 }

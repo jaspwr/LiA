@@ -38,7 +38,7 @@ impl NodeParser for LiaMarkDownSections {
             },
             _ => { todo!() }
         }.to_string();
-        Ok(vec![Rc::new(TexCommand {
+        Ok((vec![Rc::new(TexCommand {
             command,
             args: vec![Arg {
                     arg: {
@@ -56,6 +56,6 @@ impl NodeParser for LiaMarkDownSections {
                     arg_type: ArgType::Curly
                 }]
         }), Rc::new(Text { text: "\n".to_string() })
-        ])
+        ], DocSection::Document))
     }
 }

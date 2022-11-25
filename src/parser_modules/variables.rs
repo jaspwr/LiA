@@ -1,10 +1,11 @@
 use std::rc::Rc;
 
-use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult}, hierarchy::{TexCommand, Arg, ArgType, ArgList, Text}, utils::count_whitespace};
+use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult, DocSection}, hierarchy::{TexCommand, Arg, ArgType, ArgList, Text}, utils::{count_whitespace, format_error_string}};
 
 #[derive(Default)]
 pub struct LiaVariableParser {
     statement_type: Option<StatmentType>,
+    terminated_by_newline: bool
 }
 
 #[derive(Default)]
@@ -48,8 +49,10 @@ impl NodeParser for LiaVariableParser {
                 Some(StatmentType::Assign) => { 
                     return bracket_depths.curly == 0
                     && match token {
-                        Token::Newline => { true }
-                        Token::Nothing(t, _) => { t == "}"},
+                        Token::Newline => { self.terminated_by_newline = true; true }
+                        Token::Nothing(t, _) => { if t == "}" { 
+                            self.terminated_by_newline = false; true
+                        } else { false }},
                         _ => { false }
                     } 
                 },
@@ -61,27 +64,38 @@ impl NodeParser for LiaVariableParser {
 
     fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> ParseResult {
         let command = match &tokens[0] {
-            Token::LiaVariable(command, _) => { &command[1..] },
+            Token::LiaVariable(command, loc) => { 
+                    let command = &command[1..];
+                    if command.len() == 0 {
+                        return Err(
+                            format!{"{} Invalid varibale name \"{}\". Aborted.", loc.stringify(), command}
+                        );
+                    }
+                    command
+                },
             _ => { todo!() }
         }.to_string();
+        // TODO: Check for legal name
+
         match self.statement_type {
             Some(StatmentType::Read) => {
-                Ok(vec!{Rc::new( TexCommand {
+                Ok((vec!{Rc::new( TexCommand {
                     command,
                     args: vec![]
-                })})
+                })}, DocSection::Document))
             },
             Some(StatmentType::Call) => {
-                Ok(vec!{Rc::new( TexCommand {
+                Ok((vec!{Rc::new( TexCommand {
                     command,
-                    args: split_call_args(&tokens, 2, tokens.len()-1)?
-                })})
+                    args: split_call_args(&tokens, 2, tokens.len() - 1)?
+                })}, DocSection::Document))
             },
             Some(StatmentType::Assign) => {
-                Ok(vec!{Rc::new( TexCommand {
+                Ok((vec!{Rc::new( TexCommand {
                     command: "newcommand".to_string(),
-                    args: newcommand_args(command, &tokens)?
-                })})
+                    args: newcommand_args(command, &tokens, self.terminated_by_newline)?
+                }), Rc::new(Text { text: "\n".to_string() })}
+                , DocSection::Declarations))
             },
             None => { todo!() }
         }
@@ -89,7 +103,7 @@ impl NodeParser for LiaVariableParser {
     }
 }
 
-fn newcommand_args(command: String, tokens: &TokenList) -> Result<ArgList, String> {
+fn newcommand_args(command: String, tokens: &TokenList, terminated_by_newline: bool) -> Result<ArgList, String> {
     let mut ret = vec![
         Arg {
             arg_type: ArgType::Curly,
@@ -100,7 +114,8 @@ fn newcommand_args(command: String, tokens: &TokenList) -> Result<ArgList, Strin
     let content_pos = equal_oper_pos + count_whitespace(tokens, equal_oper_pos);
     ret.push(Arg {
         arg_type: ArgType::Curly,
-        arg: node_list(tokens.to_vec(), content_pos, tokens.len())?
+        arg: node_list(tokens.to_vec(), content_pos, if terminated_by_newline 
+        { tokens.len() - 1} else { tokens.len() })?
     });
     Ok(ret)
 }

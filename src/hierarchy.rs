@@ -1,9 +1,13 @@
 use std::rc::Rc;
+
+use crate::{utils::indent, hierachy_construction::IndentationType};
 pub type NodeList = Vec<Rc<dyn Node>>;
 pub type ArgList = Vec<Arg>;
 
 pub struct Doc {
-    pub children: NodeList
+    pub imports: NodeList,
+    pub declarations: NodeList,
+    pub document: NodeList
 }
 
 pub struct Text {
@@ -41,19 +45,36 @@ impl Node for TexCommand {
 
 impl Node for TexEnvironment {
     fn codegen (&self) -> String {
-        format!("\\begin{{{}}}{}{}\\end{{{}}}", self.name, 
+        format!("\\begin{{{}}}\n{}{}\\end{{{}}}\n", self.name, 
         (&self.args).into_iter().map(|arg| -> String { 
             arg.codegen() 
         }).collect::<String>(), 
-        (&self.children).into_iter().map(|child| -> String { 
+        indent((&self.children).into_iter().map(|child| -> String { 
             child.codegen() 
-        }).collect::<String>(), self.name)
+        }).collect::<String>(), 1, IndentationType::Space(4)), self.name)
     }
 }
 
 impl Node for Doc {
     fn codegen (&self) -> String {
-        codegen_nodelist(&self.children)
+        let imps = if &self.imports.len() > &0 {
+            format!{ "{}\n\n", codegen_nodelist(&self.imports) }
+        } else { "".to_string() };
+        let decs = if &self.declarations.len() > &0 {
+            format!{ "{}\n\n", codegen_nodelist(&self.declarations) }
+        } else { "".to_string() };
+
+        let doc = if &self.document.len() > &1 {
+            let doc_env = vec![ Rc::new(TexEnvironment {
+                name: "document".to_string(),
+                args: vec![],
+                children: self.document.clone()
+            }) as Rc<dyn Node>];
+            codegen_nodelist(&doc_env)
+        } else {
+            "".to_string()
+        };
+        format!{"{}{}{}", imps, decs, doc}
     }
 }
 

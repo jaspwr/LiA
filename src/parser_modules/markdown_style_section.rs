@@ -23,7 +23,7 @@ impl NodeParser for LiaMarkDownSections {
         }
     }
 
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> ParseResult {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
         let command = match &tokens[0] {
             Token::LiaMarkDown(hash, _) => { 
                 match hash.as_str() {
@@ -51,7 +51,7 @@ impl NodeParser for LiaMarkDownSections {
                                 break;
                             }
                         }
-                        node_list(tokens, start, len-1)?
+                        node_list(tokens, start, len-1, other_doc_locations)?
                     },
                     arg_type: ArgType::Curly
                 }]

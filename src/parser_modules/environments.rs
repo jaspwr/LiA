@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult, DocSection}, hierarchy::TexEnvironment};
+use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult, DocSection, OtherDocLocations}, hierarchy::TexEnvironment};
 
 #[derive(Default)]
 pub struct LiaEnvParser {}
@@ -21,7 +21,7 @@ impl NodeParser for LiaEnvParser {
         }
     }
 
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> ParseResult {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
         let mut command_pos = 1;
         let len = tokens.len();
         while command_pos < len {
@@ -44,10 +44,15 @@ impl NodeParser for LiaEnvParser {
             }
         }
         command_pos += 1;
+        let children = node_list(tokens, command_pos, len-1, other_doc_locations)?;
+        if command == "document" {
+            // LiA adds the document macro implicitly, ignore existing document macro.
+            return Ok((children, DocSection::Imports))
+        }
         Ok((vec!{Rc::new( TexEnvironment {
             name: command,
             args: vec![],
-            children: node_list(tokens, command_pos, len-1)?
+            children
         })}, DocSection::Document))
     }
 }

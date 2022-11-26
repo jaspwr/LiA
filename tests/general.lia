@@ -1,0 +1,31 @@
+use somepack🐱, [🐱thing1]{thing2}otherpackage
+
+# Section
+Test test test test $f = \frac{1}{\sqrt{2🐱}}$ test test. @a, @🐱b ect.
+
+## Section🐱
+env center🐱 {
+*List item 
+    * List item 
+        *List item 
+            *      List item 
+                *inner most
+    * List item 🐱
+    * {List 
+    
+    
+    
+    
+    
+    🐱}
+    * a
+* a
+}
+
+@fo🐱o = bar🐱
+@a(b, c, d, 🐱)
+@x = {
+    y
+    z
+    🐱
+}

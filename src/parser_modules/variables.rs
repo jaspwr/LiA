@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult, DocSection}, hierarchy::{TexCommand, Arg, ArgType, ArgList, Text}, utils::{count_whitespace, format_error_string}};
+use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult, DocSection, OtherDocLocations}, hierarchy::{TexCommand, Arg, ArgType, ArgList, Text}, utils::{count_whitespace}};
 
 #[derive(Default)]
 pub struct LiaVariableParser {
@@ -62,7 +62,7 @@ impl NodeParser for LiaVariableParser {
         false
     }
 
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> ParseResult {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
         let command = match &tokens[0] {
             Token::LiaVariable(command, loc) => { 
                     let command = &command[1..];
@@ -87,13 +87,13 @@ impl NodeParser for LiaVariableParser {
             Some(StatmentType::Call) => {
                 Ok((vec!{Rc::new( TexCommand {
                     command,
-                    args: split_call_args(&tokens, 2, tokens.len() - 1)?
+                    args: split_call_args(&tokens, 2, tokens.len() - 1, other_doc_locations)?
                 })}, DocSection::Document))
             },
             Some(StatmentType::Assign) => {
                 Ok((vec!{Rc::new( TexCommand {
                     command: "newcommand".to_string(),
-                    args: newcommand_args(command, &tokens, self.terminated_by_newline)?
+                    args: newcommand_args(command, &tokens, self.terminated_by_newline, other_doc_locations)?
                 }), Rc::new(Text { text: "\n".to_string() })}
                 , DocSection::Declarations))
             },
@@ -103,7 +103,7 @@ impl NodeParser for LiaVariableParser {
     }
 }
 
-fn newcommand_args(command: String, tokens: &TokenList, terminated_by_newline: bool) -> Result<ArgList, String> {
+fn newcommand_args(command: String, tokens: &TokenList, terminated_by_newline: bool, other_doc_locations: &mut OtherDocLocations) -> Result<ArgList, String> {
     let mut ret = vec![
         Arg {
             arg_type: ArgType::Curly,
@@ -115,12 +115,12 @@ fn newcommand_args(command: String, tokens: &TokenList, terminated_by_newline: b
     ret.push(Arg {
         arg_type: ArgType::Curly,
         arg: node_list(tokens.to_vec(), content_pos, if terminated_by_newline 
-        { tokens.len() - 1} else { tokens.len() })?
+        { tokens.len() - 1} else { tokens.len() }, other_doc_locations)?
     });
     Ok(ret)
 }
 
-fn split_call_args(tokens: &TokenList, start: usize, end: usize) -> Result<Vec<Arg>, String> {
+fn split_call_args(tokens: &TokenList, start: usize, end: usize, other_doc_locations: &mut OtherDocLocations) -> Result<Vec<Arg>, String> {
     let mut args: ArgList = Vec::new();
     let mut tokens_buffer: TokenList = Vec::new();
     for i in start..end {
@@ -131,7 +131,7 @@ fn split_call_args(tokens: &TokenList, start: usize, end: usize) -> Result<Vec<A
                     //let whitespace = count_whitespace(&tokens_buffer, 0);
                     args.push(Arg {
                         arg_type: ArgType::Curly,
-                        arg: node_list(tokens_buffer, 0, len)?
+                        arg: node_list(tokens_buffer, 0, len, other_doc_locations)?
                     });
                     tokens_buffer = Vec::new();
                 } else {
@@ -147,7 +147,7 @@ fn split_call_args(tokens: &TokenList, start: usize, end: usize) -> Result<Vec<A
     if len > 0 {
         args.push(Arg {
             arg_type: ArgType::Curly,
-            arg: node_list(tokens_buffer, 0, len)?
+            arg: node_list(tokens_buffer, 0, len, other_doc_locations)?
         });
     }
     Ok(args)

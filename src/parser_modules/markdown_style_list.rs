@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::{tokeniser::{Token, TokenList, Location}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult, DocSection}, hierarchy::TexEnvironment, utils::{count_indentation, format_error_string}};
+use crate::{tokeniser::{Token, TokenList, Location}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult, DocSection, OtherDocLocations}, hierarchy::TexEnvironment, utils::{count_indentation, format_error_string}};
 
 #[derive(Default)]
 pub struct LiaMardownListParser {
@@ -34,12 +34,12 @@ impl NodeParser for LiaMardownListParser {
         }
     }
 
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> ParseResult {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
         let mut indentation: usize = self.initial_indentation_depth;
         let mut indentation_type = indentation_type;
         let mut pre_indentation = self.initial_indentation_depth;
         let mut item_count = 0;
-        let mut inner_nodes: TokenList = vec![];
+        let mut inner_nodes: TokenList = vec![Token::Newline];
         for i in 0..tokens.len() {
             if item_count > 0 {
                 count_indentation(&tokens, i, &mut indentation, &mut indentation_type);
@@ -58,15 +58,24 @@ impl NodeParser for LiaMardownListParser {
                             inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
                             inner_nodes.push(Token::Newline);
                         } else if indentation < pre_indentation {
-                            inner_nodes.push(Token::TexCommand("\\end".to_string(), Location::default()));
-                            inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
-                            inner_nodes.push(Token::Nothing("itemize".to_string(), Location::default()));
-                            inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
-                            inner_nodes.push(Token::Newline);
+                            let diff = pre_indentation - indentation;
+                            for _ in 0..diff {
+                                inner_nodes.push(Token::TexCommand("\\end".to_string(), Location::default()));
+                                inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
+                                inner_nodes.push(Token::Nothing("itemize".to_string(), Location::default()));
+                                inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
+                                inner_nodes.push(Token::Newline);
+                            }
                         }
                         inner_nodes.push(Token::TexCommand("\\item".to_string(), Location::default()));
-                        inner_nodes.push(Token::Whitespace(" ".to_string()));
-
+                        if i + 1 < tokens.len() {
+                            if let Token::Whitespace(_) = (&tokens[i + 1]) {
+                                {}
+                            } else {
+                                inner_nodes.push(Token::Whitespace(" ".to_string()));
+                            }
+                        }
+                        
                         pre_indentation = indentation;
                     } else {
                         inner_nodes.push(tokens[i].clone());
@@ -86,7 +95,7 @@ impl NodeParser for LiaMardownListParser {
         Ok((vec!{Rc::new( TexEnvironment {
             name: "itemize".to_string(),
             args: vec![],
-            children: node_list(inner_nodes.clone(), 0, inner_nodes.len())?
+            children: node_list(inner_nodes.clone(), 0, inner_nodes.len(), other_doc_locations)?
         })}, DocSection::Document))
     }
 }

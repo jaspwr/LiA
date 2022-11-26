@@ -1,6 +1,6 @@
 use std::{fs::{File, remove_file}, io::{Read, Write}};
 
-use crate::{tokeniser::{TokenList, Token, Location}, hierarchy::{ArgList, ArgType, Arg}, hierachy_construction::{BrackDepths, node_list, IndentationType, ParseResult}};
+use crate::{tokeniser::{TokenList, Token, Location}, hierarchy::{ArgList, ArgType, Arg}, hierachy_construction::{BrackDepths, node_list, IndentationType, ParseResult, OtherDocLocations}};
 
 pub fn load_utf8_file (path: String) -> Result<String, std::io::Error> {
     let mut file = File::open(path)?;
@@ -20,7 +20,7 @@ pub fn is_whitespace (char: char) -> bool {
     char == ' ' || char == '\t' || char == '\n' || char == '\r' || char == '\x0C' || char == '\x0B'
 }
 
-pub fn parse_args (tokens: &TokenList, start: usize, end: usize) -> Result<ArgList, String> {
+pub fn parse_args (tokens: &TokenList, start: usize, end: usize, other_doc_locations: &mut OtherDocLocations) -> Result<ArgList, String> {
     let mut ret: ArgList = Vec::new();
     let mut bracket_depths = BrackDepths::default();
     let mut arg_type: Option<ArgType> = None;
@@ -42,7 +42,7 @@ pub fn parse_args (tokens: &TokenList, start: usize, end: usize) -> Result<ArgLi
             if arg_type.is_some() {
                 ret.push(Arg {
                     arg_type: arg_type.unwrap(),
-                    arg: node_list(tokens.clone(), arg_start, i)?
+                    arg: node_list(tokens.clone(), arg_start, i, other_doc_locations)?
                 });
                 arg_type = None;
             }
@@ -159,15 +159,10 @@ pub fn indent(string: String, indentation: usize, indentation_type: IndentationT
     ret
 }
 
-// pub fn remove_indentation(string: String) -> String {
-//     let mut ret = String::new();
-//     for line in string.lines() {
-//         if first {
-//             first = false;
-//         } else {
-//             ret.push_str("\n");
-//         }
-//         ret.push_str(line.trim_start());
-//     }
-//     ret
-// }
+pub fn strip_tailing_whitespace_and_newlines (string: String) -> String {
+    let mut white_space_count = 0;
+    while is_whitespace(string[string.len() - white_space_count - 1..].chars().nth(0).unwrap()) {
+        white_space_count += 1;
+    }
+    string[..string.len() - white_space_count].to_string()
+}

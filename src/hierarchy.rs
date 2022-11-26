@@ -45,7 +45,7 @@ impl Node for TexCommand {
 
 impl Node for TexEnvironment {
     fn codegen (&self) -> String {
-        format!("\\begin{{{}}}\n{}{}\\end{{{}}}\n", self.name, 
+        format!("\\begin{{{}}}{}{}\\end{{{}}}", self.name,
         (&self.args).into_iter().map(|arg| -> String { 
             arg.codegen() 
         }).collect::<String>(), 

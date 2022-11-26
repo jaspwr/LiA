@@ -12,26 +12,26 @@ use crate::utils::count_indentation;
 use crate::utils::count_whitespace;
 use crate::utils::delta_bracket_depth;
 
-// TODO: NOT THIS.
-static mut imps: NodeList = vec![];
-static mut decs: NodeList = vec![];
+#[derive(Default)]
+pub struct OtherDocLocations {
+    imps: NodeList,
+    decs: NodeList,
+}
 
 pub fn contruct_doc(tokens: TokenList) -> Result<Doc, String> {
     let len = tokens.len();
-    unsafe {
-        imps = vec![];
-        decs = vec![];
-    }
-    let doc = node_list(tokens, 0, len)?;
+    let mut other_doc_locations = OtherDocLocations::default();
+
+    let doc = node_list(tokens, 0, len, &mut other_doc_locations)?;
     let doc = Doc {
-        imports: unsafe { imps.clone() },
-        declarations: unsafe { decs.clone() },
+        imports: other_doc_locations.imps,
+        declarations: other_doc_locations.decs,
         document: doc
     };
     Ok(doc)
 }
 
-pub fn node_list (tokens: TokenList, start: usize, end: usize) -> Result<NodeList, String> {
+pub fn node_list (tokens: TokenList, start: usize, end: usize, other_doc_locations: &mut OtherDocLocations) -> Result<NodeList, String> {
     // TODO: split into multiple functions
     let mut node_parsers: [Box<dyn NodeParser>; 6] = [
         Box::new(LiaMarkDownSections::default()),
@@ -51,7 +51,15 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize) -> Result<NodeLis
     }
     let mut indentation = 0;
     let mut indentation_type: Option<IndentationType> = None;
+    let mut start = start;
+    
+    // Remove leading whitespace.
+    while let Token::Whitespace(_) = &tokens[start] {
+        start += 1;
+    }
+    let mut skip_next_flag = false;
     for i in start..end {
+        if skip_next_flag { skip_next_flag = false; continue; }
         // TODO: refactor
         let mut pushed_token_flag = false;
         bracket_depths += delta_bracket_depth(&tokens[i]);
@@ -65,33 +73,34 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize) -> Result<NodeLis
                 &tokens[if i + whitespace < tokens.len() { i + whitespace } else { i }],
                 &bracket_depths) {
 
+
+
+
+
                     child_tokens_buffer.push(tokens[i].clone()); pushed_token_flag = true;
-                    let node = node_parsers[m].parse(child_tokens_buffer.clone(), indentation_type)?;
+                    let node = node_parsers[m].parse(child_tokens_buffer.clone(), indentation_type, other_doc_locations)?;
                     match node.1 {
                         DocSection::Document => { items.extend(node.0) },
-                        DocSection::Declarations => { unsafe { decs.extend(node.0) } },
-                        DocSection::Imports => { unsafe { imps.extend(node.0) } },
+                        DocSection::Declarations => { other_doc_locations.decs.extend(node.0)},
+                        DocSection::Imports => { other_doc_locations.imps.extend(node.0) },
                     }
                     child_tokens_buffer.clear(); in_parser_module = None;
 
+
+
+                    
+
                 // For single token commands
                 for j in 0..node_parsers.len() {
-
                     if (node_parsers[j]).is_target(&tokens[i], indentation as i32) {
-
-                        items.push(text_node(&child_tokens_buffer)?);
-                        child_tokens_buffer.clear();
-                        in_parser_module = Some(j);
+                        append_text_node(&mut items, &mut child_tokens_buffer, &mut in_parser_module, j)?;
                     }
                 }
             }
         } else {
             for j in 0..node_parsers.len() {
                 if (node_parsers[j]).is_target(&tokens[i], indentation as i32) {
-
-                    items.push(text_node(&child_tokens_buffer)?);
-                    child_tokens_buffer.clear();
-                    in_parser_module = Some(j);
+                    append_text_node(&mut items, &mut child_tokens_buffer, &mut in_parser_module, j)?;
                     
                     // For commands that start at the end of another token
                     if let Some(m) = in_parser_module {
@@ -102,14 +111,20 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize) -> Result<NodeLis
                             &tokens[if i + whitespace < tokens.len() { i + whitespace } else { i }],
                             &bracket_depths) {
                                 
+
+
+
+
                                 child_tokens_buffer.push(tokens[i].clone()); pushed_token_flag = true;
-                                let node = node_parsers[m].parse(child_tokens_buffer.clone(), indentation_type)?;
+                                let node = node_parsers[m].parse(child_tokens_buffer.clone(), indentation_type, other_doc_locations)?;
                                 match node.1 {
                                     DocSection::Document => { items.extend(node.0) },
-                                    DocSection::Declarations => { unsafe { decs.extend(node.0) } },
-                                    DocSection::Imports => { unsafe { imps.extend(node.0) } },
+                                    DocSection::Declarations => { other_doc_locations.decs.extend(node.0)},
+                                    DocSection::Imports => { other_doc_locations.imps.extend(node.0) },
                                 }
                                 child_tokens_buffer.clear(); in_parser_module = None;
+
+
                         }
                     }
                 }
@@ -122,6 +137,13 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize) -> Result<NodeLis
     }
     items.push(text_node(&child_tokens_buffer)?);
     Ok(items)
+}
+
+fn append_text_node(items: &mut Vec<Rc<dyn Node>>, child_tokens_buffer: &mut Vec<Token>, in_parser_module: &mut Option<usize>, j: usize) -> Result<(), String> {
+    items.push(text_node(&*child_tokens_buffer)?);
+    child_tokens_buffer.clear();
+    *in_parser_module = Some(j);
+    Ok(())
 }
 
 fn text_node (tokens: &TokenList) -> Result<Rc<dyn Node>, String> {
@@ -175,7 +197,7 @@ pub type ParseResult = Result<(Vec<Rc<dyn Node>>, DocSection), String>;
 pub trait NodeParser {
     fn is_target(&mut self, token: &Token, identation: i32) -> bool;
     fn is_closer(&mut self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool;
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> ParseResult;
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult;
 }
 
 #[derive(Clone, Copy)]

@@ -21,18 +21,18 @@ impl NodeParser for LiaUseParser {
         }
     }
 
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>) -> ParseResult {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
         let mut imports: Vec<ArgList> = Vec::new();
 
         let len = tokens.len();
         
-        imports.push(parse_to_args(tokens.clone(), 1)?);
+        imports.push(parse_to_args(tokens.clone(), 1, other_doc_locations)?);
         let mut start = 1;
         while start < len {
             match &tokens[start] {
                 Token::Nothing(sym, _) => {
                     if sym == "," {
-                        imports.push(parse_to_args(tokens.clone(), start+1)?);
+                        imports.push(parse_to_args(tokens.clone(), start+1, other_doc_locations)?);
                     }
                 },
                 _ => {}
@@ -52,7 +52,7 @@ impl NodeParser for LiaUseParser {
     }
 }
 
-fn parse_to_args (tokens: TokenList, start: usize) -> Result<ArgList, String> {
+fn parse_to_args (tokens: TokenList, start: usize, other_doc_locations: &mut OtherDocLocations) -> Result<ArgList, String> {
     let len = tokens.len();
     let mut start = start;
     while start < len {
@@ -80,13 +80,13 @@ fn parse_to_args (tokens: TokenList, start: usize) -> Result<ArgList, String> {
             end += 1;
         }
     }
-    let mut args: ArgList = parse_args(&tokens, start, end)?;
+    let mut args: ArgList = parse_args(&tokens, start, end, other_doc_locations)?;
     if end + 1 > len {
         panic!("No package name");
     }
     if args.len() == 0 {
         end -= 1;
     }
-    args.push(Arg { arg: node_list(tokens, end, end+1)?, arg_type: ArgType::Curly });
+    args.push(Arg { arg: node_list(tokens, end, end+1, other_doc_locations)?, arg_type: ArgType::Curly });
     Ok(args)
 }

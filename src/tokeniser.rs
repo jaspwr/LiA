@@ -38,6 +38,7 @@ pub fn to_tokens (input_lia: String) -> TokenList {
     let mut first_of_line = true;
     let mut line: usize = 1;
     let mut column: usize = 1;
+    let mut pre_c = ' ';
     input_lia.chars().for_each(|c| {
         if c == '\r' { return; }
         if c == '\n' || c == ';' { first_of_line = true;
@@ -49,7 +50,7 @@ pub fn to_tokens (input_lia: String) -> TokenList {
             return; 
         }
         let char_group = classify_char(&c);
-        if char_group != pre_char_group || pre_char_group == CharGroup::Bracket {
+        if (char_group != pre_char_group || pre_char_group == CharGroup::Bracket) && pre_c != '\\' {
             if !current_token.is_empty() {
                 let token = parse_token(&current_token, first_of_line, Location { line, column });
                 match token {
@@ -63,6 +64,7 @@ pub fn to_tokens (input_lia: String) -> TokenList {
         current_token.push(c);
         column += 1;
         pre_char_group = char_group;
+        pre_c = c;
     });
     let token = parse_token(&current_token, first_of_line, Location { line, column });
     ret.push(token);

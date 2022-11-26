@@ -14,7 +14,7 @@ use graphicx, [utf8]inputenc
         \textit{@desc}
     }
 }
-# Cool Cat Image
+#* Cool Cat Image
 @img(cat.png, Meow 🐈!)
 ```
 ### Resulting TeX
@@ -40,6 +40,7 @@ use graphicx, [utf8]inputenc
 ```tex
 @muliplication = (a: Number, b: Number) => $@a \times @b = @(a * b)$
 @two = 2
+* I'm a Markdown style list
 * @muliplication(@two, 3)
 * @muliplication(6, 6)
 * @muliplication(2, 9)
@@ -56,6 +57,7 @@ use graphicx, [utf8]inputenc
 
 \begin{document}
   \being{itemize}
+    \item I'm a Markdown style list
     \item \muliplication{2, 3, 6}
     \item \muliplication{6, 6, 36}
     \item \muliplication{2, 9, 18}

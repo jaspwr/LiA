@@ -81,6 +81,7 @@ impl Node for Doc {
 pub enum ArgType {
     Curly,
     Square,
+    CurlyMultiline,
 }
 
 pub struct Arg {
@@ -98,7 +99,8 @@ impl Arg {
     fn codegen (&self) -> String {
         match &self.arg_type {
             ArgType::Curly => format!{"{{{}}}",codegen_nodelist(&self.arg)},
-            ArgType::Square => format!{"[{}]",codegen_nodelist(&self.arg)}
+            ArgType::Square => format!{"[{}]",codegen_nodelist(&self.arg)},
+            ArgType::CurlyMultiline => format!{"{{\n{}}}", indent(codegen_nodelist(&self.arg), 1, IndentationType::Space(4))}
         }
     }
 }

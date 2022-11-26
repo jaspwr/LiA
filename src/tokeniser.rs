@@ -83,6 +83,20 @@ pub enum Token {
     Nothing(String, Location)
 }
 
+impl Token {
+    pub fn get_location(&self) -> Location {
+        match self {
+            Token::TexCommand(_, loc) => *loc,
+            Token::LiaVariable(_, loc) => *loc,
+            Token::LiaKeyword(_, loc) => *loc,
+            Token::LiaMarkDown(_, loc) => *loc,
+            Token::Newline => Location::default(),
+            Token::Whitespace(_) => Location::default(),
+            Token::Nothing(_, loc) => *loc,
+        }
+    }
+}
+
 fn parse_token (token: &String, begins_line: bool, location: Location) -> Token {
     let last = match token.chars().last() {
         Some(c) => { c },

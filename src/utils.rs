@@ -20,6 +20,10 @@ pub fn is_whitespace (char: char) -> bool {
     char == ' ' || char == '\t' || char == '\n' || char == '\r' || char == '\x0C' || char == '\x0B'
 }
 
+pub fn is_bracket (char: char) -> bool {
+    char == '(' || char == ')' || char == '{' || char == '}' || char == '[' || char == ']'
+}
+
 pub fn parse_args (tokens: &TokenList, start: usize, end: usize, other_doc_locations: &mut OtherDocLocations) -> Result<ArgList, String> {
     let mut ret: ArgList = Vec::new();
     let mut bracket_depths = BrackDepths::default();
@@ -118,7 +122,7 @@ pub fn format_error_string (message: String, location: Location) -> ParseResult 
 }
 
 pub fn hash_file(path: &String) -> String {
-    let bytes: &[u8] = &std::fs::read(path).unwrap();  // Vec<u8>
+    let bytes: &[u8] = &std::fs::read(path).unwrap();
     let hash = sha256::digest(bytes);
     hash
 }

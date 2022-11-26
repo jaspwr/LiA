@@ -31,7 +31,6 @@ impl NodeParser for TexCommandParser {
         self.env_depth = 0;
         self.is_dec = false;
         self.next = false;
-        println!("is_target: {:?}", token);
         match token {
             Token::TexCommand(com, _) => { 
                 if com == "\\begin" { self.env_parsing_state = EnvParsingState::BeginOpeningCurly; }
@@ -110,11 +109,21 @@ impl NodeParser for TexCommandParser {
 
     fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
         if self.env_parsing_state != EnvParsingState::NotEnv { // For environments
-            //println!("{:#?}, {:#?}", self.env_parsing_state, tokens);
-            // Strip tailing newline
             let edge_size = if self.env_parsing_state == EnvParsingState::SquareBracketEquationEnv { self.env_name = "equation".to_string(); 1 } else { 4 };
-            let mut tokens = tokens;
-            let children = node_list(tokens.clone(), edge_size, tokens.len() - edge_size, other_doc_locations)?;
+            let mut back = 0;
+            
+            // if self.env_parsing_state != EnvParsingState::SquareBracketEquationEnv {
+            //     // Strip tailing newline
+            //     let mut end = tokens.len() - 4;
+            //     while let Token::Whitespace(_) = tokens[end - 1] { end -= 1; }             
+            //     while let Token::Newline = tokens[end - 1] { end -= 1; }
+            //     back = tokens.len() - end - 4;
+            // };
+            // println!("{:#?}", tokens);
+            // println!("{}", edge_size);
+            // println!("{}", tokens.len());
+
+            let children = node_list(tokens.clone(), edge_size, tokens.len() - edge_size - back, other_doc_locations)?;
             if self.env_name.clone() == "document" {
                 // LiA adds the document macro implicitly, ignore existing document macro.
                 return Ok((children, DocSection::Document))
@@ -129,7 +138,7 @@ impl NodeParser for TexCommandParser {
         
         let command = match &tokens[0] {
             Token::TexCommand(command, _) => { &command[1..] },
-            _ => { println!("{:#?}", tokens); todo!() }
+            _ => { todo!() }
         }.to_string();
         if self.is_dec {
             let mut v = vec![

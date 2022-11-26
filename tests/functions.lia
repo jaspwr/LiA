@@ -1,0 +1,20 @@
+@meow = (kitty, kitty2, kitty3, kitty4, kitty5, @kitty6) => {
+    @kitty meows!
+    env hi {
+        * @kitty2
+            * @kitty2
+            * @kitty2
+            * 🐈
+        * @kitty2
+    }
+    \textbf{@kitty3,@kitty4 , @kitty5, @kitty6}
+    @othervariable
+    @otherfunction(a,b,c)
+}
+
+@hi = a => {hi @a}
+@hi2 = @a => { hi hi @a }
+@a = 2
+
+#cat document with fucntions !!
+@meow(🐈, 🐈, 🐈, 🐈, 🐈, 🐈)

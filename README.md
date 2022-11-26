@@ -32,7 +32,7 @@ use graphicx, [utf8]inputenc
 
 \begin{document}
   \section*{Cool Cat Image}
-  \img{images\cat.png}{Meow 🐈!}
+  \img{images/cat.png}{Meow 🐈!}
 \end{document}
 ```
 ## Example #2

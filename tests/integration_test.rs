@@ -21,6 +21,14 @@ fn regular_tex() {
     "tests/regular_tex_out.tex".to_string());
 }
 
+#[test]
+fn functions() {
+    test_compilation_result(
+    "tests/functions.lia".to_string(),
+    "tests/temp_functions.tex".to_string(),
+    "tests/functions_out.tex".to_string());
+}
+
 
 fn test_compilation_result(input_path: String, output_path: String, correct_output_path: String) -> () {
     let job = Job {

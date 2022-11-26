@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult, DocSection, OtherDocLocations}, hierarchy::{TexCommand, Arg, ArgType, ArgList, Text}, utils::{count_whitespace}};
+use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult, DocSection, OtherDocLocations}, hierarchy::{TexCommand, Arg, ArgType, ArgList, Text, Node, NodeList}, utils::{count_whitespace, delta_bracket_depth, is_bracket}};
 
 #[derive(Default)]
 pub struct LiaVariableParser {
@@ -91,33 +91,13 @@ impl NodeParser for LiaVariableParser {
                 })}, DocSection::Document))
             },
             Some(StatmentType::Assign) => {
-                Ok((vec!{Rc::new( TexCommand {
-                    command: "newcommand".to_string(),
-                    args: newcommand_args(command, &tokens, self.terminated_by_newline, other_doc_locations)?
-                }), Rc::new(Text { text: "\n".to_string() })}
+                Ok((vec!{parse_var_declaration(command, &tokens,  self.terminated_by_newline, other_doc_locations)?, Rc::new(Text { text: "\n".to_string() })}
                 , DocSection::Declarations))
             },
             None => { todo!() }
         }
 
     }
-}
-
-fn newcommand_args(command: String, tokens: &TokenList, terminated_by_newline: bool, other_doc_locations: &mut OtherDocLocations) -> Result<ArgList, String> {
-    let mut ret = vec![
-        Arg {
-            arg_type: ArgType::Curly,
-            arg: vec![Rc::new(Text { text: format!{"\\{}", command} })]
-        }
-    ];
-    let equal_oper_pos = count_whitespace(tokens, 0);
-    let content_pos = equal_oper_pos + count_whitespace(tokens, equal_oper_pos);
-    ret.push(Arg {
-        arg_type: ArgType::Curly,
-        arg: node_list(tokens.to_vec(), content_pos, if terminated_by_newline 
-        { tokens.len() - 1} else { tokens.len() }, other_doc_locations)?
-    });
-    Ok(ret)
 }
 
 fn split_call_args(tokens: &TokenList, start: usize, end: usize, other_doc_locations: &mut OtherDocLocations) -> Result<Vec<Arg>, String> {
@@ -151,4 +131,115 @@ fn split_call_args(tokens: &TokenList, start: usize, end: usize, other_doc_locat
         });
     }
     Ok(args)
+}
+
+fn parse_var_declaration(command: String, tokens: &TokenList,
+    terminated_by_newline: bool, other_doc_locations: &mut OtherDocLocations) -> Result<Rc<dyn Node>, String> {
+    Ok(Rc::new( TexCommand {
+        command: "newcommand".to_string(),
+        args: match find_nothing_token(tokens, "=>") {
+            None => {
+                // There was no =>, so it is a econst declaration.
+                const_declaration_args(command, &tokens, terminated_by_newline, other_doc_locations)?
+            },
+            Some(arrow_pos) => {
+                let spl = tokens.split_at(arrow_pos);
+                let mut lia_variables: Vec<String> = parse_fn_declaration_lhs(spl.0.to_vec())?;
+                let function_inner: NodeList = parse_fn_declaration_rhs(spl.1.to_vec(),&mut lia_variables, other_doc_locations)?;
+                function_declaration_args(command, lia_variables.len(), function_inner)
+            }
+        }
+    }))
+}
+
+fn find_nothing_token (haystack: &TokenList, needle: &str) -> Option<usize> {
+    for (i, t) in haystack.iter().enumerate() {
+        if let Token::Nothing(t, _) = t {
+            if t == needle {
+                return Some(i);
+            }
+        }
+    }
+    None
+}
+
+fn const_declaration_args(command: String, tokens: &TokenList, terminated_by_newline: bool, other_doc_locations: &mut OtherDocLocations) -> Result<ArgList, String> {
+    let mut ret = vec![
+        Arg {
+            arg_type: ArgType::Curly,
+            arg: vec![Rc::new(Text { text: format!{"\\{}", command} })]
+        }
+    ];
+    let equal_oper_pos = count_whitespace(tokens, 0);
+    let content_pos = equal_oper_pos + count_whitespace(tokens, equal_oper_pos);
+    ret.push(Arg {
+        arg_type: ArgType::Curly,
+        arg: node_list(tokens.to_vec(), content_pos, if terminated_by_newline 
+        { tokens.len() - 1} else { tokens.len() }, other_doc_locations)?
+    });
+    Ok(ret)
+}
+
+fn function_declaration_args (command: String, argc: usize, fn_contents: NodeList) -> ArgList {
+    vec![
+        Arg {
+            arg_type: ArgType::Curly,
+            arg: vec![Rc::new(Text { text: format!{"\\{}", command} })]
+        },
+        Arg {
+            arg_type: ArgType::Square,
+            arg: vec![Rc::new(Text { text: argc.to_string() })]
+        },
+        Arg {
+            arg_type: ArgType::CurlyMultiline,
+            arg: fn_contents
+        }
+    ]
+}
+
+fn parse_fn_declaration_lhs(tokens: TokenList) -> Result<Vec<String>, String> {
+    let mut ret: Vec<String> = Vec::new();
+    let mut brack_depth = BrackDepths::default();
+    for i in 1..tokens.len() {
+        let t = &tokens[i];
+        brack_depth += delta_bracket_depth(&t);
+        match t {
+            Token::LiaVariable(var, _) => {
+                ret.push(var[1..].to_string());
+            },
+            Token::Nothing(t, _) => {
+                if t != "," && t != "=" && !is_bracket(t.chars().next().unwrap()) {
+                    ret.push(t.clone());
+                }
+            },
+            _ => {}
+        }
+    }
+    if !brack_depth.is_zero() {
+        return Err(format!{"{} Unbalanced brackets. Aborted.", tokens[0].get_location().stringify()});
+    }
+    Ok(ret)
+}
+
+fn parse_fn_declaration_rhs(tokens: TokenList, lia_variables: &mut Vec<String>, 
+    other_doc_locations: &mut OtherDocLocations) -> Result<NodeList, String> {
+    let len = tokens.len();
+    let start = count_whitespace(&tokens, 2) + 2;
+    let tokens = tokens.into_iter().map(|t| {
+        match t {
+            Token::LiaVariable(var, loc) => {
+                for i in 0..lia_variables.len() {
+                    if lia_variables[i] == var[1..] {
+                        return Token::Nothing(
+                            format!{"#{}", i + 1},
+                            loc
+                        );
+                    }
+                }
+                Token::LiaVariable(var, loc)
+            },
+            _ => t
+        }
+    }).collect();
+    node_list(tokens, start, len - 1, other_doc_locations)
 }

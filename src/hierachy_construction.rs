@@ -5,6 +5,7 @@ use crate::parser_modules::imports::LiaUseParser;
 use crate::parser_modules::markdown_style_list::LiaMardownListParser;
 use crate::parser_modules::markdown_style_section::LiaMarkDownSections;
 use crate::parser_modules::tex_command::TexCommandParser;
+use crate::parser_modules::variables::Function;
 use crate::parser_modules::variables::LiaVariableParser;
 use crate::tokeniser::*;
 use crate::hierarchy::*;
@@ -18,6 +19,7 @@ use std::ops::AddAssign;
 pub struct OtherDocLocations {
     imps: NodeList,
     decs: NodeList,
+    pub fucntions: Vec<Function>
 }
 
 pub fn contruct_doc(tokens: TokenList) -> Result<Doc, String> {
@@ -56,6 +58,7 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize, other_doc_locatio
         start += 1;
     }
     if start > tokens.len() || end > tokens.len() {
+        println!("{:#?}", tokens);
         panic!("start or end is out of bounds");
     }
     let mut skip_next_flag = false;

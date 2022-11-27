@@ -1,4 +1,4 @@
-@meow = (kitty, kitty2, kitty3, kitty4, kitty5, @kitty6) => {
+@meow = (kitty, kitty2) => {
     @kitty meows!
     env hi {
         * @kitty2
@@ -10,6 +10,21 @@
     \textbf{@kitty3,@kitty4 , @kitty5, @kitty6}
     @othervariable
     @otherfunction(a,b,c)
+    @((2 + 2) % 2)
+    @(2 + 2)
+    @(kitty + kitty2)
+}
+
+@concat = (str1: String, str2: String) => {
+    @(str1 + " " + str2 + "text text teeeeeeeeeeeeeeexxxxxxxxxxxxxxxxxxxtttttttttt")
+}
+
+@math = => {
+    @(2 + 2 - 2 + 2)
+}
+
+@multiply = (a: num, b: Number) => {
+    @(a * b)
 }
 
 @hi = a => {hi @a}
@@ -17,4 +32,14 @@
 @a = 2
 
 #cat document with fucntions !!
-@meow(🐈, 🐈, 🐈, 🐈, 🐈, 🐈)
+@meow(4, 4.2)
+@meow(cat1, cat1)
+
+@hi(moew)
+ 
+@concat(🐈, 🐈)
+@concat(🐈, 🐈)
+@multiply(2.3, 2.3)
+@multiply(1, 88)
+
+@math()

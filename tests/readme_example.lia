@@ -1,0 +1,21 @@
+use graphicx, [utf8]inputenc
+
+@cat = 🐈
+@img = (src, desc) => {
+    env center {
+        \image{@("images/" + src), 10cm}
+        \linebreak
+        \textit{@desc}
+    }
+}
+#* Cool Cat Image
+@img(cat.png, Meow @cat!)
+
+@muliplication = (a: Number, b: Number) => {$@a \times @b = @(a * b)$}
+* I'm a Markdown style list
+* @muliplication(2, 3)
+* @muliplication(6, 6)
+* @muliplication(2, 9)
+  * I'm indented
+* {I'm a multiline
+   list item}

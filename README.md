@@ -1,12 +1,12 @@
 # LiA
 ##### A transpiled superset of TeX because some of TeX's syntax was annoying me.
-This is more for my personal use however you're welcome to use it or contribute. Note that it's not a perfect superset like scss or c++ some things that would be regular text in LaTeX will be macros in LiA which is just sort of necessary with something like TeX. I don't really have a problem with vanilla TeX syntax and I can understand why they made a lot of the decisions they did these added features are just designed to make it less verbose, faster to write but mostly just catered more towards my personal preference. 
+This is more for my personal use however you're welcome to use it or contribute. These added features are just designed to make LaTeX code less verbose, faster to write but also just catered more towards my personal preference.
 
 ## Example #1
 ### LiA code
 ```tex
 use graphicx, [utf8]inputenc
-
+@cat = 🐈
 @img = (src, desc) => {
     env center {
         \image{@("images/" + src), 10cm}
@@ -15,7 +15,7 @@ use graphicx, [utf8]inputenc
     }
 }
 #* Cool Cat Image
-@img(cat.png, Meow 🐈!)
+@img(cat.png, Meow @cat!)
 ```
 ### Resulting TeX
 ```tex
@@ -32,16 +32,15 @@ use graphicx, [utf8]inputenc
 
 \begin{document}
   \section*{Cool Cat Image}
-  \img{images/cat.png}{Meow 🐈!}
+  \img{images/cat.png}{Meow \cat!}
 \end{document}
 ```
 ## Example #2
 ### LiA code
 ```tex
-@muliplication = (a: Number, b: Number) => $@a \times @b = @(a * b)$
-@two = 2
+@muliplication = (a: Number, b: Number) => { $@a \times @b = @(a * b)$ }
 * I'm a Markdown style list
-* @muliplication(@two, 3)
+* @muliplication(2, 3)
 * @muliplication(6, 6)
 * @muliplication(2, 9)
   * I'm indented

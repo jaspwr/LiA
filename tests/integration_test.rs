@@ -29,6 +29,13 @@ fn functions() {
     "tests/functions_out.tex".to_string());
 }
 
+#[test]
+fn readme_example() {
+    test_compilation_result(
+    "tests/readme_example.lia".to_string(),
+    "tests/temp_readme_example.tex".to_string(),
+    "tests/readme_example_out.tex".to_string());
+}
 
 fn test_compilation_result(input_path: String, output_path: String, correct_output_path: String) -> () {
     let job = Job {

@@ -1,4 +1,4 @@
-\newcommand{\meow}[6]{
+\newcommand{\meow}[5]{
     #1 meows!
     \begin{hi}    
         \begin{itemize}    
@@ -12,9 +12,21 @@
             \item #2
         \end{itemize} 
     \end{hi}
-    \textbf{#3,#4 , #5, #6}
+    \textbf{\kitty3,\kitty4 , \kitty5, \kitty6}
     \othervariable
     \otherfunction{a}{b}{c}
+    #3
+    #4
+    #5
+}
+\newcommand{\concat}[3]{
+    #3
+}
+\newcommand{\math}[1]{
+    #1
+}
+\newcommand{\multiply}[3]{
+    #3
 }
 \newcommand{\hi}[1]{
     hi #1
@@ -30,6 +42,22 @@
     
     
     
+    
+    
+    
+    
+    
+    
     \section{cat document with fucntions !!}
-    \meow{🐈}{🐈}{🐈}{🐈}{🐈}{🐈}
+    \meow{4}{4.2}{0}{4}{8.2}
+    \meow{cat1}{cat1}{0}{4}{cat1cat1}
+    
+    \hi{moew}
+     
+    \concat{🐈}{🐈}{🐈 🐈text text teeeeeeeeeeeeeeexxxxxxxxxxxxxxxxxxxtttttttttt}
+    \concat{🐈}{🐈}{🐈 🐈text text teeeeeeeeeeeeeeexxxxxxxxxxxxxxxxxxxtttttttttt}
+    \multiply{2.3}{2.3}{5.289999999999999}
+    \multiply{1}{88}{88}
+    
+    \math{4}
 \end{document}

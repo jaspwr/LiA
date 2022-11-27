@@ -24,7 +24,7 @@ fn classify_char (c: &char) -> CharGroup {
     match c {
         ' ' | '\t' | '\n' | '\r' | '\x0C' | '\x0B' => CharGroup::Whitespace,
         '(' | ')' | '{' | '}' | '[' | ']' => CharGroup::Bracket,
-        '=' | '>' | ',' | '#' | '*' | ':' | ';' => CharGroup::Symbol,
+        '=' | '>' | ',' | '#' | '*' | ':' | ';' | '+' | '-' | '/' | '$' => CharGroup::Symbol,
         _ => CharGroup::String,
     }
 }

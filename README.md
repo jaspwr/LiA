@@ -72,10 +72,3 @@ use graphicx, [utf8]inputenc
   \end{itemize}
 \end{document}
 ```
-### types:
-* `Number` or `num`
-* `Text` or `txt`
-* `Size` or `sz`
-* `Colour` or `Color` or `col`
-* `Lambda` or `fn` or `λ`
-* `Any` or simply no type annotation

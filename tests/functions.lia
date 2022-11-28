@@ -22,15 +22,15 @@
 @math = => {
     @(2 + 2 - 2 + 2)
 }
-
 @convolutedexpression=()=>{@(20 + 5894 / 2 * 3  +     ((4) *3) % 2 -212309128309.23423423)}
 
 @multiply = (a: num, b: Number) => {
     @(a * b)
 }
-
 @hi = a => {hi @a}
+
 @hi2 = @a => { hi hi @a }
+
 @a = 2
 
 #cat document with fucntions !!
@@ -38,7 +38,7 @@
 @meow(cat1, cat1)
 
 @hi(moew)
- 
+@convolutedexpression=()=>{@(20 + 5894 / 2 * 3  +     ((4) *3) % 2 -212309128309.23423423)}
 @concat(🐈, 🐈)
 @concat(🐈, 🐈)
 @multiply(2.3, 2.3)
@@ -46,3 +46,5 @@
 @convolutedexpression()
 
 @math()
+
+

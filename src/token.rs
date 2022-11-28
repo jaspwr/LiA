@@ -21,6 +21,13 @@ impl Token {
             Token::Nothing(_, loc) => *loc,
         }
     }
+
+    pub fn is_newline(&self) -> bool {
+        match self {
+            Token::Newline => true,
+            _ => false
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Default)]

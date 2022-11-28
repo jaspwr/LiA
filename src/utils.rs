@@ -146,6 +146,11 @@ pub fn indent(string: String, indentation: usize, indentation_type: IndentationT
             }, 
             None => {}
         }
+        // Don't indent empty lines.
+        if line.len() < 1 {
+            ret.push_str("\n");
+            continue;
+        }
         for _ in 0..indentation {
             match indentation_type {
                 IndentationType::Tab => {

@@ -16,6 +16,8 @@ use typed_value::TypedValue;
 pub struct LiaVariableParser {
     statement_type: Option<StatmentType>,
     terminated_by_newline: bool,
+    consuming_rest_of_line: bool,
+    trailing_whitespace: usize,
 }
 
 #[derive(Clone)]
@@ -36,6 +38,8 @@ enum StatmentType {
 impl NodeParser for LiaVariableParser {
     fn is_target(&mut self, token: &Token, identation: i32) -> bool {
         self.statement_type = None;
+        self.consuming_rest_of_line = false;
+        self.trailing_whitespace = 0;
         match token {
             Token::LiaVariable(_, _) => { true },
             _ => { false }
@@ -59,20 +63,29 @@ impl NodeParser for LiaVariableParser {
                 return true; // Read type
             }
         } else {
-            match self.statement_type {
-                Some(StatmentType::Read) => { return true; },
-                Some(StatmentType::Call) => { return bracket_depths.round == 0 },
-                Some(StatmentType::Assign) => { 
-                    return bracket_depths.curly == 0
-                    && match token {
-                        Token::Newline => { self.terminated_by_newline = true; true }
-                        Token::Nothing(t, _) => { if t == "}" { 
-                            self.terminated_by_newline = false; true
-                        } else { false }},
-                        _ => { false }
-                    } 
-                },
-                None => { return true; }
+            if self.consuming_rest_of_line {
+                self.trailing_whitespace += 1;
+                if let Token::Newline = token {
+                    return true;
+                }
+                return false;
+            } else {
+                match self.statement_type {
+                    Some(StatmentType::Read) => { return true; },
+                    Some(StatmentType::Call) => { return bracket_depths.round == 0 },
+                    Some(StatmentType::Assign) => { 
+                        return bracket_depths.curly == 0
+                        && match token {
+                            Token::Newline => { self.terminated_by_newline = true; true }
+                            Token::Nothing(t, _) => { if t == "}" { 
+                                self.consuming_rest_of_line = true;
+                                self.terminated_by_newline = false; false
+                            } else { false }},
+                            _ => { false }
+                        } 
+                    },
+                    None => { return true; }
+                }
             }
         }
         false
@@ -107,7 +120,7 @@ impl NodeParser for LiaVariableParser {
                 })}, DocSection::Document))
             },
             Some(StatmentType::Assign) => {
-                Ok((vec!{parse_var_declaration(command, &tokens,  self.terminated_by_newline, other_doc_locations)?, Rc::new(Text { text: "\n".to_string() })}
+                Ok((vec!{parse_var_declaration(command, &tokens, self.terminated_by_newline, other_doc_locations, self.trailing_whitespace)?, Rc::new(Text { text: "\n".to_string() })}
                 , DocSection::Declarations))
             },
             None => { todo!() }
@@ -225,20 +238,21 @@ fn to_typed_values (args: Vec<Token>) -> Result<Vec<TypedValue>, String> {
 }
 
 fn parse_var_declaration(command: String, tokens: &TokenList,
-    terminated_by_newline: bool, other_doc_locations: &mut OtherDocLocations) -> Result<Rc<dyn Node>, String> {
+    terminated_by_newline: bool, other_doc_locations: &mut OtherDocLocations, trailing_whitespace: usize) -> Result<Rc<dyn Node>, String> {
     Ok(Rc::new( TexCommand {
         command: "newcommand".to_string(),
         args: match find_nothing_token(tokens, "=>") {
             None => {
-                // There was no =>, so it is a econst declaration.
+                // There was no =>, so it is a const declaration.
                 const_declaration_args(command, &tokens, terminated_by_newline, other_doc_locations)?
             },
             Some(arrow_pos) => {
 
                 let spl = tokens.split_at(arrow_pos);
                 let mut lia_variables: Vec<LiaVarName> = parse_fn_declaration_lhs(spl.0.to_vec())?;
-
-                let function_inner: NodeList = parse_fn_declaration_rhs(spl.1.to_vec(),&mut lia_variables, other_doc_locations)?;
+                
+                let function_inner: NodeList = parse_fn_declaration_rhs(spl.1[0..(spl.1.len() - trailing_whitespace)].to_vec(),
+                &mut lia_variables, other_doc_locations)?;
                 let len = lia_variables.len();
                 other_doc_locations.fucntions.push(Function {
                     name: command.clone(),
@@ -431,6 +445,17 @@ fn parse_fn_declaration_rhs(tokens: TokenList, lia_variables: &mut Vec<LiaVarNam
         errors.push("Failed to parse @() expression. Aborted.".to_string());
         return Err(errors.join("\n"));
     }
+    
+    // Bodge for when there is no whitespace between the curly bracket and the first token
+    let mut start = start - 1;
+    if let Token::Whitespace(_) = &tokens[start] {
+        start += 1;
+    } else if let Token::Nothing(t, _) = &tokens[start] {
+        if t == "{" {
+            start += 1;
+        }
+    }
+
     let len = tokens.len();
     node_list(tokens, start, len - 1, other_doc_locations)
 }

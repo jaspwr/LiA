@@ -13,49 +13,43 @@
 \oddsidemargin= -1cm
 
 
-\begin{document}    
-    
-    
+\begin{document}
     \subsection{Entanglement} % random comment
     Quantum entanglement is a phenomenon that occurs when two or more qubits are linked together in such a way that measuring one qubit will instantly determine the state of the other qubit.
     To put two qubits into an entangled state, we can use the following circuit:
-    \begin{equation}    
-        \begin{quantikz}    
+    \begin{equation}
+        \begin{quantikz}
             \lstick{\ket{0}} & \qw & \targ{} & \qw\\
             \lstick{\ket{0}} & \gate{H} & \ctrl{-1} & \qw\\
         \end{quantikz}
     \end{equation}The simplest way to explain this is through calculation:
-    \begin{equation}    
+    \begin{equation}
         C H_{1} (\ket{0} \otimes \ket{0}) =
         C (
-        \begin{pmatrix}    
+        \begin{pmatrix}
             \frac{1}{\sqrt{2}} \\
             \frac{1}{\sqrt{2}} \\
-             
         \end{pmatrix}
         \otimes
         \ket{0}
         ) = 
-        \begin{pmatrix}    
+        \begin{pmatrix}
             1 & 0 & 0 & 0 \\
             0 & 1 & 0 & 0 \\
             0 & 0 & 1 & 0 \\
             0 & 0 & 0 & 1 \\
-             
         \end{pmatrix}
-        \begin{pmatrix}    
+        \begin{pmatrix}
             \frac{1}{\sqrt{2}} \\
             0 \\
             \frac{1}{\sqrt{2}} \\
             0 \\
-             
         \end{pmatrix} =
-        \begin{pmatrix}    
+        \begin{pmatrix}
             \frac{1}{\sqrt{2}} \\
             0 \\
             0 \\
             \frac{1}{\sqrt{2}} \\
-             
         \end{pmatrix}
     \end{equation}
 \end{document}

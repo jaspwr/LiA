@@ -1,6 +1,11 @@
 use std::rc::Rc;
 
-use crate::{tokeniser::{Token, TokenList, Location}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult, DocSection, OtherDocLocations}, hierarchy::TexEnvironment, utils::{count_indentation, format_error_string}};
+use crate::token::*;
+use crate::bracket_depth::BrackDepths;
+use crate::utils::{count_indentation, format_error_string};
+use crate::hierarchy::{TexEnvironment, Node, DocSection};
+use crate::hierachy_construction::{NodeParser, node_list, IndentationType, ParseResult, OtherDocLocations};
+use crate::tokeniser::TokenList;
 
 #[derive(Default)]
 pub struct LiaMardownListParser {
@@ -47,36 +52,10 @@ impl NodeParser for LiaMardownListParser {
             match &tokens[i] {
                 Token::LiaMarkDown(md, loc) => { 
                     if md == "*" {
-                        item_count += 1;
-                        if indentation > pre_indentation {
-                            if indentation - pre_indentation > 1 {
-                                return format_error_string("Indentation error. Nested item list was indented too far.".to_string(), *loc);
-                            }
-                            inner_nodes.push(Token::TexCommand("\\begin".to_string(), Location::default()));
-                            inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
-                            inner_nodes.push(Token::Nothing("itemize".to_string(), Location::default()));
-                            inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
-                            inner_nodes.push(Token::Newline);
-                        } else if indentation < pre_indentation {
-                            let diff = pre_indentation - indentation;
-                            for _ in 0..diff {
-                                inner_nodes.push(Token::TexCommand("\\end".to_string(), Location::default()));
-                                inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
-                                inner_nodes.push(Token::Nothing("itemize".to_string(), Location::default()));
-                                inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
-                                inner_nodes.push(Token::Newline);
-                            }
+                        if let Some(value) = list_item(&mut item_count, indentation, 
+                            &mut pre_indentation, loc, &mut inner_nodes, i, &tokens) {
+                            return value;
                         }
-                        inner_nodes.push(Token::TexCommand("\\item".to_string(), Location::default()));
-                        if i + 1 < tokens.len() {
-                            if let Token::Whitespace(_) = (&tokens[i + 1]) {
-                                {}
-                            } else {
-                                inner_nodes.push(Token::Whitespace(" ".to_string()));
-                            }
-                        }
-                        
-                        pre_indentation = indentation;
                     } else {
                         inner_nodes.push(tokens[i].clone());
                     }
@@ -85,11 +64,7 @@ impl NodeParser for LiaMardownListParser {
             }
         }
         while pre_indentation > self.initial_indentation_depth {
-            inner_nodes.push(Token::TexCommand("\\end".to_string(), Location::default()));
-            inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
-            inner_nodes.push(Token::Nothing("itemize".to_string(), Location::default()));
-            inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
-            inner_nodes.push(Token::Newline);
+            append_closer(&mut inner_nodes);
             pre_indentation -= 1;
         }
         Ok((vec!{Rc::new( TexEnvironment {
@@ -98,4 +73,46 @@ impl NodeParser for LiaMardownListParser {
             children: node_list(inner_nodes.clone(), 0, inner_nodes.len(), other_doc_locations)?
         })}, DocSection::Document))
     }
+}
+
+fn list_item(item_count: &mut i32, indentation: usize, pre_indentation: &mut usize, loc: &Location, 
+    inner_nodes: &mut Vec<Token>, i: usize, tokens: &Vec<Token>) -> Option<Result<(Vec<Rc<dyn Node>>, DocSection), String>> {
+    *item_count += 1;
+    if indentation > *pre_indentation {
+        if indentation - *pre_indentation > 1 {
+            return Some(format_error_string("Indentation error. Nested item list was indented too far.".to_string(), *loc));
+        }
+        append_opener(inner_nodes);
+    } else if indentation < *pre_indentation {
+        let diff = *pre_indentation - indentation;
+        for _ in 0..diff {
+            append_closer(inner_nodes);
+        }
+    }
+    inner_nodes.push(Token::TexCommand("\\item".to_string(), Location::default()));
+    if i + 1 < tokens.len() {
+        if let Token::Whitespace(_) = &tokens[i + 1] {
+            {}
+        } else {
+            inner_nodes.push(Token::Whitespace(" ".to_string()));
+        }
+    }
+    *pre_indentation = indentation;
+    None
+}
+
+fn append_opener(inner_nodes: &mut Vec<Token>) {
+    inner_nodes.push(Token::TexCommand("\\begin".to_string(), Location::default()));
+    inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
+    inner_nodes.push(Token::Nothing("itemize".to_string(), Location::default()));
+    inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
+    inner_nodes.push(Token::Newline);
+}
+
+fn append_closer(inner_nodes: &mut Vec<Token>) {
+    inner_nodes.push(Token::TexCommand("\\end".to_string(), Location::default()));
+    inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
+    inner_nodes.push(Token::Nothing("itemize".to_string(), Location::default()));
+    inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
+    inner_nodes.push(Token::Newline);
 }

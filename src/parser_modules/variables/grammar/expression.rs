@@ -1,6 +1,8 @@
 use std::rc::Rc;
 
-use crate::parser_modules::variables::{at_expression::{TypedValue, AtExpToken}, ast::{AstNode, OpAstNode}};
+use crate::parser_modules::variables::ast::{AstNode, OpAstNode};
+use crate::parser_modules::variables::typed_value::TypedValue;
+use crate::parser_modules::variables::at_expression::AtExpToken;
 
 use super::token_from_list;
 

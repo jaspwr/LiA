@@ -1,6 +1,11 @@
 use std::rc::Rc;
 
-use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult, DocSection, OtherDocLocations}, hierarchy::TexEnvironment};
+use crate::hierarchy::{TexEnvironment, DocSection};
+use crate::bracket_depth::BrackDepths;
+use crate::utils::format_error_string;
+use crate::tokeniser::TokenList;
+use crate::token::*;
+use crate::hierachy_construction::{NodeParser, node_list, IndentationType, ParseResult, OtherDocLocations};
 
 #[derive(Default)]
 pub struct LiaEnvParser {}
@@ -33,7 +38,8 @@ impl NodeParser for LiaEnvParser {
         }
         let command = match &tokens[command_pos] {
             Token::Nothing(command, _) => { command },
-            _ => { todo!() }
+            _ => { return format_error_string("Unexpected token in environment statement. Aborted".to_string(), 
+                tokens[command_pos].get_location()); }
         }.to_string();
         command_pos += 1;
         while command_pos < len {

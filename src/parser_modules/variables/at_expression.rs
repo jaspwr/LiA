@@ -1,9 +1,10 @@
-use std::{rc::Rc, error};
+use crate::token::*;
 
-use crate::tokeniser::{Token, Location};
-
-use super::LiaVarName;
+use super::var_definition::LiaVarName;
 use super::ast::*;
+use super::typed_value::TypedValue;
+
+static OPERATORS_AND_KEYWORDS: [&str; 9] = ["+", "-", "*", "/", "%", "?", ":", "(", ")"];
 
 pub fn parse_at_exprssion (tokens: &Vec<Token>, lia_variables: Vec<LiaVarName>) -> Result<Ast, String> {
     let lia_variables = lia_variables.into_iter().filter(|v| {
@@ -34,39 +35,6 @@ pub fn parse_at_exprssion (tokens: &Vec<Token>, lia_variables: Vec<LiaVarName>) 
 }
 
 
-#[derive(Debug, Clone)]
-pub enum TypedValue {
-    Number(f64),
-    String(String)
-}
-
-impl TypedValue {
-    pub fn stringify (&self) -> String {
-        match self {
-            TypedValue::Number(n) => n.to_string(),
-            TypedValue::String(s) => s.clone()
-        }
-    }
-
-    pub fn matches_declaration_type(&self, dec: &LiaVarName) -> bool {
-        match dec {
-            LiaVarName::Any(_) => true,
-            LiaVarName::Number(_) => {
-                match self {
-                    TypedValue::Number(_) => true,
-                    _ => false
-                }
-            },
-            LiaVarName::String(_) => {
-                match self {
-                    TypedValue::String(_) => true,
-                    _ => false
-                }
-            },
-            _ => false
-        }
-    }
-}
 
 #[derive(Clone)]
 pub enum AtExpToken {
@@ -91,20 +59,6 @@ impl AtExpToken {
             _ => false
         }
     }
-}
-
-static OPERATORS_AND_KEYWORDS: [&str; 9] = ["+", "-", "*", "/", "%", "?", ":", "(", ")"];
-
-pub fn op(s: &str) -> usize {
-    // Hopefully LLVM will optimise this out
-    let mut i = 0;
-    while OPERATORS_AND_KEYWORDS[i] != s {
-        i += 1;
-        if i > OPERATORS_AND_KEYWORDS.len() {
-            panic!("Operator not found");
-        }
-    }
-    i
 }
 
 impl AtExpToken {
@@ -157,5 +111,17 @@ fn get_imported_value_index(token: Token, imported_value_names: &Vec<LiaVarName>
             Err(format!("{} No value with name \"{}\" in @() found.", loc.stringify(), t))
         },
         _ => { panic!("Unexpected token in @() expression.") }
+    }
+}
+
+pub fn to_typed_var_name(name: String, type_annotation: String, location: &Location) -> Result<LiaVarName, String> {
+    match type_annotation.as_str() {
+        "Number" | "num" => Ok(LiaVarName::Number(name)),
+        "String" | "txt" => Ok(LiaVarName::String(name)),
+        "Size" | "sz" => Ok(LiaVarName::Size(name)),
+        "Colour" | "Color" | "col" => Ok(LiaVarName::Colour(name)),
+        "Lamda" | "fn" | "λ" => Ok(LiaVarName::Lamda(Ast::default())),
+        "Any" => Ok(LiaVarName::Any(name)),
+        _ => Err(format!{"{} Unknown type \"{}\". Aborted.", location.stringify(), type_annotation}),
     }
 }

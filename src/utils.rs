@@ -1,6 +1,7 @@
 use std::{fs::{File, remove_file}, io::{Read, Write}};
 
-use crate::{tokeniser::{TokenList, Token, Location}, hierarchy::{ArgList, ArgType, Arg}, hierachy_construction::{BrackDepths, node_list, IndentationType, ParseResult, OtherDocLocations}};
+use crate::{tokeniser::TokenList, token::*, hierarchy::{ArgList, ArgType, Arg}, bracket_depth::BrackDepths};
+use crate::hierachy_construction::{node_list, IndentationType, ParseResult, OtherDocLocations};
 
 pub fn load_utf8_file (path: String) -> Result<String, std::io::Error> {
     let mut file = File::open(path)?;

@@ -1,6 +1,11 @@
 use std::rc::Rc;
 
-use crate::{hierachy_construction::*, tokeniser::{Token, TokenList}, hierarchy::*, utils::{delta_bracket_depth, parse_args}};
+use crate::token::*;
+use crate::hierarchy::*;
+use crate::bracket_depth::BrackDepths;
+use crate::utils::{delta_bracket_depth, parse_args};
+use crate::tokeniser::TokenList;
+use crate::hierachy_construction::*;
 
 #[derive(Default)]
 pub struct LiaUseParser {}

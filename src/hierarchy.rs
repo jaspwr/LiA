@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
-use crate::{utils::indent, hierachy_construction::IndentationType};
+use crate::hierachy_construction::IndentationType;
+use crate::utils::indent;
 pub type NodeList = Vec<Rc<dyn Node>>;
 pub type ArgList = Vec<Arg>;
 
@@ -8,6 +9,12 @@ pub struct Doc {
     pub imports: NodeList,
     pub declarations: NodeList,
     pub document: NodeList
+}
+
+pub enum DocSection {
+    Imports,
+    Declarations,
+    Document
 }
 
 pub struct Text {

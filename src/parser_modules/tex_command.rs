@@ -1,6 +1,11 @@
 use std::rc::Rc;
 
-use crate::{tokeniser::{Token, TokenList}, hierachy_construction::{BrackDepths, NodeParser, IndentationType, ParseResult, DocSection, node_list, OtherDocLocations}, hierarchy::{TexCommand, TexEnvironment, Node, Text}, utils::parse_args};
+use crate::tokeniser::TokenList;
+use crate::bracket_depth::BrackDepths;
+use crate::utils::parse_args;
+use crate::hierarchy::{TexCommand, TexEnvironment, Node, Text, DocSection};
+use crate::token::*;
+use crate::hierachy_construction::{NodeParser, IndentationType, ParseResult, node_list, OtherDocLocations};
 
 #[derive(Default, PartialEq, Debug)]
 enum EnvParsingState {
@@ -109,36 +114,31 @@ impl NodeParser for TexCommandParser {
 
     fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
         if self.env_parsing_state != EnvParsingState::NotEnv { // For environments
-            let edge_size = if self.env_parsing_state == EnvParsingState::SquareBracketEquationEnv { self.env_name = "equation".to_string(); 1 } else { 4 };
-            let mut back = 0;
-            
-            // if self.env_parsing_state != EnvParsingState::SquareBracketEquationEnv {
-            //     // Strip tailing newline
-            //     let mut end = tokens.len() - 4;
-            //     while let Token::Whitespace(_) = tokens[end - 1] { end -= 1; }             
-            //     while let Token::Newline = tokens[end - 1] { end -= 1; }
-            //     back = tokens.len() - end - 4;
-            // };
-            // println!("{:#?}", tokens);
-            // println!("{}", edge_size);
-            // println!("{}", tokens.len());
-
-            let children = node_list(tokens.clone(), edge_size, tokens.len() - edge_size - back, other_doc_locations)?;
-            if self.env_name.clone() == "document" {
-                // LiA adds the document macro implicitly, ignore existing document macro.
-                return Ok((children, DocSection::Document))
-            }
-            return Ok((vec!{ Rc::new(TexEnvironment {
-                name: self.env_name.clone(),
-                args: vec![],
-                children
-            }) }, DocSection::Document))
+            return self.parse_as_env(&tokens, other_doc_locations);
         }
+        self.parse_as_regular_tex_command(tokens, other_doc_locations)
+    }
+}
 
-        
+impl TexCommandParser {
+    fn parse_as_env(&mut self, tokens: &Vec<Token>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
+        let edge_size = if self.env_parsing_state == EnvParsingState::SquareBracketEquationEnv { self.env_name = "equation".to_string(); 1 } else { 4 };
+        let children = node_list(tokens.clone(), edge_size, tokens.len() - edge_size, other_doc_locations)?;
+        if self.env_name.clone() == "document" {
+            // LiA adds the document macro implicitly, ignore existing document macro.
+            return Ok((children, DocSection::Document))
+        }
+        Ok((vec!{ Rc::new(TexEnvironment {
+            name: self.env_name.clone(),
+            args: vec![],
+            children
+        }) }, DocSection::Document))
+    }
+
+    fn parse_as_regular_tex_command(&mut self, tokens: Vec<Token>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
         let command = match &tokens[0] {
             Token::TexCommand(command, _) => { &command[1..] },
-            _ => { todo!() }
+            _ => { panic!("Should not be here.") }
         }.to_string();
         if self.is_dec {
             let mut v = vec![
@@ -165,6 +165,5 @@ impl NodeParser for TexCommandParser {
             }));
         }
         Ok((v, section))
-        
     }
 }

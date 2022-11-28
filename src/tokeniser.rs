@@ -1,4 +1,4 @@
-use crate::utils::*;
+use crate::{utils::*, token::*};
 
 #[derive(PartialEq)]
 enum CharGroup {
@@ -6,18 +6,6 @@ enum CharGroup {
     String,
     Symbol,
     Bracket,
-}
-
-#[derive(Debug, Clone, Copy, Default)]
-pub struct Location {
-    pub line: usize,
-    pub column: usize,
-}
-
-impl Location {
-    pub fn stringify(&self) -> String {
-        format!("{}:{}", self.line, self.column)
-    }
 }
 
 fn classify_char (c: &char) -> CharGroup {
@@ -38,27 +26,28 @@ pub fn to_tokens (input_lia: String) -> TokenList {
     let mut first_of_line = true;
     let mut line: usize = 1;
     let mut column: usize = 1;
+    let mut start_of_token = Location::default();
     let mut pre_c = ' ';
     input_lia.chars().for_each(|c| {
         if c == '\r' { return; }
         if c == '\n' || c == ';' { first_of_line = true;
-            line += 1; column = 0;
+            line += 1; column = 1;
             let token = parse_token(&current_token, first_of_line, Location { line, column });
             ret.push(token);
-            current_token.clear();
+            start_new_token(&mut start_of_token, line, column, &mut current_token);
             ret.push(Token::Newline); 
             return; 
         }
         let char_group = classify_char(&c);
         if (char_group != pre_char_group || pre_char_group == CharGroup::Bracket) && pre_c != '\\' {
             if !current_token.is_empty() {
-                let token = parse_token(&current_token, first_of_line, Location { line, column });
+                let token = parse_token(&current_token, first_of_line, start_of_token);
                 match token {
                     Token::Whitespace(_) => {},
                     _ => { first_of_line = false; }
                 };
+                start_new_token(&mut start_of_token, line, column, &mut current_token);
                 ret.push(token);
-                current_token.clear();
             }
         }
         current_token.push(c);
@@ -66,35 +55,15 @@ pub fn to_tokens (input_lia: String) -> TokenList {
         pre_char_group = char_group;
         pre_c = c;
     });
-    let token = parse_token(&current_token, first_of_line, Location { line, column });
+    let token = parse_token(&current_token, first_of_line, start_of_token);
     ret.push(token);
     ret.push(Token::Newline);
     ret
 }
 
-#[derive(Debug, Clone)]
-pub enum Token {
-    TexCommand(String, Location),
-    LiaVariable(String, Location),
-    LiaKeyword(String, Location),
-    LiaMarkDown(String, Location),
-    Newline,
-    Whitespace(String),
-    Nothing(String, Location)
-}
-
-impl Token {
-    pub fn get_location(&self) -> Location {
-        match self {
-            Token::TexCommand(_, loc) => *loc,
-            Token::LiaVariable(_, loc) => *loc,
-            Token::LiaKeyword(_, loc) => *loc,
-            Token::LiaMarkDown(_, loc) => *loc,
-            Token::Newline => Location::default(),
-            Token::Whitespace(_) => Location::default(),
-            Token::Nothing(_, loc) => *loc,
-        }
-    }
+fn start_new_token(start_of_token: &mut Location, line: usize, column: usize, current_token: &mut String) {
+    *start_of_token = Location { line, column };
+    current_token.clear();
 }
 
 fn parse_token (token: &String, begins_line: bool, location: Location) -> Token {

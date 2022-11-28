@@ -1,6 +1,11 @@
 use std::rc::Rc;
 
-use crate::{hierachy_construction::*, tokeniser::{Token, TokenList}, hierarchy::*};
+use crate::tokeniser::TokenList;
+use crate::bracket_depth::BrackDepths;
+use crate::hierarchy::*;
+use crate::token::*;
+use crate::hierachy_construction::*;
+use crate::utils::format_error_string;
 
 #[derive(Default)]
 pub struct LiaMarkDownSections {}
@@ -23,9 +28,10 @@ impl NodeParser for LiaMarkDownSections {
         }
     }
 
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, 
+        other_doc_locations: &mut OtherDocLocations) -> ParseResult {
         let command = match &tokens[0] {
-            Token::LiaMarkDown(hash, _) => { 
+            Token::LiaMarkDown(hash, loc) => { 
                 match hash.as_str() {
                     "#" => { "section" },
                     "##" => { "subsection" },
@@ -33,29 +39,32 @@ impl NodeParser for LiaMarkDownSections {
                     "#*" => { "section*" },
                     "##*" => { "subsection*" },
                     "###*" => { "subsubsection*" },
-                    _ => { todo!() }
+                    _ => { return format_error_string(
+                        format!{"Lines opened with '#' will automatically be assumed to be a header. \"{}\" is not a valid header command. If you don't want this to parse as a header, add a '\\' to escape it.", 
+                        hash}, 
+                        *loc) }
                 }
             },
-            _ => { todo!() }
+            _ => { panic!("Should not be here.") }
         }.to_string();
         Ok((vec![Rc::new(TexCommand {
             command,
             args: vec![Arg {
                     arg: {
-                        let len = tokens.len();
-                        let mut start = 1;
-                        while start < len {
-                            if let Token::Whitespace(_) = tokens[start] {
-                                start += 1;
-                            } else {
-                                break;
-                            }
-                        }
-                        node_list(tokens, start, len-1, other_doc_locations)?
+                        rest_of_line(&tokens, other_doc_locations)?
                     },
                     arg_type: ArgType::Curly
                 }]
         }), Rc::new(Text { text: "\n".to_string() })
         ], DocSection::Document))
     }
+}
+
+fn rest_of_line(tokens: &TokenList, other_doc_locations: &mut OtherDocLocations) -> Result<NodeList, String> {
+    let len = tokens.len();
+    let mut start = 1;
+    while start < len {
+        if let Token::Whitespace(_) = tokens[start] { start += 1; } else { break; }
+    }
+    Ok(node_list(tokens.clone(), start, len-1, other_doc_locations)?)
 }

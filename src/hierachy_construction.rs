@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use crate::bracket_depth::BrackDepths;
 use crate::parser_modules::environments::LiaEnvParser;
 use crate::parser_modules::imports::LiaUseParser;
 use crate::parser_modules::markdown_style_list::LiaMardownListParser;
@@ -7,13 +8,10 @@ use crate::parser_modules::markdown_style_section::LiaMarkDownSections;
 use crate::parser_modules::tex_command::TexCommandParser;
 use crate::parser_modules::variables::Function;
 use crate::parser_modules::variables::LiaVariableParser;
+use crate::token::*;
 use crate::tokeniser::*;
 use crate::hierarchy::*;
-use crate::utils::count_indentation;
-use crate::utils::count_whitespace;
-use crate::utils::delta_bracket_depth;
-use std::ops::Add;
-use std::ops::AddAssign;
+use crate::utils::{count_indentation, count_whitespace, delta_bracket_depth};
 
 #[derive(Default)]
 pub struct OtherDocLocations {
@@ -51,16 +49,10 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize, other_doc_locatio
     let mut bracket_depths = BrackDepths::default();
     let mut indentation = 0;
     let mut indentation_type: Option<IndentationType> = None;
-    let mut start = start;
 
-    // Remove leading whitespace.
-    while let Token::Whitespace(_) = &tokens[start] {
-        start += 1;
-    }
-    if start > tokens.len() || end > tokens.len() {
-        println!("{:#?}", tokens);
-        panic!("start or end is out of bounds");
-    }
+    let start = move_past_whitespace(&tokens, start);
+    check_range(start, &tokens, end);
+
     let mut skip_next_flag = false;
     for i in start..end {
         if skip_next_flag { skip_next_flag = false; continue; }
@@ -76,9 +68,9 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize, other_doc_locatio
                 &tokens[if i + whitespace < tokens.len() { i + whitespace } else { i }],
                 &bracket_depths) {
                     
-                    append_token(&mut child_tokens_buffer, &tokens, i, &mut pushed_token_flag, 
-                        &mut node_parsers[m], indentation_type, other_doc_locations, 
-                        &mut items, &mut in_parser_module)?;
+                append_token(&mut child_tokens_buffer, &tokens, i, &mut pushed_token_flag, 
+                    &mut node_parsers[m], indentation_type, other_doc_locations, 
+                    &mut items, &mut in_parser_module)?;
 
                 // For single token commands
                 for j in 0..node_parsers.len() {
@@ -115,6 +107,20 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize, other_doc_locatio
     }
     items.push(text_node(&child_tokens_buffer)?);
     Ok(items)
+}
+
+fn move_past_whitespace(tokens: &Vec<Token>, start: usize) -> usize {
+    let mut start = start;
+    while let Token::Whitespace(_) = &tokens[start] {
+        start += 1;
+    }
+    start
+}
+
+fn check_range(start: usize, tokens: &Vec<Token>, end: usize) {
+    if start > tokens.len() || end > tokens.len() {
+        panic!("start or end is out of bounds");
+    }
 }
 
 fn clamp_index(i: usize, tokens: &Vec<Token>) -> usize {
@@ -160,39 +166,6 @@ fn text_node (tokens: &TokenList) -> Result<Rc<dyn Node>, String> {
     Ok(Rc::new( Text { text }))
 }
 
-#[derive(Default, Copy, Clone, PartialEq)]
-pub struct BrackDepths {
-    pub curly: i32,
-    pub square: i32,
-    pub round: i32,
-}
-
-impl Add for BrackDepths {
-    type Output = BrackDepths;
-
-    fn add(self, other: BrackDepths) -> BrackDepths {
-        BrackDepths {
-            curly: self.curly + other.curly,
-            square: self.square + other.square,
-            round: self.round + other.round,
-        }
-    }
-}
-
-impl AddAssign for BrackDepths {
-    fn add_assign(&mut self, other: BrackDepths) {
-        self.curly += other.curly;
-        self.square += other.square;
-        self.round += other.round;
-    }
-}
-
-impl BrackDepths {
-    pub fn is_zero(&self) -> bool {
-        self.curly == 0 && self.square == 0 && self.round == 0
-    }
-}
-
 pub type ParseResult = Result<(Vec<Rc<dyn Node>>, DocSection), String>;
 pub trait NodeParser {
     fn is_target(&mut self, token: &Token, identation: i32) -> bool;
@@ -204,10 +177,4 @@ pub trait NodeParser {
 pub enum IndentationType {
     Space(u8),
     Tab
-}
-
-pub enum DocSection {
-    Imports,
-    Declarations,
-    Document
 }

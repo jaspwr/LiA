@@ -10,6 +10,8 @@ mod parser_modules;
 mod tokeniser;
 mod hierarchy;
 mod hierachy_construction;
+mod token;
+mod bracket_depth;
 
 pub fn run_from_args(args: Vec<String>) {
     let jobs = match cli::parse_args(args) {
@@ -27,10 +29,14 @@ pub fn run_from_args(args: Vec<String>) {
             let mut pre_hash = utils::hash_file(&job.input_path);
             let mut watcher = notify::recommended_watcher(move|_| {
                 let hash = utils::hash_file(&job.input_path);
+                if hash == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" {
+                    // Empty file
+                    return;
+                }
                 if pre_hash != hash {
-                    pre_hash = hash;
                     run_job(&job);
                 }
+                pre_hash = hash;
             }).unwrap();
             watcher.watch(Path::new(&name), RecursiveMode::Recursive).unwrap();
             loop { std::thread::sleep(std::time::Duration::from_millis(1000)); }

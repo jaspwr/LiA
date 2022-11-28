@@ -1,12 +1,16 @@
-use std::{rc::Rc, fmt::format};
+use std::rc::Rc;
 
-use crate::{tokeniser::{Token, TokenList, Location}, hierachy_construction::{BrackDepths, NodeParser, node_list, IndentationType, ParseResult, DocSection, OtherDocLocations}, hierarchy::{TexCommand, Arg, ArgType, ArgList, Text, Node, NodeList}, utils::{count_whitespace, delta_bracket_depth, is_bracket}};
+use crate::{tokeniser::TokenList, token::*, hierachy_construction::{NodeParser, node_list, IndentationType, ParseResult, OtherDocLocations}, hierarchy::{TexCommand, Arg, ArgType, ArgList, Text, Node, NodeList, DocSection}, utils::{count_whitespace, delta_bracket_depth, is_bracket}, bracket_depth::BrackDepths};
 
 mod at_expression;
 mod ast;
 mod grammar;
+mod typed_value;
+mod var_definition;
 use at_expression::*;
 use ast::Ast;
+use var_definition::*;
+use typed_value::TypedValue;
 
 #[derive(Default)]
 pub struct LiaVariableParser {
@@ -85,7 +89,7 @@ impl NodeParser for LiaVariableParser {
                     }
                     command
                 },
-            _ => { todo!() }
+            _ => { panic!("Should not be here.") }
         }.to_string();
         // TODO: Check for legal name
 
@@ -150,6 +154,7 @@ fn split_call_args(tokens: &TokenList, start: usize, end: usize,
     }
     if function.is_some() {
         let function = function.unwrap();
+
         // TODO: Not this.
         let a: Vec<LiaVarName> = function.clone().args.into_iter().filter(|f| {
             if let LiaVarName::Lamda(_) = f { true } else { false }
@@ -157,7 +162,7 @@ fn split_call_args(tokens: &TokenList, start: usize, end: usize,
         let b: Vec<LiaVarName> = function.clone().args.into_iter().filter(|f| {
             if let LiaVarName::Lamda(_) = f { false } else { true }
         }).collect();
-        let args_to_parse_in = to_typed_values(str_args);
+        let args_to_parse_in = to_typed_values(str_args)?;
         if args.len() != b.len() {
             return Err(format!("{} Function {} takes {} arguments, but {} were given.", 
             tokens[0].get_location().stringify(), 
@@ -205,13 +210,18 @@ fn append_arg(args: &mut Vec<Arg>, tokens_buffer: &Vec<Token>, len: usize,
     Ok(())
 }
 
-fn to_typed_values (args: Vec<Token>) -> Vec<TypedValue> {
-    args.into_iter().map(|a| {
+fn to_typed_values (args: Vec<Token>) -> Result<Vec<TypedValue>, String> {
+    let mut err: Option<String> = None;
+    let args = args.into_iter().filter_map(|a| {
         match a {
-            Token::Nothing(t, _) => { string_to_typed_value(t).unwrap() },
-            _ => { todo!() }
+            Token::Nothing(t, _) => { Some(string_to_typed_value(t).unwrap()) },
+            _ => { err = Some(format!{"{} Tried to pass an illegal argument.", a.get_location().stringify()}); None }
         }
-    }).collect()
+    }).collect();
+    match err {
+        Some(e) => Err(e),
+        None => Ok(args)
+    }
 }
 
 fn parse_var_declaration(command: String, tokens: &TokenList,
@@ -227,6 +237,7 @@ fn parse_var_declaration(command: String, tokens: &TokenList,
 
                 let spl = tokens.split_at(arrow_pos);
                 let mut lia_variables: Vec<LiaVarName> = parse_fn_declaration_lhs(spl.0.to_vec())?;
+
                 let function_inner: NodeList = parse_fn_declaration_rhs(spl.1.to_vec(),&mut lia_variables, other_doc_locations)?;
                 let len = lia_variables.len();
                 other_doc_locations.fucntions.push(Function {
@@ -237,6 +248,23 @@ fn parse_var_declaration(command: String, tokens: &TokenList,
             }
         }
     }))
+}
+
+fn function_declaration_args (command: String, argc: usize, fn_contents: NodeList) -> ArgList {
+    vec![
+        Arg {
+            arg_type: ArgType::Curly,
+            arg: vec![Rc::new(Text { text: format!{"\\{}", command} })]
+        },
+        Arg {
+            arg_type: ArgType::Square,
+            arg: vec![Rc::new(Text { text: argc.to_string() })]
+        },
+        Arg {
+            arg_type: ArgType::CurlyMultiline,
+            arg: fn_contents
+        }
+    ]
 }
 
 fn find_nothing_token (haystack: &TokenList, needle: &str) -> Option<usize> {
@@ -265,46 +293,6 @@ fn const_declaration_args(command: String, tokens: &TokenList, terminated_by_new
         { tokens.len() - 1} else { tokens.len() }, other_doc_locations)?
     });
     Ok(ret)
-}
-
-#[derive(Clone)]
-pub enum LiaVarName {
-    Number(String), 
-    String(String),
-    Size(String),
-    Colour(String),
-    Lamda(Ast),
-    Any(String),
-}
-
-impl LiaVarName {
-    fn matches_name(&self, name: &str) -> bool {
-        match self {
-            LiaVarName::Number(n) => { n == name },
-            LiaVarName::String(s) => { s == name },
-            LiaVarName::Size(s) => { s == name },
-            LiaVarName::Colour(c) => { c == name },
-            LiaVarName::Lamda(_) => { false },
-            LiaVarName::Any(a) => { a == name },
-        }
-    }
-}
-
-fn function_declaration_args (command: String, argc: usize, fn_contents: NodeList) -> ArgList {
-    vec![
-        Arg {
-            arg_type: ArgType::Curly,
-            arg: vec![Rc::new(Text { text: format!{"\\{}", command} })]
-        },
-        Arg {
-            arg_type: ArgType::Square,
-            arg: vec![Rc::new(Text { text: argc.to_string() })]
-        },
-        Arg {
-            arg_type: ArgType::CurlyMultiline,
-            arg: fn_contents
-        }
-    ]
 }
 
 fn parse_fn_declaration_lhs(tokens: TokenList) -> Result<Vec<LiaVarName>, String> {
@@ -354,18 +342,6 @@ fn extract_type_annotation(tokens: &Vec<Token>, i: usize) -> Option<(String, usi
     None
 }
 
-fn to_typed_var_name(name: String, type_annotation: String, location: &Location) -> Result<LiaVarName, String> {
-    match type_annotation.as_str() {
-        "Number" | "num" => Ok(LiaVarName::Number(name)),
-        "String" | "txt" => Ok(LiaVarName::String(name)),
-        "Size" | "sz" => Ok(LiaVarName::Size(name)),
-        "Colour" | "Color" | "col" => Ok(LiaVarName::Colour(name)),
-        "Lamda" | "fn" | "λ" => Ok(LiaVarName::Lamda(Ast::default())),
-        "Any" => Ok(LiaVarName::Any(name)),
-        _ => Err(format!{"{} Unknown type \"{}\". Aborted.", location.stringify(), type_annotation}),
-    }
-}
-
 fn parse_fn_declaration_rhs(tokens: TokenList, lia_variables: &mut Vec<LiaVarName>, 
     other_doc_locations: &mut OtherDocLocations) -> Result<NodeList, String> {
     let start = count_whitespace(&tokens, 2) + 2;
@@ -406,6 +382,7 @@ fn parse_fn_declaration_rhs(tokens: TokenList, lia_variables: &mut Vec<LiaVarNam
                             return None;
                         }
                         if t == ")" && brack_depth.round == 0 {
+                            
                             in_at_expression = false;
                             lia_variables.push(LiaVarName::Lamda(match parse_at_exprssion(&at_buf, lia_variables.clone()) {
                                 Ok(a) => a,

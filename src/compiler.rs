@@ -1,4 +1,7 @@
-use crate::{utils::{load_utf8_file, write_utf8_file}, hierachy_construction, tokeniser, hierarchy::Node};
+use crate::hierarchy::Node;
+use crate::tokeniser;
+use crate::utils::{write_utf8_file, load_utf8_file};
+use crate::hierachy_construction;
 
 #[derive(Default, Clone)]
 pub struct Job {

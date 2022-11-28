@@ -1,6 +1,8 @@
 use std::rc::Rc;
 
-use crate::parser_modules::variables::{ast::*, at_expression::{AtExpToken, TypedValue}};
+use crate::parser_modules::variables::ast::*;
+use crate::parser_modules::variables::typed_value::TypedValue;
+use crate::parser_modules::variables::at_expression::AtExpToken;
 
 use super::token_from_list;
 
@@ -23,35 +25,12 @@ impl AstNode for BinaryAdditiveExpression {
                 let rhs = right.evaluate(imported_values)?;
                 match self.operation {
                     Operation::Add => {                
-                        match lhs {
-                        TypedValue::Number(lhs) => {
-                                match rhs {
-                                    TypedValue::Number(rhs) => Ok(TypedValue::Number(lhs + rhs)),
-                                    _ => Err("Tried to add mismatched types in @() expression.".to_string())
-                                }
-                            },
-                            TypedValue::String(lhs) => {
-                                match rhs {
-                                    TypedValue::String(rhs) => Ok(TypedValue::String(lhs + &rhs)),
-                                    _ => Err("Tried to add mismatched types in @() expression.".to_string())
-                                }
-                            },
-                            _ => Err("Tried to add with imcompatible type in @() expression".to_string())
-                        }
+                        add(&lhs, &rhs)
                     },
                     Operation::Sub => {
-                        match lhs {
-                            TypedValue::Number(lhs) => {
-                                match rhs {
-                                    TypedValue::Number(rhs) => Ok(TypedValue::Number(lhs - rhs)),
-                                    _ => Err("Tried to add mismatched types in @() expression.".to_string())
-                                }
-                            },
-                            _ => Err("Tried to add mismatched types in @() expression.".to_string())
-                        }
+                        sub(lhs, rhs)
                     }
                 }
-
             } else {
                 panic!("BinaryAdditionOperator::evaluate() called with non-AstNode token in right position.")
             }
@@ -86,5 +65,33 @@ pub fn parse(tokens: &Vec<AtExpToken>, start: i32) -> Result<OpAstNode, String> 
     } else {
         Ok(None)
     }
-    //Ok(None)
+}
+
+fn sub(lhs: TypedValue, rhs: TypedValue) -> Result<TypedValue, String> {
+    match lhs {
+        TypedValue::Number(lhs) => {
+            match rhs {
+                TypedValue::Number(rhs) => Ok(TypedValue::Number(lhs - rhs)),
+                _ => Err("Tried to subtract mismatched types in @() expression.".to_string())
+            }
+        },
+        _ => Err("Tried to subtract a forbidden type in @() expression.".to_string())
+    }
+}
+
+fn add(lhs: &TypedValue, rhs: &TypedValue) -> Result<TypedValue, String> {
+    match lhs {
+    TypedValue::Number(lhs) => {
+            match rhs {
+                TypedValue::Number(rhs) => Ok(TypedValue::Number(lhs + rhs)),
+                _ => Err("Tried to add mismatched types in @() expression.".to_string())
+            }
+        },
+        TypedValue::String(lhs) => {
+            match rhs {
+                TypedValue::String(rhs) => Ok(TypedValue::String(lhs.clone() + rhs)),
+                _ => Err("Tried to add mismatched types in @() expression.".to_string())
+            }
+        },
+    }
 }

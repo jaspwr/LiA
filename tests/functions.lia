@@ -23,6 +23,8 @@
     @(2 + 2 - 2 + 2)
 }
 
+@convolutedexpression=()=>{@(20 + 5894 / 2 * 3  +     ((4) *3) % 2 -212309128309.23423423)}
+
 @multiply = (a: num, b: Number) => {
     @(a * b)
 }
@@ -41,5 +43,6 @@
 @concat(🐈, 🐈)
 @multiply(2.3, 2.3)
 @multiply(1, 88)
+@convolutedexpression()
 
 @math()

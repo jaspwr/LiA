@@ -22,6 +22,8 @@ use graphicx, [utf8]inputenc
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
 
+
+\newcommand{\cat}{🐈}
 \newcommand{\img}[2]{
   \begin{center}
     \image{#1, 10cm}
@@ -29,6 +31,7 @@ use graphicx, [utf8]inputenc
     \textit{#2}
   \end{center}
 }
+
 
 \begin{document}
   \section*{Cool Cat Image}
@@ -53,6 +56,7 @@ use graphicx, [utf8]inputenc
 \newcommand{\img}[3]{
   $#1 \times #2 = #3$
 }
+
 
 \begin{document}
   \being{itemize}

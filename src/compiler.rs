@@ -1,3 +1,5 @@
+use std::process::Command;
+
 use crate::hierarchy::Node;
 use crate::tokeniser;
 use crate::utils::{write_utf8_file, load_utf8_file};
@@ -7,6 +9,7 @@ use crate::hierachy_construction;
 pub struct Job {
     pub input_path: String,
     pub output_path: String,
+    pub chained_command: Option<String>,
     pub watches: bool,
     pub debug_printing: bool
 }
@@ -22,7 +25,28 @@ pub fn compile (job: Job) -> Result<(), String> {
     if job.debug_printing {
         println!("{}", output);
     }
-    match write_utf8_file(job.output_path, output) {
+    let file_res = write_utf8_file(job.output_path, output);
+
+    if job.chained_command.is_some() {
+        let command = job.chained_command.unwrap();        
+        if cfg!(target_os = "windows") {
+            if Command::new("cmd")
+                .args(&["/C", &command])
+                .spawn()
+                .is_err() {
+                    return Err(format!("Failed to run command \"{}\".", command));
+                }
+        } else {
+            if Command::new("sh")
+                .args(&["/C", &command])
+                .spawn()
+                .is_err() {
+                    return Err(format!("Failed to run command \"{}\".", command));
+                }
+        };
+    }
+
+    match file_res {
         Ok(_) => { Ok(()) },
         Err(e) => { Err(format!("{}. Aborted.",e)) }
     }

@@ -42,7 +42,8 @@ fn test_compilation_result(input_path: String, output_path: String, correct_outp
         input_path: input_path.clone(),
         output_path: output_path.clone(),
         watches: false,
-        debug_printing: false
+        debug_printing: false,
+        chained_command: None
     };
     match compile(job.clone()) {
         Ok(_) => { 

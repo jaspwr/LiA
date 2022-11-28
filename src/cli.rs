@@ -31,6 +31,12 @@ fn parse_flag (flag: &str) -> Result<Flag, String> {
                 ShouldContinue::Continues
             })))
         },
+        "--chain" | "-c" => {
+            Ok(Flag::TakesNextArg(Rc::new(|job: &mut Job, arg: String| -> ShouldContinue {
+                job.chained_command = Some(arg);
+                ShouldContinue::Continues
+            })))
+        },
         "--help" | "-h" => {
             Ok(Flag::OnlySelf(Rc::new(|_job: &mut Job| -> ShouldContinue {
                 println!("[{}] LiA Compiler Help", "?".blink());
@@ -38,9 +44,10 @@ fn parse_flag (flag: &str) -> Result<Flag, String> {
                 println!("Usage: lia [flags] [input files]");
                 println!("Flags:");
                 println!("-o [output file] - Sets the output file.");
+                println!("-w / --watch - Watch file for changes and automatically recompile.");
+                println!("-c / --chain [command] - Chain a command to run after compilation. E.g. your LaTeX compiler.");
                 println!("--help - Prints this help message.");
                 println!("--version - Prints the version of the LiA.");
-                println!("--watch - Watch file for changes and automatically recompile.");
                 println!("Input file - The file to compile.");
                 ShouldContinue::Aborts
             })))

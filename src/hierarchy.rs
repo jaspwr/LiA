@@ -1,10 +1,6 @@
-use std::borrow::BorrowMut;
-use std::ops::Deref;
 use std::rc::Rc;
 
 use crate::hierachy_construction::IndentationType;
-use crate::token::Token;
-use crate::tokeniser::TokenList;
 use crate::utils::indent;
 pub type NodeList = Vec<Rc<dyn Node>>;
 pub type ArgList = Vec<Arg>;
@@ -77,7 +73,7 @@ impl Node for TexEnvironment {
         if !children.starts_with('\n') {
             children.insert(0, '\n');
         }
-        
+
         // This is a little scuffed.
         children = children.trim_end_matches(' ')
         .trim_end_matches('\t')

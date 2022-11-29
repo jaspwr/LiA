@@ -44,7 +44,6 @@ impl Node for Doc {
         let imps = codegen_section(&self.imports);
         let decs = codegen_section(&self.declarations);
 
-        println!("LEN {}", &self.document.len());
         let inner = codegen_nodelist(&self.document)
         .trim_start_matches('\n')
         .trim_end_matches('\n')

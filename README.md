@@ -15,6 +15,7 @@ use graphicx, [utf8]inputenc
     }
 }
 #* Cool Cat Image
+## A subsection
 @img(cat.png, Meow @cat!)
 ```
 ### Resulting TeX
@@ -35,6 +36,7 @@ use graphicx, [utf8]inputenc
 
 \begin{document}
   \section*{Cool Cat Image}
+  \subsection{A subsection}
   \img{images/cat.png}{Meow \cat!}
 \end{document}
 ```

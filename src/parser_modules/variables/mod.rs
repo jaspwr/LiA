@@ -36,7 +36,7 @@ enum StatmentType {
 
 #[allow(unused)]
 impl NodeParser for LiaVariableParser {
-    fn is_target(&mut self, token: &Token, identation: i32) -> bool {
+    fn is_opener(&mut self, token: &Token, identation: i32) -> bool {
         self.statement_type = None;
         self.consuming_rest_of_line = false;
         self.trailing_whitespace = 0;

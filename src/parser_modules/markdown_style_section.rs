@@ -12,7 +12,7 @@ pub struct LiaMarkDownSections {}
 
 #[allow(unused)]
 impl NodeParser for LiaMarkDownSections {
-    fn is_target(&mut self, token: &Token, identation: i32) -> bool {
+    fn is_opener(&mut self, token: &Token, identation: i32) -> bool {
         match token {
             Token::LiaMarkDown(text, _) => { 
                 text.starts_with("#")

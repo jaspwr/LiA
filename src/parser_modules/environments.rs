@@ -12,7 +12,7 @@ pub struct LiaEnvParser {}
 
 #[allow(unused)]
 impl NodeParser for LiaEnvParser {
-    fn is_target(&mut self, token: &Token, identation: i32) -> bool {
+    fn is_opener(&mut self, token: &Token, identation: i32) -> bool {
         match token {
             Token::LiaKeyword(k, _) => { k == "env" },
             _ => { false }
@@ -26,7 +26,9 @@ impl NodeParser for LiaEnvParser {
         }
     }
 
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, 
+        other_doc_locations: &mut OtherDocLocations) -> ParseResult {
+
         let mut command_pos = 1;
         let len = tokens.len();
         while command_pos < len {
@@ -43,10 +45,18 @@ impl NodeParser for LiaEnvParser {
         }.to_string();
         command_pos += 1;
         while command_pos < len {
-            if let Token::Whitespace(_) = tokens[command_pos] {
+            if let Token::Whitespace(_) = &tokens[command_pos] {
                 command_pos += 1;
+            } else if let Token::Nothing(t, loc) = &tokens[command_pos] {
+                if t == "{" {
+                    break;
+                } else {
+                    return format_error_string(
+                        "Unexpected token in evnironment statement.".to_string(), 
+                        *loc);
+                }
             } else {
-                break;
+                return Err("Unexpected token in evnironment statement.".to_string());
             }
         }
         command_pos += 1;

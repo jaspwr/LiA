@@ -12,6 +12,7 @@ mod hierarchy;
 mod hierachy_construction;
 mod token;
 mod bracket_depth;
+mod codegen;
 
 pub fn run_from_args(args: Vec<String>) {
     let jobs = match cli::parse_args(args) {

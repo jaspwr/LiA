@@ -31,7 +31,7 @@ pub struct TexCommandParser {
 
 #[allow(unused)]
 impl NodeParser for TexCommandParser {
-    fn is_target(&mut self, token: &Token, identation: i32) -> bool {
+    fn is_opener(&mut self, token: &Token, identation: i32) -> bool {
         self.env_parsing_state = EnvParsingState::NotEnv;
         self.env_depth = 0;
         self.is_dec = false;
@@ -58,7 +58,7 @@ impl NodeParser for TexCommandParser {
                 bracket_depths.curly == 0 && bracket_depths.square == 0
                 && match next_token {
                     Token::Nothing(t, _) => { t != "{" && t != "[" },
-                    Token::Newline => { false }, // Consume trailing newline
+                    Token::Newline => { self.next = true; false }, // Consume trailing newline
                     _ => { true }
                 } && match next_token_no_white_space {
                     Token::Nothing(t, _) => { 

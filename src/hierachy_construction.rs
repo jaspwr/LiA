@@ -74,14 +74,14 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize, other_doc_locatio
 
                 // For single token commands
                 for j in 0..node_parsers.len() {
-                    if (node_parsers[j]).is_target(&tokens[i], indentation as i32) {
+                    if (node_parsers[j]).is_opener(&tokens[i], indentation as i32) {
                         append_text_node(&mut items, &mut child_tokens_buffer, &mut in_parser_module, j)?;
                     }
                 }
             }
         } else {
             for j in 0..node_parsers.len() {
-                if (node_parsers[j]).is_target(&tokens[i], indentation as i32) {
+                if (node_parsers[j]).is_opener(&tokens[i], indentation as i32) {
                     append_text_node(&mut items, &mut child_tokens_buffer, &mut in_parser_module, j)?;
                     
                     // For commands that start at the end of another token
@@ -168,7 +168,7 @@ fn text_node (tokens: &TokenList) -> Result<Rc<dyn Node>, String> {
 
 pub type ParseResult = Result<(Vec<Rc<dyn Node>>, DocSection), String>;
 pub trait NodeParser {
-    fn is_target(&mut self, token: &Token, identation: i32) -> bool;
+    fn is_opener(&mut self, token: &Token, identation: i32) -> bool;
     fn is_closer(&mut self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool;
     fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult;
 }

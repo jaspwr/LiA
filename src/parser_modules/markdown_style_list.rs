@@ -14,7 +14,7 @@ pub struct LiaMardownListParser {
 
 #[allow(unused)]
 impl NodeParser for LiaMardownListParser {
-    fn is_target(&mut self, token: &Token, identation: i32) -> bool {
+    fn is_opener(&mut self, token: &Token, identation: i32) -> bool {
         match token {
             Token::LiaMarkDown(text, _) => { if text == "*" {
                 self.initial_indentation_depth = identation as usize;

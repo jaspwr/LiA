@@ -12,7 +12,7 @@ pub struct LiaUseParser {}
 
 #[allow(unused)]
 impl NodeParser for LiaUseParser {
-    fn is_target(&mut self, token: &Token, identation: i32) -> bool {
+    fn is_opener(&mut self, token: &Token, identation: i32) -> bool {
         match token {
             Token::LiaKeyword(k, _) => { k == "use" },
             _ => { false }

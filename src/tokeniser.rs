@@ -40,7 +40,10 @@ pub fn to_tokens (input_lia: String) -> TokenList {
             return; 
         }
         let char_group = classify_char(&c);
-        if (char_group != pre_char_group || pre_char_group == CharGroup::Bracket || c == '\\') && pre_c != '\\' {
+        if (char_group != pre_char_group
+            || pre_char_group == CharGroup::Bracket
+            || c == '\\' || c == '@')
+            && pre_c != '\\' {
             if !current_token.is_empty() {
                 let token = parse_token(&current_token, first_of_line, start_of_token);
                 match token {

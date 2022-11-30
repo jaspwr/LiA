@@ -52,11 +52,11 @@ impl NodeParser for LiaEnvParser {
                     break;
                 } else {
                     return format_error_string(
-                        "Unexpected token in evnironment statement.".to_string(), 
+                        "Unexpected token in environment statement.".to_string(), 
                         *loc);
                 }
             } else {
-                return Err("Unexpected token in evnironment statement.".to_string());
+                return Err("Unexpected token in environment statement.".to_string());
             }
         }
         command_pos += 1;

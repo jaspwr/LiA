@@ -122,7 +122,16 @@ impl NodeParser for TexCommandParser {
 
 impl TexCommandParser {
     fn parse_as_env(&mut self, tokens: &Vec<Token>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
-        let edge_size = if self.env_parsing_state == EnvParsingState::SquareBracketEquationEnv { self.env_name = "equation".to_string(); 1 } else { 4 };
+        let edge_size = if self.env_parsing_state == EnvParsingState::SquareBracketEquationEnv { 
+                self.env_name = "equation".to_string();
+                let mut r = 1;
+                while let Token::Whitespace(_) = tokens[tokens.len() - r] { 
+                    r += 1; 
+                }
+                r
+            } else { 
+                4 
+            };
         let children = node_list(tokens.clone(), edge_size, tokens.len() - edge_size, other_doc_locations)?;
         if self.env_name.clone() == "document" {
             // LiA adds the document macro implicitly, ignore existing document macro.

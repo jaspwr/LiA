@@ -2,7 +2,9 @@ use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
 use crate::parser_modules::environments::LiaEnvParser;
+use crate::parser_modules::equation::LiaEquation;
 use crate::parser_modules::imports::LiaUseParser;
+use crate::parser_modules::markdown_style_bold_italic::BoldItalic;
 use crate::parser_modules::markdown_style_list::LiaMardownListParser;
 use crate::parser_modules::markdown_style_section::LiaMarkDownSections;
 use crate::parser_modules::tex_command::TexCommandParser;
@@ -34,13 +36,15 @@ pub fn contruct_doc(tokens: TokenList) -> Result<Doc, String> {
 }
 
 pub fn node_list (tokens: TokenList, start: usize, end: usize, other_doc_locations: &mut OtherDocLocations) -> Result<NodeList, String> {
-    let mut node_parsers: [Box<dyn NodeParser>; 6] = [
+    let mut node_parsers: [Box<dyn NodeParser>; 8] = [
         Box::new(LiaMarkDownSections::default()),
         Box::new(TexCommandParser::default()),
         Box::new(LiaEnvParser::default()),
         Box::new(LiaUseParser::default()),
         Box::new(LiaVariableParser::default()),
         Box::new(LiaMardownListParser::default()),
+        Box::new(BoldItalic::default()),
+        Box::new(LiaEquation::default()),
     ];
 
     let mut items: NodeList = Vec::new();
@@ -160,7 +164,7 @@ fn text_node (tokens: &TokenList) -> Result<Rc<dyn Node>, String> {
             Token::LiaKeyword(s, loc) => { return Err(format!{"{} Malformed {} statement.", loc.stringify(), s})},
             Token::LiaMarkDown(s, loc) => { return Err(format!{"{} Malformed {} expression.", loc.stringify(), s})},
             Token::LiaVariable(s, loc) => { return Err(format!{"{} Malformed variable expression for \"{}\".", loc.stringify(), s})},
-            _ => { }
+            Token::TexCommand(_, _) => { return Err(format!{"Environment was opened but never closed."})}
         }
     }
     Ok(Rc::new( Text { text }))

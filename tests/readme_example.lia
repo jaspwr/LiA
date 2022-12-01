@@ -12,7 +12,7 @@ use graphicx, [utf8]inputenc
 @img(cat.png, Meow @cat!)
 
 @muliplication = (a: Number, b: Number) => {$@a \times @b = @(a * b)$}
-* I'm a Markdown style list
+* I'm a **Markdown** style ***list***
 * @muliplication(2, 3)
 * @muliplication(6, 6)
 * @muliplication(2, 9)

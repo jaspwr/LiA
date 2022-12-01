@@ -31,11 +31,16 @@ impl Node for TexEnvironment {
         .trim_end_matches('\n')
         .to_string();
 
-        format!("\\begin{{{}}}{}{}\\end{{{}}}", self.name,
-        (&self.args).into_iter().map(|arg| -> String { 
-            arg.codegen() 
-        }).collect::<String>(), 
-        indent(children, 1, IndentationType::Space(4)), self.name)
+        if self.name == "[" {
+            format!{"\\[{}\\]",
+            indent(children, 1, IndentationType::Space(4))}
+        } else {
+            format!("\\begin{{{}}}{}{}\\end{{{}}}", self.name,
+            (&self.args).into_iter().map(|arg| -> String { 
+                arg.codegen() 
+            }).collect::<String>(), 
+            indent(children, 1, IndentationType::Space(4)), self.name)
+        }
     }
 }
 

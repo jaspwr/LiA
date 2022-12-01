@@ -40,7 +40,7 @@ impl NodeParser for LiaMarkDownSections {
                     "##*" => { "subsection*" },
                     "###*" => { "subsubsection*" },
                     _ => { return format_error_string(
-                        format!{"Lines opened with '#' will automatically be assumed to be a header. \"{}\" is not a valid header command. If you don't want this to parse as a header, add a '\\' to escape it.", 
+                        format!{"Lines opened with '#' will automatically be assumed to be a section. \"{}\" is not a valid section command. If you don't want this to parse as a section, add a '\\' to escape it.", 
                         hash}, 
                         *loc) }
                 }

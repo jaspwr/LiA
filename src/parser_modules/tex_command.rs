@@ -104,7 +104,7 @@ impl NodeParser for TexCommandParser {
             EnvParsingState::EndClosingCurly => { true },
             EnvParsingState::SquareBracketEquationEnv => { 
                 match token {
-                    Token::TexCommand(com, _) => { if com == "\\]" { self.next = true; } false },
+                    Token::TexCommand(com, _) => { com == "\\]" },
                     _ => { false }
                 }
             }
@@ -122,16 +122,7 @@ impl NodeParser for TexCommandParser {
 
 impl TexCommandParser {
     fn parse_as_env(&mut self, tokens: &Vec<Token>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
-        let edge_size = if self.env_parsing_state == EnvParsingState::SquareBracketEquationEnv { 
-                self.env_name = "equation".to_string();
-                let mut r = 1;
-                while let Token::Whitespace(_) = tokens[tokens.len() - r] { 
-                    r += 1; 
-                }
-                r
-            } else { 
-                4 
-            };
+        let edge_size = if self.env_parsing_state == EnvParsingState::SquareBracketEquationEnv { self.env_name = "[".to_string(); 1 } else { 4 };
         let children = node_list(tokens.clone(), edge_size, tokens.len() - edge_size, other_doc_locations)?;
         if self.env_name.clone() == "document" {
             // LiA adds the document macro implicitly, ignore existing document macro.
@@ -145,9 +136,12 @@ impl TexCommandParser {
     }
 
     fn parse_as_regular_tex_command(&mut self, tokens: Vec<Token>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
+        let a = "a".to_string();
         let command = match &tokens[0] {
             Token::TexCommand(command, _) => { &command[1..] },
-            _ => { panic!("Should not be here.") }
+            _ => { 
+                return Ok((node_list(tokens, 0, 1, other_doc_locations)?, DocSection::Document));
+            }
         }.to_string();
         if self.is_dec {
             let mut v = vec![

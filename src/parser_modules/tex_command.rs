@@ -136,7 +136,6 @@ impl TexCommandParser {
     }
 
     fn parse_as_regular_tex_command(&mut self, tokens: Vec<Token>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
-        let a = "a".to_string();
         let command = match &tokens[0] {
             Token::TexCommand(command, _) => { &command[1..] },
             _ => { 

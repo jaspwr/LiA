@@ -39,16 +39,16 @@ fn parse_flag (flag: &str) -> Result<Flag, String> {
         },
         "--help" | "-h" => {
             Ok(Flag::OnlySelf(Rc::new(|_job: &mut Job| -> ShouldContinue {
-                println!("[{}] LiA Compiler Help", "?".blink());
+                println!("[?] LiA Compiler {} Help", env!("CARGO_PKG_VERSION"));
                 println!("--------------------------------");
+                println!("For language documentation, visit {}", "https://github.com/jaspwr/LiA/blob/main/docs.md".blue());
                 println!("Usage: lia [flags] [input files]");
                 println!("Flags:");
-                println!("-o [output file] - Sets the output file.");
-                println!("-w / --watch - Watch file for changes and automatically recompile.");
-                println!("-c / --chain [command] - Chain a command to run after compilation. E.g. your LaTeX compiler.");
-                println!("--help - Prints this help message.");
-                println!("--version - Prints the version of the LiA.");
-                println!("Input file - The file to compile.");
+                println!("  -o [output file] - Sets the output file.");
+                println!("  -w / --watch - Watch file for changes and automatically recompile.");
+                println!("  -c / --chain [command] - Chain a command to run after compilation. E.g. your LaTeX compiler.");
+                println!("  --help - Prints this help message.");
+                println!("  --version - Prints the version of the LiA.");
                 ShouldContinue::Aborts
             })))
         },

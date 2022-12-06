@@ -21,6 +21,8 @@ fn classify_char (c: &char) -> CharGroup {
 pub type TokenList = Vec<Token>;
 
 pub fn to_tokens (input_lia: String) -> TokenList {
+    // TODO: Refactor to be less hard coded for the specific use case.
+
     let mut ret = Vec::<Token>::new();
     let mut current_token = String::new();
     let mut pre_char_group = CharGroup::Whitespace;

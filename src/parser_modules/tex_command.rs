@@ -39,7 +39,8 @@ impl NodeParser for TexCommandParser {
         match token {
             Token::TexCommand(com, _) => { 
                 if com == "\\begin" { self.env_parsing_state = EnvParsingState::BeginOpeningCurly; }
-                else if com == "\\[" { self.env_parsing_state = EnvParsingState::SquareBracketEquationEnv;}                 
+                else if com == "\\[" { self.env_parsing_state = EnvParsingState::SquareBracketEquationEnv;}
+                else if com == "\\]" { return false; }              
                 true },
             _ => { false }
         }
@@ -138,8 +139,11 @@ impl TexCommandParser {
     fn parse_as_regular_tex_command(&mut self, tokens: Vec<Token>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
         let command = match &tokens[0] {
             Token::TexCommand(command, _) => { &command[1..] },
-            _ => { 
-                return Ok((node_list(tokens, 0, 1, other_doc_locations)?, DocSection::Document));
+            _ => {
+                // Scuffed fix for weird issue where tokens after `\]` end up being passed to this function.
+                // This should really be panicing as the code should never be here.
+                // Will cold fix eventually.
+                return Ok((node_list(tokens.clone(), 0, tokens.len(), other_doc_locations)?, DocSection::Document));
             }
         }.to_string();
         if self.is_dec {

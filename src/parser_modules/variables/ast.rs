@@ -68,7 +68,7 @@ impl Ast {
         }
         match self.root_node {
             Some(ref root) => Ok(root.evaluate(imported_values)?),
-            None => panic!("Attempted to evaluate an empty AST")
+            None => { return Err("Attempted to evaluate an empty AST".to_string()); }
         }
     }
 }

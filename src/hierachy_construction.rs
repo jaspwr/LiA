@@ -36,6 +36,9 @@ pub fn contruct_doc(tokens: TokenList) -> Result<Doc, String> {
 }
 
 pub fn node_list (tokens: TokenList, start: usize, end: usize, other_doc_locations: &mut OtherDocLocations) -> Result<NodeList, String> {
+    // TODO: Refactor this function to be more readable.
+    //       It's impossible to work with at the moment.
+    
     let mut node_parsers: [Box<dyn NodeParser>; 8] = [
         Box::new(LiaMarkDownSections::default()),
         Box::new(TexCommandParser::default()),

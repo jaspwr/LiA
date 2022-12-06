@@ -94,7 +94,7 @@ env environmenttype {
 
 ### Variables
 
-* Any work annotated with a `@` will be treated as a variable.
+* Any word annotated with a `@` will be treated as a variable.
 #### Referencing variables
 > ⚠️ As of version 0.1.0, variables with computed arguments can not be used before they are defined. This will be fixed in future versions.
 

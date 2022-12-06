@@ -1,6 +1,5 @@
 # LiA
 ##### A transpiled superset of TeX because some of TeX's syntax was annoying me.
-
 This is more for my personal use however you're welcome to use it or contribute. These added features are just designed to make LaTeX code less verbose, faster to write but also just catered more towards my personal preference.
 
 > For a more detailed explanation of the features see the [documentation](docs.md).
@@ -76,4 +75,19 @@ use graphicx, [utf8]inputenc
           list item
   \end{itemize}
 \end{document}
+```
+# Installation
+* __Windows:__ Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually.
+* __Other:__ Follow the instructions in the [building](#building) section.
+# Usage
+```bash
+lia file.lia
+```
+* Run `lia --help` for more information on usage.
+# Building
+Requires [Rust](https://www.rust-lang.org/tools/install) to be installed.
+```bash
+git clone https://github.com/jaspwr/LiA
+cd LiA
+cargo install --path
 ```

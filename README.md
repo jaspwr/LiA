@@ -77,7 +77,7 @@ use graphicx, [utf8]inputenc
 \end{document}
 ```
 # Installation
-* __Windows:__ Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually.
+* __Windows:__ Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually. If you have Rust intalled it is recommended that you use the instructions in the [building](#building) section.
 * __Arch Linux:__ Clone this repository and use the PKGBUILD. I'm working on adding this to the AUR.
 * __Other:__ Follow the instructions in the [building](#building) section.
 # Usage

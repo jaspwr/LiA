@@ -18,7 +18,7 @@ impl Ast {
         }
     }
 
-    pub fn construct (tokens: &Vec<AtExpToken>, imported_values_count: usize) -> Result<Ast, String> {
+    pub fn construct (tokens: &Vec<AtExpToken>, imported_values_count: usize, general_error_message: &str) -> Result<Ast, String> {
         let mut tokens = tokens.clone();
         const STALE: u32 = 200;
         let mut i = 0;
@@ -46,7 +46,7 @@ impl Ast {
             }
             i += 1;
             if i > STALE {
-                return Err("Could not parse @() expression".to_string());
+                return Err(general_error_message.to_string());
             }
         }
         let root_node = match tokens[0] {
@@ -59,9 +59,12 @@ impl Ast {
         })
     }
 
-    pub fn evaluate (&self, imported_values: &Vec<TypedValue>) -> Result<TypedValue, String> {
+    pub fn evaluate (&self, imported_values: &Vec<TypedValue>, invalid_arg_count_message: &str) -> Result<TypedValue, String> {
         if imported_values.len() != self.imported_values_count {
-            return Err(format!("Failed for run @() expression. Expected {} arguments, got {}. Aborted", self.imported_values_count, imported_values.len()));
+            return Err(format!("{} Expected {} arguments, got {}. Aborted",
+            invalid_arg_count_message,
+            self.imported_values_count, 
+            imported_values.len()));
         }
         match self.root_node {
             Some(ref root) => Ok(root.evaluate(imported_values)?),

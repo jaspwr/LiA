@@ -97,7 +97,7 @@ impl NodeParser for LiaVariableParser {
                     let command = &command[1..];
                     if command.len() == 0 {
                         return Err(
-                            format!{"{} Invalid varibale name \"{}\". Aborted.", loc.stringify(), command}
+                            format!{"{} Invalid variable name \"{}\". Aborted.", loc.stringify(), command}
                         );
                     }
                     command
@@ -194,7 +194,7 @@ fn split_call_args(tokens: &TokenList, start: usize, end: usize,
                 args.push(Arg {
                     arg_type: ArgType::Curly,
                     arg: vec!{Rc::new( Text { text:
-                        match l.evaluate(&args_to_parse_in) {
+                        match l.evaluate(&args_to_parse_in, "Failed for run @() expression.") {
                             Ok(r) => r.stringify(),
                             Err(e) => { errs.push(e); "".to_string() }
                         }

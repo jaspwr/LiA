@@ -1,6 +1,9 @@
 # LiA
 ##### A transpiled superset of TeX because some of TeX's syntax was annoying me.
+
 This is more for my personal use however you're welcome to use it or contribute. These added features are just designed to make LaTeX code less verbose, faster to write but also just catered more towards my personal preference.
+
+> For a more detailed explanation of the features see the [documentation](docs.md).
 
 ## Example #1
 ### LiA code

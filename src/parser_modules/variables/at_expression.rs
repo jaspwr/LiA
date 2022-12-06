@@ -30,7 +30,12 @@ pub fn parse_at_exprssion (tokens: &Vec<Token>, lia_variables: Vec<LiaVarName>) 
     if did_error {
         return Err(errors.join("\n").to_string());
     }
-    let ast = Ast::construct(&tokens, lia_variables.len())?;
+    if tokens.len() == 0 {
+        return Err("Found empty @() expression.".to_string());
+    }
+    let ast = Ast::construct(&tokens,
+        lia_variables.len(),
+        "Could not parse @() expression")?;
     Ok(ast)
 }
 

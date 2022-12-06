@@ -23,7 +23,7 @@ env environmenttype {
 -------------------
 
 ### Imports
-* Any row opened with a `use` keyword (excluding whitespace) will be treated as an import statement.
+* Any line opened with a `use` keyword (excluding whitespace) will be treated as an import statement.
 
 | LiA                     | TeX                       |
 |-------------------------|---------------------------|
@@ -65,7 +65,7 @@ env environmenttype {
 -------------------
 
 ### Markdown style lists
-* Any row opened with a `*` will be treated as a list item. You can create nested lists with indentation. In most cases the indentation type will be inferred. 
+* Any line opened with a `*` will be treated as a list item. You can create nested lists with indentation. In most cases the indentation type will be inferred. 
 #### Lia
 ```tex
 * List item.

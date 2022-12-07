@@ -196,7 +196,8 @@ eq* {
 ```
 The content inside the equation expression uses a separate syntax to more easily
 represent mathematical expressions. The content will be parsed and converted to
-LaTeX.
+LaTeX. Most TeX commands should work as normal.
+> ⚠️ As of version 0.2.0, TeX commands can be separated from their arguments by fractions. This can be solved by encasing the command in `{}`. This will be fixed in future versions.
 #### General expressions
 ##### Lia
 

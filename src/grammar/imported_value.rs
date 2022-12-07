@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
-use crate::parser_modules::variables::ast::{AstNode, OpAstNode};
-use crate::parser_modules::variables::typed_value::TypedValue;
-use crate::parser_modules::variables::at_expression::AtExpToken;
+use crate::ast::{AstNode, OpAstNode};
+use crate::typed_value::TypedValue;
+use crate::at_expression::AtExpToken;
 
 pub struct ImportedValue {
     index: usize
@@ -11,6 +11,10 @@ pub struct ImportedValue {
 impl AstNode for ImportedValue {
     fn evaluate(&self, imported_values: &Vec<TypedValue>) -> Result<TypedValue, String> {
         Ok(imported_values[self.index].clone())
+    }
+
+    fn codegen(&self) -> String {
+        format!("imported_values[{}]", self.index)
     }
 }
 

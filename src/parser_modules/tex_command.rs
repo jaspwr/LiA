@@ -5,7 +5,7 @@ use crate::bracket_depth::BrackDepths;
 use crate::utils::parse_args;
 use crate::hierarchy::{TexCommand, TexEnvironment, Node, Text, DocSection};
 use crate::token::*;
-use crate::hierachy_construction::{NodeParser, IndentationType, ParseResult, node_list, OtherDocLocations};
+use crate::hierachy_construction::{NodeParser, IndentationType, ParseResult, node_list, CompilerGlobals};
 
 #[derive(Default, PartialEq, Debug)]
 enum EnvParsingState {
@@ -31,7 +31,7 @@ pub struct TexCommandParser {
 
 #[allow(unused)]
 impl NodeParser for TexCommandParser {
-    fn is_opener(&mut self, token: &Token, identation: i32) -> bool {
+    fn is_opener(&mut self, token: &Token, identation: i32, other_doc_locations: &mut CompilerGlobals) -> bool {
         self.env_parsing_state = EnvParsingState::NotEnv;
         self.env_depth = 0;
         self.is_dec = false;
@@ -113,7 +113,7 @@ impl NodeParser for TexCommandParser {
 
     }
 
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut CompilerGlobals) -> ParseResult {
         if self.env_parsing_state != EnvParsingState::NotEnv { // For environments
             return self.parse_as_env(&tokens, other_doc_locations);
         }
@@ -122,7 +122,7 @@ impl NodeParser for TexCommandParser {
 }
 
 impl TexCommandParser {
-    fn parse_as_env(&mut self, tokens: &Vec<Token>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
+    fn parse_as_env(&mut self, tokens: &Vec<Token>, other_doc_locations: &mut CompilerGlobals) -> ParseResult {
         let edge_size = if self.env_parsing_state == EnvParsingState::SquareBracketEquationEnv { self.env_name = "[".to_string(); 1 } else { 4 };
         let children = node_list(tokens.clone(), edge_size, tokens.len() - edge_size, other_doc_locations)?;
         if self.env_name.clone() == "document" {
@@ -136,7 +136,7 @@ impl TexCommandParser {
         }) }, DocSection::Document))
     }
 
-    fn parse_as_regular_tex_command(&mut self, tokens: Vec<Token>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
+    fn parse_as_regular_tex_command(&mut self, tokens: Vec<Token>, other_doc_locations: &mut CompilerGlobals) -> ParseResult {
         let command = match &tokens[0] {
             Token::TexCommand(command, _) => { &command[1..] },
             _ => {

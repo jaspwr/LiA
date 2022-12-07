@@ -10,6 +10,20 @@ pub enum Token {
 }
 
 impl Token {
+    pub fn stringify(&self) -> String {
+        match self {
+            Token::TexCommand(s, _) => s.clone(),
+            Token::LiaVariable(s, _) => s.clone(),
+            Token::LiaKeyword(s, _) => s.clone(),
+            Token::LiaMarkDown(s, _) => s.clone(),
+            Token::Newline => "\n".to_string(),
+            Token::Whitespace(s) => s.clone(),
+            Token::Nothing(s, _) => s.clone(),
+        }
+    }
+}
+
+impl Token {
     pub fn get_location(&self) -> Location {
         match self {
             Token::TexCommand(_, loc) => *loc,

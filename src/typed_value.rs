@@ -1,4 +1,4 @@
-use super::var_definition::LiaVarName;
+use crate::parser_modules::variables::var_definition::LiaVarName;
 
 #[derive(Debug, Clone)]
 pub enum TypedValue {
@@ -30,6 +30,13 @@ impl TypedValue {
                 }
             },
             _ => false
+        }
+    }
+
+    pub fn type_name(&self) -> String {
+        match self {
+            TypedValue::Number(_) => "Number".to_string(),
+            TypedValue::String(_) => "String".to_string()
         }
     }
 }

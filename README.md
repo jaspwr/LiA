@@ -1,10 +1,26 @@
 # LiA
-##### A transpiled superset of TeX because some of TeX's syntax was annoying me.
+##### A transpiled superset of TeX for writing LaTeX.
 This is more for my personal use however you're welcome to use it or contribute. These added features are just designed to make LaTeX code less verbose, faster to write but also just catered more towards my personal preference.
 
 > For a more detailed explanation of the features see the [documentation](docs.md).
 
+> For installation instructions see the [installation](#installation) section.
+
 ## Example #1
+### LiA code
+```tex
+eq {
+    dy/dx = x*(a - b) + [[1, 2], [3, 4]]
+}
+```
+### Resulting TeX
+```tex
+\begin{equation}
+    \frac{dy}{dx} = x \times \left(a - b\right) + \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}
+\end{equation}
+```
+
+## Example #2
 ### LiA code
 ```tex
 use graphicx, [utf8]inputenc
@@ -13,7 +29,7 @@ use graphicx, [utf8]inputenc
     env center {
         \image{@("images/" + src), 10cm}
         \linebreak
-        \textit{@desc}
+        **@desc**
     }
 }
 #* Cool Cat Image
@@ -42,7 +58,7 @@ use graphicx, [utf8]inputenc
   \img{images/cat.png}{Meow \cat!}
 \end{document}
 ```
-## Example #2
+## Example #3
 ### LiA code
 ```tex
 @muliplication = (a: Number, b: Number) => { $@a \times @b = @(a * b)$ }
@@ -77,9 +93,12 @@ use graphicx, [utf8]inputenc
 \end{document}
 ```
 # Installation
-* __Windows:__ Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually. If you have Rust intalled it is recommended that you use the instructions in the [building](#building) section.
-* __Arch Linux:__ Clone this repository and use the PKGBUILD. I'm working on adding this to the AUR.
-* __Other:__ Follow the instructions in the [building](#building) section.
+
+|__OS__|__Instructions__|
+|---|---|
+|__Windows__| Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually. If you have Rust intalled it is recommended that you use the instructions in the [building](#building) section.
+|__Arch Linux__| Clone this repository and use the PKGBUILD. I'm working on adding this to the AUR.
+|__Other__| Follow the instructions in the [building](#building) section.
 # Usage
 ```bash
 lia file.lia

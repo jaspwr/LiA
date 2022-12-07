@@ -1,18 +1,22 @@
 use std::rc::Rc;
 
-use crate::hierarchy::{TexEnvironment, DocSection};
+use crate::ast::Ast;
+use crate::at_expression::AtExpToken;
+use crate::hierarchy::{TexEnvironment, DocSection, Text, Node};
 use crate::bracket_depth::BrackDepths;
 use crate::utils::format_error_string;
 use crate::tokeniser::TokenList;
 use crate::token::*;
-use crate::hierachy_construction::{NodeParser, node_list, IndentationType, ParseResult, OtherDocLocations};
+use crate::hierachy_construction::{NodeParser, node_list, IndentationType, ParseResult, CompilerGlobals};
 
 #[derive(Default)]
 pub struct LiaEquation {}
 
+static OPERATORS_AND_KEYWORDS: [&str; 15] = ["+", "-", "*", "/", "%", "?", ":", "(", ")", "{", "}", "^", ",", "[", "]"];
+
 #[allow(unused)]
 impl NodeParser for LiaEquation {
-    fn is_opener(&mut self, token: &Token, identation: i32) -> bool {
+    fn is_opener(&mut self, token: &Token, identation: i32, other_doc_locations: &mut CompilerGlobals) -> bool {
         match token {
             Token::Nothing(k, _) => { k == "eq" },
             _ => { false }
@@ -27,7 +31,7 @@ impl NodeParser for LiaEquation {
     }
 
     fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, 
-        other_doc_locations: &mut OtherDocLocations) -> ParseResult {
+        other_doc_locations: &mut CompilerGlobals) -> ParseResult {
             let mut asterisk = false;
             let mut open_pos = 1;
             let len = tokens.len();
@@ -52,12 +56,49 @@ impl NodeParser for LiaEquation {
                 }
             }
             
-            let children = node_list(tokens, open_pos + 1, len - 1, other_doc_locations)?;
+            let children = if other_doc_locations.feature_status_list.equation_statement_internal_syntax.is_supported() {
+                vec![Rc::new(Text { text:
+                    Ast::construct(&to_at_exp_tokens_for_equation(&tokens, open_pos + 1, len - 1)?,
+                        0,
+                        format!("{} Invalid syntax in equation statement", tokens[0].get_location().stringify()).as_str())
+                        ?.codegen()
+                }) as Rc<dyn Node>]
+            } else {
+                node_list(tokens, open_pos + 1, len - 1, other_doc_locations)?
+            };
 
             Ok((vec!{Rc::new( TexEnvironment {
                 name: if asterisk { "[".to_string() } else { "equation".to_string() },
                 args: vec![],
                 children
             })}, DocSection::Document))
+    }
+}
+
+fn to_at_exp_tokens_for_equation (tokens: &TokenList, start: usize, end: usize) -> Result<Vec<AtExpToken>, String> {
+    let mut at_exp_tokens = vec![];
+    for i in start..end {
+        let t_opt = tokenise(&tokens[i])?;
+        if let Some(t) = t_opt {
+            at_exp_tokens.push(t);
+        }
+    }
+    Ok(at_exp_tokens)
+}
+
+fn tokenise(token: &Token) -> Result<Option<AtExpToken>, String> {
+    match token {
+        Token::Nothing(t, _) => {
+            for op in OPERATORS_AND_KEYWORDS {
+                if t == op {
+                    return Ok(Some(AtExpToken::OperatorOrKeyword(t.to_string())));
+                }
+            }
+            return Ok(Some(AtExpToken::Text(token.stringify())));
+        },
+        Token::TexCommand(_, _) => {
+            return Ok(Some(AtExpToken::Text(token.stringify())));
+        },
+        _ => { return Ok(None); }
     }
 }

@@ -12,7 +12,7 @@ pub struct LiaUseParser {}
 
 #[allow(unused)]
 impl NodeParser for LiaUseParser {
-    fn is_opener(&mut self, token: &Token, identation: i32) -> bool {
+    fn is_opener(&mut self, token: &Token, identation: i32, other_doc_locations: &mut CompilerGlobals) -> bool {
         match token {
             Token::LiaKeyword(k, _) => { k == "use" },
             _ => { false }
@@ -26,7 +26,7 @@ impl NodeParser for LiaUseParser {
         }
     }
 
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut CompilerGlobals) -> ParseResult {
         let mut imports: Vec<ArgList> = Vec::new();
 
         let len = tokens.len();
@@ -57,7 +57,7 @@ impl NodeParser for LiaUseParser {
     }
 }
 
-fn parse_to_args (tokens: TokenList, start: usize, other_doc_locations: &mut OtherDocLocations) -> Result<ArgList, String> {
+fn parse_to_args (tokens: TokenList, start: usize, other_doc_locations: &mut CompilerGlobals) -> Result<ArgList, String> {
     let len = tokens.len();
     let mut start = start;
     while start < len {

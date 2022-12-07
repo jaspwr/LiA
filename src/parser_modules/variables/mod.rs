@@ -1,16 +1,13 @@
 use std::rc::Rc;
 
-use crate::{tokeniser::TokenList, token::*, hierachy_construction::{NodeParser, node_list, IndentationType, ParseResult, OtherDocLocations}, hierarchy::{TexCommand, Arg, ArgType, ArgList, Text, Node, NodeList, DocSection}, utils::{count_whitespace, delta_bracket_depth, is_bracket}, bracket_depth::BrackDepths};
+use crate::{tokeniser::TokenList, token::*, hierachy_construction::{NodeParser, node_list, IndentationType, ParseResult, CompilerGlobals}, hierarchy::{TexCommand, Arg, ArgType, ArgList, Text, Node, NodeList, DocSection}, utils::{count_whitespace, delta_bracket_depth, is_bracket, untokenise, strip_all_whitespace}, bracket_depth::BrackDepths, feature_matrix::get_status_list};
 
-mod at_expression;
-mod ast;
-mod grammar;
-mod typed_value;
-mod var_definition;
-use at_expression::*;
-use ast::Ast;
+
+pub mod var_definition;
+use crate::at_expression::*;
+use crate::ast::Ast;
 use var_definition::*;
-use typed_value::TypedValue;
+use crate::typed_value::TypedValue;
 
 #[derive(Default)]
 pub struct LiaVariableParser {
@@ -36,7 +33,7 @@ enum StatmentType {
 
 #[allow(unused)]
 impl NodeParser for LiaVariableParser {
-    fn is_opener(&mut self, token: &Token, identation: i32) -> bool {
+    fn is_opener(&mut self, token: &Token, identation: i32, other_doc_locations: &mut CompilerGlobals) -> bool {
         self.statement_type = None;
         self.consuming_rest_of_line = false;
         self.trailing_whitespace = 0;
@@ -91,7 +88,7 @@ impl NodeParser for LiaVariableParser {
         false
     }
 
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult {
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut CompilerGlobals) -> ParseResult {
         let command = match &tokens[0] {
             Token::LiaVariable(command, loc) => { 
                     let command = &command[1..];
@@ -120,8 +117,13 @@ impl NodeParser for LiaVariableParser {
                 })}, DocSection::Document))
             },
             Some(StatmentType::Assign) => {
-                Ok((vec!{parse_var_declaration(command, &tokens, self.terminated_by_newline, other_doc_locations, self.trailing_whitespace)?, Rc::new(Text { text: "\n".to_string() })}
-                , DocSection::Declarations))
+                if command == "LIAVERSION" {
+                    other_doc_locations.feature_status_list = get_status_list(&strip_all_whitespace(untokenise(&tokens).split('=').last().unwrap()))?;
+                    Ok((vec![], DocSection::Document))
+                } else {
+                    Ok((vec!{parse_var_declaration(command, &tokens, self.terminated_by_newline, other_doc_locations, self.trailing_whitespace)?, Rc::new(Text { text: "\n".to_string() })}
+                    , DocSection::Declarations))
+                }
             },
             None => { todo!() }
         }
@@ -139,7 +141,7 @@ fn is_defined_function(name: String, functions: Vec<Function>) -> Option<Functio
 }
 
 fn split_call_args(tokens: &TokenList, start: usize, end: usize, 
-    other_doc_locations: &mut OtherDocLocations, function: Option<Function>) -> Result<Vec<Arg>, String> {
+    other_doc_locations: &mut CompilerGlobals, function: Option<Function>) -> Result<Vec<Arg>, String> {
     let mut args: ArgList = Vec::new();
     let mut tokens_buffer: TokenList = Vec::new();
     let mut str_args: Vec<Token> = Vec::new();
@@ -210,7 +212,7 @@ fn split_call_args(tokens: &TokenList, start: usize, end: usize,
 }
 
 fn append_arg(args: &mut Vec<Arg>, tokens_buffer: &Vec<Token>, len: usize, 
-    other_doc_locations: &mut OtherDocLocations, tokens: &Vec<Token>, 
+    other_doc_locations: &mut CompilerGlobals, tokens: &Vec<Token>, 
     str_args: &mut Vec<Token>) -> Result<(), String> {
     args.push(Arg {
         arg_type: ArgType::Curly,
@@ -238,7 +240,7 @@ fn to_typed_values (args: Vec<Token>) -> Result<Vec<TypedValue>, String> {
 }
 
 fn parse_var_declaration(command: String, tokens: &TokenList,
-    terminated_by_newline: bool, other_doc_locations: &mut OtherDocLocations, trailing_whitespace: usize) -> Result<Rc<dyn Node>, String> {
+    terminated_by_newline: bool, other_doc_locations: &mut CompilerGlobals, trailing_whitespace: usize) -> Result<Rc<dyn Node>, String> {
     Ok(Rc::new( TexCommand {
         command: "newcommand".to_string(),
         args: match find_nothing_token(tokens, "=>") {
@@ -292,7 +294,7 @@ fn find_nothing_token (haystack: &TokenList, needle: &str) -> Option<usize> {
     None
 }
 
-fn const_declaration_args(command: String, tokens: &TokenList, terminated_by_newline: bool, other_doc_locations: &mut OtherDocLocations) -> Result<ArgList, String> {
+fn const_declaration_args(command: String, tokens: &TokenList, terminated_by_newline: bool, other_doc_locations: &mut CompilerGlobals) -> Result<ArgList, String> {
     let mut ret = vec![
         Arg {
             arg_type: ArgType::Curly,
@@ -357,7 +359,7 @@ fn extract_type_annotation(tokens: &Vec<Token>, i: usize) -> Option<(String, usi
 }
 
 fn parse_fn_declaration_rhs(tokens: TokenList, lia_variables: &mut Vec<LiaVarName>, 
-    other_doc_locations: &mut OtherDocLocations) -> Result<NodeList, String> {
+    other_doc_locations: &mut CompilerGlobals) -> Result<NodeList, String> {
     let start = count_whitespace(&tokens, 2) + 2;
     let mut in_at_expression = false;
     let mut in_string_literal = false;

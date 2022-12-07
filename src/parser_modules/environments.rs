@@ -5,14 +5,14 @@ use crate::bracket_depth::BrackDepths;
 use crate::utils::format_error_string;
 use crate::tokeniser::TokenList;
 use crate::token::*;
-use crate::hierachy_construction::{NodeParser, node_list, IndentationType, ParseResult, OtherDocLocations};
+use crate::hierachy_construction::{NodeParser, node_list, IndentationType, ParseResult, CompilerGlobals};
 
 #[derive(Default)]
 pub struct LiaEnvParser {}
 
 #[allow(unused)]
 impl NodeParser for LiaEnvParser {
-    fn is_opener(&mut self, token: &Token, identation: i32) -> bool {
+    fn is_opener(&mut self, token: &Token, identation: i32, other_doc_locations: &mut CompilerGlobals) -> bool {
         match token {
             Token::LiaKeyword(k, _) => { k == "env" },
             _ => { false }
@@ -27,7 +27,7 @@ impl NodeParser for LiaEnvParser {
     }
 
     fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, 
-        other_doc_locations: &mut OtherDocLocations) -> ParseResult {
+        other_doc_locations: &mut CompilerGlobals) -> ParseResult {
 
         let mut command_pos = 1;
         let len = tokens.len();

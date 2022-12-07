@@ -1,4 +1,4 @@
-use super::ast::Ast;
+use crate::parser_modules::variables::Ast;
 
 #[derive(Clone)]
 pub enum LiaVarName {

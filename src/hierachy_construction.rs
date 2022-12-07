@@ -1,10 +1,13 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
+use crate::feature_matrix::FeatureStatusList;
+use crate::feature_matrix::get_status_list;
 use crate::parser_modules::environments::LiaEnvParser;
 use crate::parser_modules::equation::LiaEquation;
 use crate::parser_modules::imports::LiaUseParser;
 use crate::parser_modules::markdown_style_bold_italic::BoldItalic;
+use crate::parser_modules::markdown_style_enumerated_list::LiaMardownEnumListParser;
 use crate::parser_modules::markdown_style_list::LiaMardownListParser;
 use crate::parser_modules::markdown_style_section::LiaMarkDownSections;
 use crate::parser_modules::tex_command::TexCommandParser;
@@ -16,15 +19,17 @@ use crate::hierarchy::*;
 use crate::utils::{count_indentation, count_whitespace, delta_bracket_depth};
 
 #[derive(Default)]
-pub struct OtherDocLocations {
+pub struct CompilerGlobals {
     imps: NodeList,
     decs: NodeList,
-    pub fucntions: Vec<Function>
+    pub fucntions: Vec<Function>,
+    pub feature_status_list: FeatureStatusList
 }
 
 pub fn contruct_doc(tokens: TokenList) -> Result<Doc, String> {
     let len = tokens.len();
-    let mut other_doc_locations = OtherDocLocations::default();
+    let mut other_doc_locations = CompilerGlobals::default();
+    other_doc_locations.feature_status_list = get_status_list(env!("CARGO_PKG_VERSION"))?;
 
     let doc = node_list(tokens, 0, len, &mut other_doc_locations)?;
     let doc = Doc {
@@ -35,11 +40,11 @@ pub fn contruct_doc(tokens: TokenList) -> Result<Doc, String> {
     Ok(doc)
 }
 
-pub fn node_list (tokens: TokenList, start: usize, end: usize, other_doc_locations: &mut OtherDocLocations) -> Result<NodeList, String> {
+pub fn node_list (tokens: TokenList, start: usize, end: usize, other_doc_locations: &mut CompilerGlobals) -> Result<NodeList, String> {
     // TODO: Refactor this function to be more readable.
     //       It's impossible to work with at the moment.
     
-    let mut node_parsers: [Box<dyn NodeParser>; 8] = [
+    let mut node_parsers: [Box<dyn NodeParser>; 9] = [
         Box::new(LiaMarkDownSections::default()),
         Box::new(TexCommandParser::default()),
         Box::new(LiaEnvParser::default()),
@@ -48,6 +53,7 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize, other_doc_locatio
         Box::new(LiaMardownListParser::default()),
         Box::new(BoldItalic::default()),
         Box::new(LiaEquation::default()),
+        Box::new(LiaMardownEnumListParser::default())
     ];
 
     let mut items: NodeList = Vec::new();
@@ -81,14 +87,14 @@ pub fn node_list (tokens: TokenList, start: usize, end: usize, other_doc_locatio
 
                 // For single token commands
                 for j in 0..node_parsers.len() {
-                    if (node_parsers[j]).is_opener(&tokens[i], indentation as i32) {
+                    if (node_parsers[j]).is_opener(&tokens[i], indentation as i32, other_doc_locations) {
                         append_text_node(&mut items, &mut child_tokens_buffer, &mut in_parser_module, j)?;
                     }
                 }
             }
         } else {
             for j in 0..node_parsers.len() {
-                if (node_parsers[j]).is_opener(&tokens[i], indentation as i32) {
+                if (node_parsers[j]).is_opener(&tokens[i], indentation as i32, other_doc_locations) {
                     append_text_node(&mut items, &mut child_tokens_buffer, &mut in_parser_module, j)?;
                     
                     // For commands that start at the end of another token
@@ -136,7 +142,7 @@ fn clamp_index(i: usize, tokens: &Vec<Token>) -> usize {
 
 fn append_token(child_tokens_buffer: &mut Vec<Token>, tokens: &Vec<Token>, i: usize, pushed_token_flag: 
     &mut bool, node_parser: &mut Box<dyn NodeParser>, indentation_type: Option<IndentationType>, other_doc_locations: 
-    &mut OtherDocLocations, items: &mut Vec<Rc<dyn Node>>, in_parser_module: &mut Option<usize>) -> Result<(), String> {
+    &mut CompilerGlobals, items: &mut Vec<Rc<dyn Node>>, in_parser_module: &mut Option<usize>) -> Result<(), String> {
     child_tokens_buffer.push(tokens[i].clone());
     *pushed_token_flag = true;
     let node = node_parser.parse(child_tokens_buffer.clone(), indentation_type, other_doc_locations)?;
@@ -175,9 +181,9 @@ fn text_node (tokens: &TokenList) -> Result<Rc<dyn Node>, String> {
 
 pub type ParseResult = Result<(Vec<Rc<dyn Node>>, DocSection), String>;
 pub trait NodeParser {
-    fn is_opener(&mut self, token: &Token, identation: i32) -> bool;
+    fn is_opener(&mut self, token: &Token, identation: i32, other_doc_locations: &mut CompilerGlobals) -> bool;
     fn is_closer(&mut self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool;
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut OtherDocLocations) -> ParseResult;
+    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut CompilerGlobals) -> ParseResult;
 }
 
 #[derive(Clone, Copy)]

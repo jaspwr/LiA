@@ -5,7 +5,7 @@ use graphicx, [utf8]inputenc
     env center {
         \image{@("images/" + src), 10cm}
         \linebreak
-        \textit{@desc}
+        **@desc**
     }
 }
 #* Cool Cat Image

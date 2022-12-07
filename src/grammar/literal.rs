@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
-use crate::parser_modules::variables::ast::{AstNode, OpAstNode};
-use crate::parser_modules::variables::typed_value::TypedValue;
-use crate::parser_modules::variables::at_expression::AtExpToken;
+use crate::ast::{AstNode, OpAstNode};
+use crate::typed_value::TypedValue;
+use crate::at_expression::AtExpToken;
 
 pub struct Literal {
     value: TypedValue
@@ -12,6 +12,13 @@ pub struct Literal {
 impl AstNode for Literal {
     fn evaluate(&self, imported_values: &Vec<TypedValue>) -> Result<TypedValue, String> {
         Ok(self.value.clone())
+    }
+
+    fn codegen(&self) -> String {
+        match &self.value {
+            TypedValue::Number(n) => format!("{}", n),
+            TypedValue::String(s) => format!("\"{}\"", s),
+        }
     }
 }
 

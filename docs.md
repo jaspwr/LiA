@@ -1,6 +1,6 @@
-# LiA
+# LiA 0.2.0
 
->⚠️This is the documentation for version 0.1.0. This is only an early version and is still in development. Do not expect any of these features to stay the same in future versions. Additionally, the compiler has not been thoroughly tested and may not work as expected. If you find any bugs or have any suggestions please open an issue or pull request on the [GitHub repository](https://github.com/jaspwr/LiA). 
+>⚠️This is the documentation for version 0.2.0. This is only an early version and is still in development. Do not expect any of these features to stay the same in future versions. Additionally, the compiler has not been thoroughly tested and may not work as expected. If you find any bugs or have any suggestions please open an issue or pull request on the [GitHub repository](https://github.com/jaspwr/LiA). 
 
 Most TeX is valid in LiA so you are able to write LaTeX as normal however with the addition of the features listed below.
 
@@ -23,7 +23,7 @@ env environmenttype {
 -------------------
 
 ### Imports
-* Any line opened with a `use` keyword (excluding whitespace) will be treated as an import statement.
+Any line opened with a `use` keyword (excluding whitespace) will be treated as an import statement.
 
 | LiA                     | TeX                       |
 |-------------------------|---------------------------|
@@ -31,7 +31,7 @@ env environmenttype {
 |`use packagename, otherpackage, thirdpackage`| `\usepackage{packagename}`<br>`\usepackage{otherpackage}`<br>`\usepackage{thirdpackage}`|
 |`use [option]packagename`| `\usepackage[option]{packagename}`|
 
-* Consumes remainder of line.
+Consumes remainder of line.
 
 -------------------
 
@@ -39,14 +39,14 @@ env environmenttype {
 | LiA                    | TeX                      |
 |------------------------|--------------------------|
 | `**Inner text**`       | `\textit{Inner text}`    |
-* Note this differs from the single `*` in markdown.
+> Note this differs from the single `*` in markdown.
 -------------------
 
 ### Bold
 | LiA                     | TeX                      |
 |-------------------------|--------------------------|
 | `***Inner text***`      | `\textbf{Inner text}`    |
-* Note this differs from the `**` in markdown.
+> Note this differs from the `**` in markdown.
 
 -------------------
 
@@ -60,18 +60,18 @@ env environmenttype {
 | `#* title`   | `\section*{title}`       |
 | `##* title`  | `\subsection*{title}`    |
 | `###* title` | `\subsubsection*{title}` |
-* Consumes remainder of line. For multiline enclose the section title in `{}`.
+Consumes remainder of line. For multiline enclose the section title in `{}`.
 
 -------------------
 
 ### Markdown style lists
-* Any line opened with a `*` will be treated as a list item. You can create nested lists with indentation. In most cases the indentation type will be inferred. 
+Any line opened with a `*` will be treated as a list item. You can create nested lists with indentation. In most cases the indentation type will be inferred. 
 #### Lia
 ```tex
 * List item.
 * List item.
     * Nested item.
-        * Double Nested item.
+        * Double nested item.
 * List item.
 ```
 #### TeX
@@ -82,21 +82,49 @@ env environmenttype {
     \begin{itemize}
         \item Nested item.
         \begin{itemize}
-            \item Double Nested item.
+            \item Double nested item.
         \end{itemize}
     \end{itemize}
     \item List item.
 \end{itemize}
 ```
-* List items consume the remainder of the line. For multiline enclose list item contents in `{}`.
+ List items consume the remainder of the line. For multiline enclose list item contents in `{}`.
+
+-------------------
+
+### Markdown style enumerated lists
+Any line opened with `1.` will be treated as an enumerated list item, this can be any number. You can create nested lists with indentation. In most cases the indentation type will be inferred. 
+#### Lia
+```tex
+1. List item.
+1. List item.
+    1. Nested item.
+        1. Double nested item.
+1. List item.
+```
+#### TeX
+```tex
+\begin{enumerate}
+    \item List item.
+    \item List item.
+    \begin{enumerate}
+        \item Nested item.
+        \begin{enumerate}
+            \item Double nested item.
+        \end{enumerate}
+    \end{enumerate}
+    \item List item.
+\end{enumerate}
+```
+List items consume the remainder of the line. For multiline enclose list item contents in `{}`.
 
 -------------------
 
 ### Variables
 
-* Any word annotated with a `@` will be treated as a variable.
+Any word annotated with a `@` will be treated as a variable.
 #### Referencing variables
-> ⚠️ As of version 0.1.0, variables with computed arguments can not be used before they are defined. This will be fixed in future versions.
+> ⚠️ As of version 0.2.0, variables with computed arguments can not be used before they are defined. This will be fixed in future versions.
 
 | LiA                      | TeX                      |
 |--------------------------|--------------------------|
@@ -113,9 +141,9 @@ env environmenttype {
 |--------------------------|--------------------------|
 | `@varname = () => {Some content}`| `\newcommand{\varname}[0]{Some content}`|
 |`@varname = (arg, otherarg) => {Hello @arg @otherarg}`|`\newcommand{\varname}[2]{Hello #1 #2}`|
-* Will consume until unnested `}`.
+Will consume until unnested `}`.
 ##### Computed functions
-* If inside the contents of a function an expression in `@()` is found it will be evaluated and whenever it is referenced the result will be computed and passed in as an additional argument.
+If inside the contents of a function an expression in `@()` is found it will be evaluated and whenever it is referenced the result will be computed and passed in as an additional argument.
 ```tex
 @varname = (a, b) => {
     @(a + b)
@@ -129,27 +157,27 @@ When referenced as `@varname(1,2)` the result will be `\varname{1}{2}{3}`.
     @(otherarg + "!")
 }
 ```
-* Supported operators are for `Number` are `+`, `-`, `*`, `/`, and `%`.
+* Supported operators are for `Number` are `+`, `-`, `*`, `/`, `%` and `^`.
 * Supported operators for `String` are `+`.
-> ⚠️ As of version 0.1.0, there are no unary operators. This will be added in a future version.
-* Will consume until unnested `}`.
+
+Will consume until unnested `}`.
 
 
 -------------------
 
 ### Equations
-> ⚠️ As of version 0.1.0, this feature is still in development. Eventually it will be possible to use a more ergonomic syntax for equations inside of the `{}` in equation statements however in it's current state it will just treat the contents the same as the rest of the document.
+
 #### Numbered
 ##### Lia
 ```tex
 eq {
-    content
+    a * b
 }
 ```
 ##### TeX
 ```tex
 \begin{equation}
-    content
+    a \times b
 \end{equation}
 ```
 #### Anonymous
@@ -157,14 +185,66 @@ eq {
 
 ```tex
 eq* {
-    content
+    a * b
 }
 ```
 ##### TeX
 ```tex
 \[
-    content
+    a \times b
 \]
+```
+The content inside the equation expression uses a separate syntax to more easily
+represent mathematical expressions. The content will be parsed and converted to
+LaTeX.
+#### General expressions
+##### Lia
+
+```tex
+eq* {
+    x = (1 / 2 + 2 ^ 3) + \alpha
+}
+```
+##### TeX
+```tex
+\[
+    x = \left(\frac{1}{2} + 2^3\right) + \alpha
+\]
+```
+#### Expression with grouping
+##### Lia
+```tex
+eq* {
+    f \left(x\right) = 1 / {2 + 2 ^ 3}
+}
+```
+##### TeX
+```tex
+\[
+      f \left(x\right) = \frac{1}{2 + 2^3}
+\]
+```
+#### Matrices
+##### Lia
+```tex
+eq* {
+    [[1, 2],
+    [3, 4]]
+}
+```
+##### TeX
+```tex
+    \[
+        \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}
+    \]
+```
+
+-------------------
+
+### Version specification
+The variable `@LIAVERSION` is reserved for specifying the version that the document is written in. If you specify a version, the document will be compiled with that version of the compiler otherwise it will use the latest version. It is recommended to specify a version to ensure that your document will compile correctly in the future. Always specify the version as the first line of the document.
+```tex
+@LIAVERSION = 0.2.0
 ```
 
 ## Document structure

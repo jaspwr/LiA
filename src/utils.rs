@@ -1,7 +1,7 @@
 use std::{fs::{File, remove_file}, io::{Read, Write}};
 
 use crate::{tokeniser::TokenList, token::*, hierarchy::{ArgList, ArgType, Arg}, bracket_depth::BrackDepths};
-use crate::hierachy_construction::{node_list, IndentationType, ParseResult, OtherDocLocations};
+use crate::hierachy_construction::{node_list, IndentationType, ParseResult, CompilerGlobals};
 
 pub fn load_utf8_file (path: String) -> Result<String, std::io::Error> {
     let mut file = File::open(path)?;
@@ -25,7 +25,7 @@ pub fn is_bracket (char: char) -> bool {
     char == '(' || char == ')' || char == '{' || char == '}' || char == '[' || char == ']'
 }
 
-pub fn parse_args (tokens: &TokenList, start: usize, end: usize, other_doc_locations: &mut OtherDocLocations) -> Result<ArgList, String> {
+pub fn parse_args (tokens: &TokenList, start: usize, end: usize, other_doc_locations: &mut CompilerGlobals) -> Result<ArgList, String> {
     let mut ret: ArgList = Vec::new();
     let mut bracket_depths = BrackDepths::default();
     let mut arg_type: Option<ArgType> = None;
@@ -175,4 +175,22 @@ pub fn strip_tailing_whitespace_and_newlines (string: String) -> String {
         white_space_count += 1;
     }
     string[..string.len() - white_space_count].to_string()
+}
+
+pub fn untokenise (tokens: &TokenList) -> String {
+    let mut ret = String::new();
+    for token in tokens {
+        ret.push_str(token.stringify().as_str());
+    }
+    ret
+}
+
+pub fn strip_all_whitespace (string: &str) -> String {
+    let mut ret = String::new();
+    for c in string.chars() {
+        if !is_whitespace(c) {
+            ret.push(c);
+        }
+    }
+    ret
 }

@@ -6,3 +6,4 @@ pub mod markdown_style_section;
 pub mod markdown_style_list;
 pub mod markdown_style_bold_italic;
 pub mod equation;
+pub mod markdown_style_enumerated_list;

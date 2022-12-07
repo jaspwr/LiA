@@ -5,6 +5,10 @@ use notify::{Watcher, RecursiveMode};
 
 pub mod compiler;
 pub mod utils;
+pub mod ast;
+pub mod typed_value;
+pub mod at_expression;
+pub mod grammar;
 mod cli;
 mod parser_modules;
 mod tokeniser;
@@ -13,6 +17,7 @@ mod hierachy_construction;
 mod token;
 mod bracket_depth;
 mod codegen;
+mod feature_matrix;
 
 pub fn run_from_args(args: Vec<String>) {
     let jobs = match cli::parse_args(args) {

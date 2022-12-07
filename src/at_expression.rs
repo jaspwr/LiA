@@ -1,10 +1,10 @@
 use crate::token::*;
 
-use super::var_definition::LiaVarName;
+use crate::parser_modules::variables::var_definition::LiaVarName;
 use super::ast::*;
 use super::typed_value::TypedValue;
 
-static OPERATORS_AND_KEYWORDS: [&str; 9] = ["+", "-", "*", "/", "%", "?", ":", "(", ")"];
+static OPERATORS_AND_KEYWORDS: [&str; 15] = ["+", "-", "*", "/", "%", "?", ":", "(", ")", "{", "}", "^", ",", "[", "]"];
 
 pub fn parse_at_exprssion (tokens: &Vec<Token>, lia_variables: Vec<LiaVarName>) -> Result<Ast, String> {
     let lia_variables = lia_variables.into_iter().filter(|v| {
@@ -47,6 +47,7 @@ pub enum AtExpToken {
     Literal(TypedValue),
     OperatorOrKeyword(String),
     AstNode(DefAstNode),
+    Text(String),
     Error
 }
 

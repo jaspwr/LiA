@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
-use crate::parser_modules::variables::ast::*;
-use crate::parser_modules::variables::typed_value::TypedValue;
-use crate::parser_modules::variables::at_expression::AtExpToken;
+use crate::ast::*;
+use crate::typed_value::TypedValue;
+use crate::at_expression::AtExpToken;
 
 use super::token_from_list;
 
@@ -38,6 +38,21 @@ impl AstNode for BinaryAdditiveExpression {
             panic!("BinaryAdditionOperator::evaluate() called with non-AstNode token in left position.")
         }
     }
+
+    fn codegen(&self) -> String {
+        if let AtExpToken::AstNode(left) = &self.children.0 {
+            if let AtExpToken::AstNode(right) = &self.children.1 {
+                match self.operation {
+                    Operation::Add => format!("{} + {}", left.codegen(), right.codegen()),
+                    Operation::Sub => format!("{} - {}", left.codegen(), right.codegen())
+                }
+            } else {
+                panic!("BinaryAdditionOperator::codegen() called with non-AstNode token in right position.")
+            }
+        } else {
+            panic!("BinaryAdditionOperator::codegen() called with non-AstNode token in left position.")
+        }
+    }
 }
 
 pub fn parse(tokens: &Vec<AtExpToken>, start: i32) -> Result<OpAstNode, String> {
@@ -49,10 +64,12 @@ pub fn parse(tokens: &Vec<AtExpToken>, start: i32) -> Result<OpAstNode, String> 
     token_from_list(tokens, start + 2).is_ast_node() &&
     !(token_from_list(tokens, start - 1).is_opertor_or_keyword("*") 
         || token_from_list(tokens, start - 1).is_opertor_or_keyword("/")
-        || token_from_list(tokens, start - 1).is_opertor_or_keyword("%")) &&
+        || token_from_list(tokens, start - 1).is_opertor_or_keyword("%")
+        || token_from_list(tokens, start - 1).is_opertor_or_keyword("^")) &&
     !(token_from_list(tokens, start + 3).is_opertor_or_keyword("*") 
         || token_from_list(tokens, start + 3).is_opertor_or_keyword("/")
-        || token_from_list(tokens, start + 3).is_opertor_or_keyword("%"))
+        || token_from_list(tokens, start + 3).is_opertor_or_keyword("%")
+        || token_from_list(tokens, start + 3).is_opertor_or_keyword("^"))
     {
 
         Ok(Some((Rc::new(BinaryAdditiveExpression {

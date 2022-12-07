@@ -8,15 +8,16 @@ use crate::hierachy_construction::{NodeParser, node_list, IndentationType, Parse
 use crate::tokeniser::TokenList;
 
 #[derive(Default)]
-pub struct LiaMardownListParser {
+pub struct LiaMardownEnumListParser {
     initial_indentation_depth: usize
 }
 
 #[allow(unused)]
-impl NodeParser for LiaMardownListParser {
+impl NodeParser for LiaMardownEnumListParser {
     fn is_opener(&mut self, token: &Token, identation: i32, other_doc_locations: &mut CompilerGlobals) -> bool {
+        if !other_doc_locations.feature_status_list.enumerated_lists.is_supported() { return false; }
         match token {
-            Token::LiaMarkDown(text, _) => { if text == "*" {
+            Token::Nothing(text, _) => { if is_list_number(text.to_string()) {
                 self.initial_indentation_depth = identation as usize;
                 true
             } else {
@@ -31,7 +32,7 @@ impl NodeParser for LiaMardownListParser {
         && match token {
             Token::Newline => { 
                 match next_token_no_white_space {
-                    Token::LiaMarkDown(text, _) => { text != "*" },
+                    Token::Nothing(text, _) => { !is_list_number(next_token_no_white_space.stringify()) },
                     _ => { true }
                 }
             },
@@ -50,8 +51,8 @@ impl NodeParser for LiaMardownListParser {
                 count_indentation(&tokens, i, &mut indentation, &mut indentation_type);
             }
             match &tokens[i] {
-                Token::LiaMarkDown(md, loc) => { 
-                    if md == "*" {
+                Token::Nothing(t, loc) => { 
+                    if is_list_number(t.to_string()) {
                         if let Some(value) = list_item(&mut item_count, indentation, 
                             &mut pre_indentation, loc, &mut inner_nodes, i, &tokens) {
                             return value;
@@ -68,7 +69,7 @@ impl NodeParser for LiaMardownListParser {
             pre_indentation -= 1;
         }
         Ok((vec!{Rc::new( TexEnvironment {
-            name: "itemize".to_string(),
+            name: "enumerate".to_string(),
             args: vec![],
             children: node_list(inner_nodes.clone(), 0, inner_nodes.len(), other_doc_locations)?
         }), Rc::new( Text {text: "\n".to_string() } )}, DocSection::Document))
@@ -104,7 +105,7 @@ fn list_item(item_count: &mut i32, indentation: usize, pre_indentation: &mut usi
 fn append_opener(inner_nodes: &mut Vec<Token>) {
     inner_nodes.push(Token::TexCommand("\\begin".to_string(), Location::default()));
     inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("itemize".to_string(), Location::default()));
+    inner_nodes.push(Token::Nothing("enumerate".to_string(), Location::default()));
     inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
     inner_nodes.push(Token::Newline);
 }
@@ -112,7 +113,12 @@ fn append_opener(inner_nodes: &mut Vec<Token>) {
 fn append_closer(inner_nodes: &mut Vec<Token>) {
     inner_nodes.push(Token::TexCommand("\\end".to_string(), Location::default()));
     inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("itemize".to_string(), Location::default()));
+    inner_nodes.push(Token::Nothing("enumerate".to_string(), Location::default()));
     inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
     inner_nodes.push(Token::Newline);
+}
+
+fn is_list_number(text: String) -> bool {
+    if !text.ends_with('.') { return false; }
+    text.chars().all(|c| c.is_numeric() || c == '.')
 }

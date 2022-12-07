@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
-use crate::parser_modules::variables::ast::*;
-use crate::parser_modules::variables::at_expression::AtExpToken;
-use crate::parser_modules::variables::typed_value::TypedValue;
+use crate::ast::*;
+use crate::at_expression::AtExpToken;
+use crate::typed_value::TypedValue;
 
 use super::token_from_list;
 
@@ -30,6 +30,22 @@ impl AstNode for BinaryMultiplicativeExpression {
             panic!("BinaryAdditionOperator::evaluate() called with non-AstNode token in left position.")
         }
     }
+
+    fn codegen(&self) -> String {
+        if let AtExpToken::AstNode(left) = &self.children.0 {
+            if let AtExpToken::AstNode(right) = &self.children.1 {
+                match self.operation {
+                    Operation::Mul => format!("{} \\times {}", left.codegen(), right.codegen()),
+                    Operation::Div => format!("\\frac{{{}}}{{{}}}", left.codegen(), right.codegen()),
+                    Operation::Mod => format!("{} \\mod {}", left.codegen(), right.codegen())
+                }
+            } else {
+                panic!("BinaryAdditionOperator::codegen() called with non-AstNode token in right position.")
+            }
+        } else {
+            panic!("BinaryAdditionOperator::codegen() called with non-AstNode token in left position.")
+        }
+    }
 }
 
 impl BinaryMultiplicativeExpression {
@@ -43,7 +59,7 @@ impl BinaryMultiplicativeExpression {
                     _ => Err("Tried to multiply mismatched types in @() expression.".to_string())
                 }
             },
-            _ => Err("Tried to multiply with imcompatible type in @() expression".to_string())
+            _ => Err("Tried to multiply with incompatible type in @() expression".to_string())
         }
     }
 
@@ -62,8 +78,11 @@ pub fn parse(tokens: &Vec<AtExpToken>, start: i32) -> Result<OpAstNode, String> 
     let div = token_from_list(tokens, start + 1).is_opertor_or_keyword("/");
     let _mod = token_from_list(tokens, start + 1).is_opertor_or_keyword("%");
     if token_from_list(tokens, start).is_ast_node() &&
-    (mul || div || _mod) && 
-    token_from_list(tokens, start + 2).is_ast_node() {
+    (mul || div || _mod) &&
+    token_from_list(tokens, start + 2).is_ast_node() &&
+    !token_from_list(tokens, start - 1).is_opertor_or_keyword("^") &&
+    !token_from_list(tokens, start + 3).is_opertor_or_keyword("^")
+    {
         Ok(Some((Rc::new(BinaryMultiplicativeExpression {
             children: (
                 token_from_list(tokens, start),

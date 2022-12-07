@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
-use super::*;
+use crate::at_expression::AtExpToken;
+
 use super::grammar;
 use super::typed_value::TypedValue;
 
@@ -71,6 +72,13 @@ impl Ast {
             None => { return Err("Attempted to evaluate an empty AST".to_string()); }
         }
     }
+
+    pub fn codegen (&self) -> String {
+        match self.root_node {
+            Some(ref root) => root.codegen(),
+            None => { return "".to_string(); }
+        }
+    }
 }
 
 pub type OpAstNode = Option<(Rc::<dyn AstNode>, usize)>;
@@ -78,4 +86,5 @@ pub type DefAstNode = Rc::<dyn AstNode>;
 
 pub trait AstNode {
     fn evaluate(&self, imported_values: &Vec<TypedValue>) -> Result<TypedValue, String>;
+    fn codegen(&self) -> String;
 }

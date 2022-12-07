@@ -37,6 +37,14 @@ fn readme_example() {
     "tests/readme_example_out.tex".to_string());
 }
 
+#[test]
+fn equations() {
+    test_compilation_result(
+    "tests/equations.lia".to_string(),
+    "tests/temp_equations.tex".to_string(),
+    "tests/equations_out.tex".to_string());
+}
+
 fn test_compilation_result(input_path: String, output_path: String, correct_output_path: String) -> () {
     let job = Job {
         input_path: input_path.clone(),

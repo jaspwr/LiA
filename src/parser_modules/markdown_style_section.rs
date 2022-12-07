@@ -12,7 +12,7 @@ pub struct LiaMarkDownSections {}
 
 #[allow(unused)]
 impl NodeParser for LiaMarkDownSections {
-    fn is_opener(&mut self, token: &Token, identation: i32) -> bool {
+    fn is_opener(&mut self, token: &Token, identation: i32, other_doc_locations: &mut CompilerGlobals) -> bool {
         match token {
             Token::LiaMarkDown(text, _) => { 
                 text.starts_with("#")
@@ -29,7 +29,7 @@ impl NodeParser for LiaMarkDownSections {
     }
 
     fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, 
-        other_doc_locations: &mut OtherDocLocations) -> ParseResult {
+        other_doc_locations: &mut CompilerGlobals) -> ParseResult {
         let command = match &tokens[0] {
             Token::LiaMarkDown(hash, loc) => { 
                 match hash.as_str() {
@@ -60,7 +60,7 @@ impl NodeParser for LiaMarkDownSections {
     }
 }
 
-fn rest_of_line(tokens: &TokenList, other_doc_locations: &mut OtherDocLocations) -> Result<NodeList, String> {
+fn rest_of_line(tokens: &TokenList, other_doc_locations: &mut CompilerGlobals) -> Result<NodeList, String> {
     let len = tokens.len();
     let mut start = 1;
     while start < len {

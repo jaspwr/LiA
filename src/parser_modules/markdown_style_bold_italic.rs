@@ -20,7 +20,7 @@ pub struct BoldItalic {
 
 #[allow(unused)]
 impl NodeParser for BoldItalic {
-    fn is_opener(&mut self, token: &Token, identation: i32) -> bool {
+    fn is_opener(&mut self, token: &Token, identation: i32, other_doc_locations: &mut CompilerGlobals) -> bool {
         self.start = true;
         self.b_or_i = None;
         if self.end {
@@ -62,7 +62,7 @@ impl NodeParser for BoldItalic {
     }
 
     fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, 
-        other_doc_locations: &mut OtherDocLocations) -> ParseResult {
+        other_doc_locations: &mut CompilerGlobals) -> ParseResult {
             self.end = true;
             let len = tokens.len();
             Ok((vec![Rc::new(TexCommand {

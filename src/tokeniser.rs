@@ -34,13 +34,14 @@ pub fn to_tokens (input_lia: String) -> TokenList {
     let mut pre_c = ' ';
     input_lia.chars().for_each(|c| {
         if c == '\r' { return; }
-        if c == '\n' || c == ';' { first_of_line = true;
+        if c == '\n' {
             line += 1; column = 1;
             let token = parse_token(&current_token, first_of_line, Location { line, column });
             ret.push(token);
             start_new_token(&mut start_of_token, line, column, &mut current_token);
             ret.push(Token::Newline); 
-            return; 
+            first_of_line = true;
+            return;
         }
         let char_group = classify_char(&c);
         if (char_group != pre_char_group

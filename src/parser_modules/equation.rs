@@ -56,7 +56,8 @@ impl NodeParser for LiaEquation {
                 }
             }
             
-            let children = if open_pos + 1 < len - 1 && other_doc_locations.feature_status_list.equation_statement_internal_syntax.is_supported() {
+            let children = if contains_anything_meaningful(&tokens, open_pos + 1, len - 1)
+            && other_doc_locations.feature_status_list.equation_statement_internal_syntax.is_supported() {
                 vec![Rc::new(Text { text:
                     Ast::construct(&to_at_exp_tokens_for_equation(&tokens, open_pos + 1, len - 1)?,
                         0,
@@ -99,6 +100,23 @@ fn tokenise(token: &Token) -> Result<Option<AtExpToken>, String> {
         Token::TexCommand(_, _) => {
             return Ok(Some(AtExpToken::Text(token.stringify())));
         },
+        Token::LiaKeyword(t, loc) => {
+            return Err(format!("{} Unexpected keyword \"{}\" in equation statement. This will be supposed in future versions.", loc.stringify(), t));
+        },
+        Token::LiaVariable(_, _) => {
+            return Err("Variables are not current supported in equation statements outside of functions. This will be supported in the future.".to_string());
+        },
         _ => { return Ok(None); }
     }
+}
+
+fn contains_anything_meaningful(tokens: &TokenList, start: usize, end: usize) -> bool {
+    for i in start..end {
+        match &tokens[i] {
+            Token::Whitespace(_) => {},
+            Token::Newline => {},
+            _ => { return true; }
+        }
+    }
+    false
 }

@@ -60,6 +60,8 @@ Consumes remainder of line.
 | `#* title`   | `\section*{title}`       |
 | `##* title`  | `\subsection*{title}`    |
 | `###* title` | `\subsubsection*{title}` |
+
+
 Consumes remainder of line. For multiline enclose the section title in `{}`.
 
 -------------------

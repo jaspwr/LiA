@@ -56,7 +56,7 @@ impl NodeParser for LiaEquation {
                 }
             }
             
-            let children = if other_doc_locations.feature_status_list.equation_statement_internal_syntax.is_supported() {
+            let children = if open_pos + 1 < len - 1 && other_doc_locations.feature_status_list.equation_statement_internal_syntax.is_supported() {
                 vec![Rc::new(Text { text:
                     Ast::construct(&to_at_exp_tokens_for_equation(&tokens, open_pos + 1, len - 1)?,
                         0,

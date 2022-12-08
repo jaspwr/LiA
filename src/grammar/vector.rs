@@ -11,7 +11,7 @@ pub struct Vector_ {
 }
 
 impl AstNode for Vector_ {
-    fn evaluate(&self, imported_values: &Vec<TypedValue>) -> Result<TypedValue, String> {
+    fn evaluate(&self, _imported_values: &Vec<TypedValue>) -> Result<TypedValue, String> {
         Err("Can't evaluate vectors. Vector arithmetic yet supported.".to_string())
     }
 

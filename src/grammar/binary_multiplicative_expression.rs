@@ -83,6 +83,11 @@ pub fn parse(tokens: &Vec<AtExpToken>, start: i32) -> Result<OpAstNode, String> 
     !token_from_list(tokens, start - 1).is_opertor_or_keyword("^") &&
     !token_from_list(tokens, start + 3).is_opertor_or_keyword("^")
     {
+        if mul && 
+        (token_from_list(tokens, start + 3).is_opertor_or_keyword("/") 
+        || token_from_list(tokens, start - 1).is_opertor_or_keyword("/")) {
+            return Ok(None);
+        }
         Ok(Some((Rc::new(BinaryMultiplicativeExpression {
             children: (
                 token_from_list(tokens, start),

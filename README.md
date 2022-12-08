@@ -13,14 +13,16 @@ This is more for my personal use however you're welcome to use it or contribute.
 ### LiA code
 ```tex
 eq {
-    dy/dx = x*(a - b) + [[1, 2], [3, 4]]
+    dy/dx = x*(a - b) + [[1, 2], [3, 4]] + sin(x)
 }
 ```
 ### Resulting TeX
 ```tex
-\begin{equation}
-    \frac{dy}{dx} = x \times \left(a - b\right) + \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}
-\end{equation}
+\begin{document}
+    \begin{equation}
+        \frac{dy}{dx} = x \times \left(a - b\right) + \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} + \sin \left(x\right)
+    \end{equation}
+\end{document}
 ```
 
 ## Example #2

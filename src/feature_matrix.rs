@@ -1,6 +1,6 @@
-use std::num::ParseIntError;
-
 use owo_colors::OwoColorize;
+
+use crate::version::{version_cmp, parse_version_string};
 
 pub fn get_status_list(version_: &str) -> Result<FeatureStatusList, String> {
     let mut status_list = FeatureStatusList::default();
@@ -44,46 +44,4 @@ impl ImplementationStatus {
 pub struct FeatureStatusList {
     pub enumerated_lists: ImplementationStatus,
     pub equation_statement_internal_syntax: ImplementationStatus,
-}
-
-fn parse_version_string(version: &str) -> Result<(u8, u8, u8), String> {
-    let mut version_spl = version.split(".");
-    if version_spl.clone().count() != 3 {
-        return Err(format!{"Invalid version string \"{}\".", version});
-    }
-    match try_ver_number_num_casts(&mut version_spl) {
-        Ok(v) =>  Ok(v),
-        Err(_) => Err(format!{"Invalid version string \"{}\".", version})
-    }
-}
-
-fn try_ver_number_num_casts(version_spl: &mut std::str::Split<&str>) -> Result<(u8, u8, u8), ParseIntError> {
-    let major = version_spl.next().unwrap().parse::<u8>()?;
-    let minor = version_spl.next().unwrap().parse::<u8>()?;
-    let patch = version_spl.next().unwrap().parse::<u8>()?;
-    Ok((major, minor, patch))
-}
-
-fn version_cmp(version1: (u8, u8, u8), version2str: &str) -> i8 {
-    let (major1, minor1, patch1) = version1;
-    let (major2, minor2, patch2) = parse_version_string(version2str).unwrap();
-    if major1 > major2 {
-        return 1;
-    } else if major1 < major2 {
-        return -1;
-    } else {
-        if minor1 > minor2 {
-            return 1;
-        } else if minor1 < minor2 {
-            return -1;
-        } else {
-            if patch1 > patch2 {
-                return 1;
-            } else if patch1 < patch2 {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-    }
 }

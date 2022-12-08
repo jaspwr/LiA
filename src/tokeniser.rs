@@ -13,6 +13,7 @@ fn classify_char (c: &char) -> CharGroup {
         ' ' | '\t' | '\n' | '\r' | '\x0C' | '\x0B' => CharGroup::Whitespace,
         '(' | ')' | '{' | '}' | '[' | ']' => CharGroup::Bracket,
         '=' | '>' | ',' | '#' | '*' | ':' | '%' |
+        '<' | '~' | '!' |
         ';' | '+' | '-' | '/' | '^' | '_' | '$' => CharGroup::Symbol,
         _ => CharGroup::String,
     }

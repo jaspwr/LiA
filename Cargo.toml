@@ -1,18 +1,12 @@
 [package]
 name = "lia"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
-
-# [[bin]]
-# name = "lia"
-# path = "src/main.rs"
-
-# [lib]
-# name = "lia"
-# path = "src/lib.rs"
 
 [dependencies]
 owo-colors = "3.5.0"
 notify = "5.0.0"
 sha256 = "1.1.1"
 text-diff = "0.4.0"
+home = "0.5.4"
+reqwest = { version = "0.11.13", features = ["blocking"] }

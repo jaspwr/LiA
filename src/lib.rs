@@ -2,6 +2,7 @@ use std::path::Path;
 use compiler::*;
 use owo_colors::OwoColorize;
 use notify::{Watcher, RecursiveMode};
+use version::check_for_new_version;
 
 pub mod compiler;
 pub mod utils;
@@ -18,8 +19,10 @@ mod token;
 mod bracket_depth;
 mod codegen;
 mod feature_matrix;
+mod version;
 
 pub fn run_from_args(args: Vec<String>) {
+    let _ = check_for_new_version();
     let jobs = match cli::parse_args(args) {
         Ok(jobs) => { jobs },
         Err(e) => {

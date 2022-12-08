@@ -1,6 +1,6 @@
-# LiA 0.2.0
+# LiA 0.2.1
 
->⚠️This is the documentation for version 0.2.0. This is only an early version and is still in development. Do not expect any of these features to stay the same in future versions. Additionally, the compiler has not been thoroughly tested and may not work as expected. If you find any bugs or have any suggestions please open an issue or pull request on the [GitHub repository](https://github.com/jaspwr/LiA). 
+>⚠️This is the documentation for version 0.2.1. This is only an early version and is still in development. Do not expect any of these features to stay the same in future versions. Additionally, the compiler has not been thoroughly tested and may not work as expected. If you find any bugs or have any suggestions please open an issue or pull request on the [GitHub repository](https://github.com/jaspwr/LiA). 
 
 Most TeX is valid in LiA so you are able to write LaTeX as normal however with the addition of the features listed below.
 
@@ -124,7 +124,7 @@ List items consume the remainder of the line. For multiline enclose list item co
 
 Any word annotated with a `@` will be treated as a variable.
 #### Referencing variables
-> ⚠️ As of version 0.2.0, variables with computed arguments can not be used before they are defined. This will be fixed in future versions.
+> ⚠️ As of version 0.2.1, variables with computed arguments can not be used before they are defined. This will be fixed in future versions.
 
 | LiA                      | TeX                      |
 |--------------------------|--------------------------|
@@ -197,7 +197,7 @@ eq* {
 The content inside the equation expression uses a separate syntax to more easily
 represent mathematical expressions. The content will be parsed and converted to
 LaTeX. Most TeX commands should work as normal.
-> ⚠️ As of version 0.2.0, TeX commands can be separated from their arguments by fractions. This can be solved by encasing the command in `{}`. This will be fixed in future versions.
+> ⚠️ As of version 0.2.1, TeX commands can be separated from their arguments by fractions. This can be solved by encasing the command in `{}`. This will be fixed in future versions.
 #### General expressions
 ##### Lia
 
@@ -212,11 +212,12 @@ eq* {
     x = \left(\frac{1}{2} + 2^3\right) + \alpha
 \]
 ```
+Operations are grouped by precedence, so `1 + 2 / 3` will be parsed as `1 + (2 / 3)` (it won't literally add brackets). operators are `+`, `-`, `*`, `/`, `%` and `^`. Other symbols such as `=` are treated as regular tokens or replaced if a [macro](#macros).
 #### Expression with grouping
 ##### Lia
 ```tex
 eq* {
-    f \left(x\right) = 1 / {2 + 2 ^ 3}
+    f(x) = 1 / {2 + 2 ^ 3}
 }
 ```
 ##### TeX
@@ -225,6 +226,7 @@ eq* {
       f \left(x\right) = \frac{1}{2 + 2^3}
 \]
 ```
+Note that tokens are separated by spaces, so `xyz` will be grouped but `x y z` will be separate which differs from pronumerals in LaTeX equations. This saves grouping pronumerals in `{}` in situations like `dy/dx`.
 #### Matrices
 ##### Lia
 ```tex
@@ -235,17 +237,49 @@ eq* {
 ```
 ##### TeX
 ```tex
-    \[
-        \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}
-    \]
+\[
+    \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}
+\]
 ```
 
+#### Macros
+| Token | Replacment | LaTeX |
+|-|-|-|
+| `<=` | `\le` | $\le$ |
+| `>=` | `\ge` | $\ge$ |
+| `+-` | `\pm` | $\pm$ |
+| `-+` | `\mp` | $\mp$ |
+| `=>` | `\implies` | $\implies$ |
+| `!=` | `\ne` | $\ne$ |
+| `->` | `\rightarrow` | $\rightarrow$ |
+| `<-` | `\leftarrow` | $\leftarrow$ |
+| `~==` | `\cong` | $\cong$ |
+| `~=` | `\simeq` | $\simeq$ |
+| `~~` | `\approx` | $\approx$ |
+| `inf` | `\infty` | $\infty$ |
+| `arcsin` | `\arcsin` | $\arcsin$ |
+| `arccos` | `\arccos` | $\arccos$ |
+| `arctan` | `\arctan` | $\arctan$ |
+| `sinh` | `\sinh` | $\sinh$ |
+| `cosh` | `\cosh` | $\cosh$ |
+| `tanh` | `\tanh` | $\tanh$ |
+| `coth` | `\coth` | $\coth$ |
+| `sin` | `\sin` | $\sin$ |
+| `cos` | `\cos` | $\cos$ |
+| `tan` | `\tan` | $\tan$ |
+| `cot` | `\cot` | $\cot$ |
+| `sec` | `\sec` | $\sec$ |
+| `csc` | `\csc` | $\csc$ |
+| `log` | `\log` | $\log$ |
+| `ln` | `\ln` | $\ln$ |
+
+> If you don't want a macro to be replaced, you can separate it with spaces e.g. `s i n` will be parsed as the separate pronumerals $s$, $i$ and $n$ and not `\sin`.
 -------------------
 
 ### Version specification
 The variable `@LIAVERSION` is reserved for specifying the version that the document is written in. If you specify a version, the document will be compiled with that version of the compiler otherwise it will use the latest version. It is recommended to specify a version to ensure that your document will compile correctly in the future. Always specify the version as the first line of the document.
 ```tex
-@LIAVERSION = 0.2.0
+@LIAVERSION = 0.2.1
 ```
 
 ## Document structure

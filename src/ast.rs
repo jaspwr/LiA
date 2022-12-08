@@ -23,7 +23,7 @@ impl Ast {
         let mut tokens = tokens.clone();
         const STALE: u32 = 200;
         let mut i = 0;
-        while tokens.len() > 1 {
+        while tokens.len() > 1 || i < 5 {
             let mut j = 0;
             while j < tokens.len() {
                 let p = grammar::parse(&tokens, j as i32)?;

@@ -23,7 +23,7 @@ eq {
 ```tex
 \begin{document}
     \begin{equation}
-        \frac{dy}{dx} = x \times \left(a - b\right) + \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} + \sin \left(x\right)
+        \frac{dy}{dx} = x \times \left(a - b\right) + \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} +\sin \left(x\right)
     \end{equation}
 \end{document}
 ```
@@ -55,19 +55,19 @@ use graphicx, [utf8]inputenc
 
 
 \newcommand{\cat}{🐈}
-\newcommand{\img}[2]{
-  \begin{center}
-    \image{#1, 10cm}
-    \linebreak
-    \textit{#2}
-  \end{center}
+\newcommand{\img}[3]{
+    \begin{center}
+        \image{#3, 10cm}
+        \linebreak
+        \textit{#2}
+    \end{center}
 }
 
 
 \begin{document}
-  \section*{Cool Cat Image}
-  \subsection{A subsection}
-  \img{images/cat.png}{Meow \cat!}
+    \section*{Cool Cat Image}
+    \subsection{A subsection}
+    \img{cat.png}{Meow \cat!}{images/cat.png}
 \end{document}
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
@@ -88,23 +88,23 @@ use graphicx, [utf8]inputenc
 ### Resulting TeX
 [COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\newcommand{\img}[3]{
-  $#1 \times #2 = #3$
+\newcommand{\muliplication}[3]{
+    $#1 \times #2 = #3$ 
 }
 
 
 \begin{document}
-  \being{itemize}
-    \item I'm a \textit{Markdown} style \textbf{list}
-    \item \muliplication{2, 3, 6}
-    \item \muliplication{6, 6, 36}
-    \item \muliplication{2, 9, 18}
-    \being{itemize}
-      \item I'm indented
+    \begin{itemize}
+        \item I'm a \textit{Markdown} style \textbf{list}
+        \item \muliplication{2}{3}{6}
+        \item \muliplication{6}{6}{36}
+        \item \muliplication{2}{9}{18}
+        \begin{itemize}
+            \item I'm indented
+        \end{itemize}
+        \item {I'm a multiline
+        list item}
     \end{itemize}
-    \item I'm a multiline
-          list item
-  \end{itemize}
 \end{document}
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
@@ -129,7 +129,7 @@ cargo install --path
 ```
 
 ### Building docs and tooling.
-If you have made changes to the code that alter the language in anyway, it is a good idea to run the following command. This will recompile all of the code examples in the documentation, update list of known macros and keywords, etc.
+If you have made changes to the code that alter the language in anyway or bumped the version, it is a good idea to run the following command. This will recompile all of the code examples in the documentation, update list of known macros and keywords, etc.
 ```bash
 cargo run --bin docs_and_tooling_builder
 ```

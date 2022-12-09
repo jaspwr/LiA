@@ -53,11 +53,12 @@ fn do_replacements(text: &str) -> String {
             result = result.replace(rpl.text, rpl.replacment);
         }
     }
+    //generate_regex();
     result
 }
 
 #[allow(unused)]
-fn generate_docs() {
+pub fn generate_docs() {
     let mut result = "| Token | Replacment | LaTeX |\n|-|-|-|\n".to_string();
     for rpl in REPLACMENTS.iter() {
         result = format!("{}| `{}` | `{}` | ${}$ |\n", result, rpl.text, rpl.replacment, rpl.replacment);
@@ -65,6 +66,32 @@ fn generate_docs() {
     println!("{}", result);
 }
 
+#[allow(unused)]
+pub fn generate_regex() {
+    let mut result = "(".to_string();
+    for rpl in REPLACMENTS.iter() {
+        result = format!("{}|{}", result, do_regex_escapes(rpl.text));
+    }
+    result = format!("{})", result);
+    println!("{}", result);
+}
+
+static ESCAPES: [char; 2] = [
+    '^', '+'
+];
+
+fn do_regex_escapes(s: &str) -> String {
+    let mut result = String::new();
+    for c in s.chars() {
+        if ESCAPES.contains(&c) {
+            result.push('\\');
+            result.push('\\');
+        }
+        result.push(c);
+    }
+    result
+}
+ 
 
 #[allow(unused)]
 impl AstNode for AstText {

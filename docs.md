@@ -1,4 +1,4 @@
-# LiA {VERSIONSTART} 0.2.2 {VERSIONEND}
+# LiA 0.2.2
 
 >⚠️This is the documentation for version 0.2.2. This is only an early version and is still in development. Do not expect any of these features to stay the same in future versions. Additionally, the compiler has not been thoroughly tested and may not work as expected. If you find any bugs or have any suggestions please open an issue or pull request on the [GitHub repository](https://github.com/jaspwr/LiA). 
 
@@ -8,17 +8,23 @@ Most TeX is valid in LiA so you are able to write LaTeX as normal however with t
 
 ### Environments
 #### Lia
+[COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 env environmenttype {
     content
 }
 ```
+[COMPILATION_INPUT_END]: <> (Do not remove this line.)
 #### TeX
+[COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\begin{environmenttype}
-    content
-\end{environmenttype}
+\begin{document}
+    \begin{environmenttype}
+        content
+    \end{environmenttype}
+\end{document}
 ```
+[COMPILATION_RESULT_END]: <> (Do not remove this line.)
 
 -------------------
 
@@ -69,6 +75,7 @@ Consumes remainder of line. For multiline enclose the section title in `{}`.
 ### Markdown style lists
 Any line opened with a `*` will be treated as a list item. You can create nested lists with indentation. In most cases the indentation type will be inferred. 
 #### Lia
+[COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 * List item.
 * List item.
@@ -76,20 +83,25 @@ Any line opened with a `*` will be treated as a list item. You can create nested
         * Double nested item.
 * List item.
 ```
+[COMPILATION_INPUT_END]: <> (Do not remove this line.)
 #### TeX
+[COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\begin{itemize}
-    \item List item.
-    \item List item.
+\begin{document}
     \begin{itemize}
-        \item Nested item.
+        \item List item.
+        \item List item.
         \begin{itemize}
-            \item Double nested item.
+            \item Nested item.
+            \begin{itemize}
+                \item Double nested item.
+            \end{itemize}
         \end{itemize}
+        \item List item.
     \end{itemize}
-    \item List item.
-\end{itemize}
+\end{document}
 ```
+[COMPILATION_RESULT_END]: <> (Do not remove this line.)
  List items consume the remainder of the line. For multiline enclose list item contents in `{}`.
 
 -------------------
@@ -97,6 +109,7 @@ Any line opened with a `*` will be treated as a list item. You can create nested
 ### Markdown style enumerated lists
 Any line opened with `1.` will be treated as an enumerated list item, this can be any number. You can create nested lists with indentation. In most cases the indentation type will be inferred. 
 #### Lia
+[COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 1. List item.
 1. List item.
@@ -104,20 +117,25 @@ Any line opened with `1.` will be treated as an enumerated list item, this can b
         1. Double nested item.
 1. List item.
 ```
+[COMPILATION_INPUT_END]: <> (Do not remove this line.)
 #### TeX
+[COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\begin{enumerate}
-    \item List item.
-    \item List item.
+\begin{document}
     \begin{enumerate}
-        \item Nested item.
+        \item List item.
+        \item List item.
         \begin{enumerate}
-            \item Double nested item.
+            \item Nested item.
+            \begin{enumerate}
+                \item Double nested item.
+            \end{enumerate}
         \end{enumerate}
+        \item List item.
     \end{enumerate}
-    \item List item.
-\end{enumerate}
+\end{document}
 ```
+[COMPILATION_RESULT_END]: <> (Do not remove this line.)
 List items consume the remainder of the line. For multiline enclose list item contents in `{}`.
 
 -------------------
@@ -171,78 +189,106 @@ Will consume until unnested `}`.
 
 #### Numbered
 ##### Lia
+[COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 eq {
     a * b
 }
 ```
+[COMPILATION_INPUT_END]: <> (Do not remove this line.)
 ##### TeX
+[COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\begin{equation}
-    a \times b
-\end{equation}
+\begin{document}
+    \begin{equation}
+        a \times b
+    \end{equation}
+\end{document}
 ```
+[COMPILATION_RESULT_END]: <> (Do not remove this line.)
 #### Anonymous
 ##### Lia
-
+[COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 eq* {
     a * b
 }
 ```
+[COMPILATION_INPUT_END]: <> (Do not remove this line.)
 ##### TeX
+[COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\[
-    a \times b
-\]
+\begin{document}
+    \[
+        a \times b
+    \]
+\end{document}
 ```
+[COMPILATION_RESULT_END]: <> (Do not remove this line.)
 The content inside the equation expression uses a separate syntax to more easily
 represent mathematical expressions. The content will be parsed and converted to
 LaTeX. Most TeX commands should work as normal.
 > ⚠️ As of version 0.2.2, TeX commands can be separated from their arguments by fractions. This can be solved by encasing the command in `{}`. This will be fixed in future versions.
 #### General expressions
 ##### Lia
-
+[COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 eq* {
     x = (1 / 2 + 2 ^ 3) + \alpha
 }
 ```
+[COMPILATION_INPUT_END]: <> (Do not remove this line.)
 ##### TeX
+[COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\[
-    x = \left(\frac{1}{2} + 2^3\right) + \alpha
-\]
+\begin{document}
+    \[
+        x = \left(\frac{1}{2} + 2^3\right) +\alpha
+    \]
+\end{document}
 ```
+[COMPILATION_RESULT_END]: <> (Do not remove this line.)
 Operations are grouped by precedence, so `1 + 2 / 3` will be parsed as `1 + (2 / 3)` (it won't literally add brackets). operators are `+`, `-`, `*`, `/`, `%` and `^`. Other symbols such as `=` are treated as regular tokens or replaced if a [macro](#macros).
 #### Expression with grouping
 ##### Lia
+[COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 eq* {
     f(x) = 1 / {2 + 2 ^ 3}
 }
 ```
+[COMPILATION_INPUT_END]: <> (Do not remove this line.)
 ##### TeX
+[COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\[
-      f \left(x\right) = \frac{1}{2 + 2^3}
-\]
+\begin{document}
+    \[
+        f \left(x\right) = \frac{1}{{2 + 2^3}}
+    \]
+\end{document}
 ```
+[COMPILATION_RESULT_END]: <> (Do not remove this line.)
 Note that tokens are separated by spaces, so `xyz` will be grouped but `x y z` will be separate which differs from pronumerals in LaTeX equations. This saves grouping pronumerals in `{}` in situations like `dy/dx`.
 #### Matrices
 ##### Lia
+[COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 eq* {
     [[1, 2],
     [3, 4]]
 }
 ```
+[COMPILATION_INPUT_END]: <> (Do not remove this line.)
 ##### TeX
+[COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\[
-    \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}
-\]
+\begin{document}
+    \[
+        \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}
+    \]
+\end{document}
 ```
+[COMPILATION_RESULT_END]: <> (Do not remove this line.)
 
 #### Macros
 | Token | Replacment | LaTeX |

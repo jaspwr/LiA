@@ -3,7 +3,13 @@
 	"name": "LiA",
 	"patterns": [
 		{
+			"include": "#equations"
+		},
+		{
 			"include": "#keywords"
+		},
+		{
+			"include": "#mdsyms"
 		},
 		{
 			"include": "#macros"
@@ -12,20 +18,41 @@
 			"include": "#variables"
 		},
 		{
-			"include": "#equations"
+			"include": "#numbers"
+		},
+		{
+			"include": "#texcommands"
+		},
+		{
+			"include": "#escapedsym"
+		},
+		{
+			"include": "#comments"
 		}
 	],
 	"repository": {
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.control.lia",
-				"match": "\\b(env|use|eq)\\b"
+				"match": "\\b(env\\b|use\\b|eq(\\*|\\b))"
 			}]
 		},
 		"macros": {
 			"patterns": [{
-				"name": "keyword.control.lia",
-				"match": "(\\+-)|sin|inf|cos|tan"
+				"name": "constant.character.escape",
+				"match": "(<->|<=>|<=|>=|\\+-|-\\+|=>|!=|->|<-|\\^\\^|~==|~=|~~|inf|arcsin|arccos|arctan|sinh|cosh|tanh|coth|sin|cos|tan|cot|sec|csc|log|ln)"
+			}]
+		},
+		"texcommands": {
+			"patterns": [{
+				"name": "support.type.property-name",
+				"match": "\\\\[a-zA-Z0-9]+"
+			}]
+		},
+		"escapedsym": {
+			"patterns": [{
+				"name": "constant.character.escape",
+				"match": "\\\\."
 			}]
 		},
 		"variables": {
@@ -34,16 +61,23 @@
 				"match": "@[a-zA-Z0-9]+"
 			}]
 		},
-		"equations": {
-			"name": "string.quoted.double.lia",
-			"begin": "eq(\\*?)\\s+{",
-			"end": "}",
-			"patterns": [
-				{
-					"name": "constant.character.escape.lia",
-					"match": "\\\\."
-				}
-			]
+		"numbers": {
+			"patterns": [{
+				"name": "constant.numeric",
+				"match": "(\\b([0-9]+)(\\.[0-9]+)?)"
+			}]
+		},
+		"mdsyms": {
+			"patterns": [{
+				"name": "keyword.control.lia",
+				"match": "(^(\\s+?)?(((###|##|#)(\\*?))|([0-9]+\\.(?![a-zA-Z0-9]))(?![0-9])|(\\*)))|(\\*\\*+)"
+			}]
+		},
+		"comments": {
+			"patterns": [{
+				"name": "comment.line.lia",
+				"match": "(%(.+?)(\n|$))|(%)"
+			}]
 		}
 	},
 	"scopeName": "source.lia"

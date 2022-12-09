@@ -40,6 +40,11 @@
 \newcommand{\convolutedexpression}[1]{
     #1
 }
+\newcommand{\unaries}[2]{
+    #1 \begin{equation}
+        \approx
+    \end{equation} #2
+}
 
 
 \begin{document}
@@ -47,12 +52,14 @@
     \meow{4}{4.2}{0}{4}{8.2}
     \meow{cat1}{cat1}{0}{4}{cat1cat1}
 
+
     \hi{moew}
     \concat{🐈}{🐈}{🐈 🐈text text teeeeeeeeeeeeeeexxxxxxxxxxxxxxxxxxxtttttttttt}
     \concat{🐈}{🐈}{🐈 🐈text text teeeeeeeeeeeeeeexxxxxxxxxxxxxxxxxxxtttttttttt}
     \multiply{2.3}{2.3}{5.289999999999999}
     \multiply{1}{88}{88}
     \convolutedexpression{-212309119448.23422}
+    \unaries{7}{11.5}
 
     \math{4}
 \end{document}

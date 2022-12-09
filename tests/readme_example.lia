@@ -1,3 +1,7 @@
+eq {
+    dy/dx = x*(a - b) + [[1, 2], [3, 4]] + sin(x)
+}
+
 use graphicx, [utf8]inputenc
 
 @cat = 🐈

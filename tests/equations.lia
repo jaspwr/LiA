@@ -27,4 +27,27 @@ eq* {
 
 eq {
     hi {HI_2}/2 \a{2}{2} \int^x_y
+}eq{}
+
+eq {
+    f(x) = {sin(x)} / {cos{x}} -> b^{2^2_i} +- -+ <= >= < > != b-ab s in (a) inf 1 * b / c b / b + 2 - (2+ 2)/ 2 
+}
+
+eq {\text{tall} [[1], [2], [3], [8123 + 3]]
+
+
+
+}
+
+@fn = a => {
+    eq{@a^2 = @(a^2)}
+}
+
+eq { }
+eq{1}
+eq{asjdhk}
+eq{+2}
+eq{                              }
+eq{
+
 }

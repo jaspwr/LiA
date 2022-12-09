@@ -9,13 +9,26 @@ use crate::tokeniser::TokenList;
 
 #[derive(Default)]
 pub struct LiaMardownEnumListParser {
-    initial_indentation_depth: usize
+    initial_indentation_depth: usize,
+    not_start_of_line: bool
 }
 
 #[allow(unused)]
 impl NodeParser for LiaMardownEnumListParser {
     fn is_opener(&mut self, token: &Token, identation: i32, other_doc_locations: &mut CompilerGlobals) -> bool {
         if !other_doc_locations.feature_status_list.enumerated_lists.is_supported() { return false; }
+        if let Token::Newline = token { 
+            self.not_start_of_line = false; 
+            return false; 
+        } else {
+            if (!self.not_start_of_line) {
+                if let Token::Whitespace(_) = token {} else {
+                    self.not_start_of_line = true;
+                }
+            } else {
+                return false;
+            }
+        }
         match token {
             Token::Nothing(text, _) => { if is_list_number(text.to_string()) {
                 self.initial_indentation_depth = identation as usize;
@@ -120,5 +133,6 @@ fn append_closer(inner_nodes: &mut Vec<Token>) {
 
 fn is_list_number(text: String) -> bool {
     if !text.ends_with('.') { return false; }
+    if !text.starts_with(|c: char| c.is_numeric()) { return false; }
     text.chars().all(|c| c.is_numeric() || c == '.')
 }

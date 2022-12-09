@@ -9,7 +9,7 @@ env center🐱 {
     * List item 
         *List item 
             *      List item 
-                *inner most
+                *inner most  *
     * List item 🐱
     * {List 
     
@@ -18,7 +18,7 @@ env center🐱 {
     
     
     🐱}
-    * a
+    * a*
 * a
 }
 
@@ -37,4 +37,18 @@ env center🐱 {
         1. num
         3223428349. num
         1234243. num
-a
+a *
+a use
+a 1.
+a ##
+a *a 
+a use a
+a 2222. sin
+a ###text
+**it* ***bf***
+* **it   * a *** a\*\*\* *** a **a*****
+
+1 . this should not be a list
+                1. this should
+
+\documentclass{xyz}

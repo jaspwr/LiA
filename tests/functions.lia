@@ -37,13 +37,16 @@
 @meow(4, 4.2)
 @meow(cat1, cat1)
 
+
 @hi(moew)
 @convolutedexpression=()=>{@(20 + 5894 / 2 * 3  +     ((4) *3) % 2 -212309128309.23423423)}
+@unaries = a => {@a eq{~~} @(-2 + +3 -a * + +3 / + - + - -2)}
 @concat(🐈, 🐈)
 @concat(🐈, 🐈)
 @multiply(2.3, 2.3)
 @multiply(1, 88)
 @convolutedexpression()
+@unaries(7)
 
 @math()
 

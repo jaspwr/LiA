@@ -1,6 +1,6 @@
-# LiA 0.2.1
+# LiA 0.2.2
 
->⚠️This is the documentation for version 0.2.1. This is only an early version and is still in development. Do not expect any of these features to stay the same in future versions. Additionally, the compiler has not been thoroughly tested and may not work as expected. If you find any bugs or have any suggestions please open an issue or pull request on the [GitHub repository](https://github.com/jaspwr/LiA). 
+>⚠️This is the documentation for version 0.2.2. This is only an early version and is still in development. Do not expect any of these features to stay the same in future versions. Additionally, the compiler has not been thoroughly tested and may not work as expected. If you find any bugs or have any suggestions please open an issue or pull request on the [GitHub repository](https://github.com/jaspwr/LiA). 
 
 Most TeX is valid in LiA so you are able to write LaTeX as normal however with the addition of the features listed below.
 
@@ -60,6 +60,8 @@ Consumes remainder of line.
 | `#* title`   | `\section*{title}`       |
 | `##* title`  | `\subsection*{title}`    |
 | `###* title` | `\subsubsection*{title}` |
+
+
 Consumes remainder of line. For multiline enclose the section title in `{}`.
 
 -------------------
@@ -124,7 +126,7 @@ List items consume the remainder of the line. For multiline enclose list item co
 
 Any word annotated with a `@` will be treated as a variable.
 #### Referencing variables
-> ⚠️ As of version 0.2.1, variables with computed arguments can not be used before they are defined. This will be fixed in future versions.
+> ⚠️ As of version 0.2.2, variables with computed arguments can not be used before they are defined. This will be fixed in future versions.
 
 | LiA                      | TeX                      |
 |--------------------------|--------------------------|
@@ -197,7 +199,7 @@ eq* {
 The content inside the equation expression uses a separate syntax to more easily
 represent mathematical expressions. The content will be parsed and converted to
 LaTeX. Most TeX commands should work as normal.
-> ⚠️ As of version 0.2.1, TeX commands can be separated from their arguments by fractions. This can be solved by encasing the command in `{}`. This will be fixed in future versions.
+> ⚠️ As of version 0.2.2, TeX commands can be separated from their arguments by fractions. This can be solved by encasing the command in `{}`. This will be fixed in future versions.
 #### General expressions
 ##### Lia
 
@@ -279,7 +281,7 @@ eq* {
 ### Version specification
 The variable `@LIAVERSION` is reserved for specifying the version that the document is written in. If you specify a version, the document will be compiled with that version of the compiler otherwise it will use the latest version. It is recommended to specify a version to ensure that your document will compile correctly in the future. Always specify the version as the first line of the document.
 ```tex
-@LIAVERSION = 0.2.1
+@LIAVERSION = 0.2.2
 ```
 
 ## Document structure

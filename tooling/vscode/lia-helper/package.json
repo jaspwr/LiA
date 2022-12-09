@@ -14,7 +14,11 @@
       "id": "lia",
       "aliases": ["LiA", "lia"],
       "extensions": [".lia"],
-      "configuration": "./language-configuration.json"
+      "configuration": "./language-configuration.json",
+      "icon": {
+        "light": "./icons/lia.svg",
+        "dark": "./icons/lia.svg"
+      }
     }],
     "grammars": [{
       "language": "lia",

@@ -12,9 +12,6 @@
 			"include": "#mdsyms"
 		},
 		{
-			"include": "#macros"
-		},
-		{
 			"include": "#variables"
 		},
 		{
@@ -22,6 +19,9 @@
 		},
 		{
 			"include": "#texcommands"
+		},
+		{
+			"include": "#backslash"
 		},
 		{
 			"include": "#escapedsym"
@@ -37,12 +37,6 @@
 				"match": "\\b(env\\b|use\\b|eq(\\*|\\b))"
 			}]
 		},
-		"macros": {
-			"patterns": [{
-				"name": "constant.character.escape",
-				"match": "(<->|<=>|<=|>=|\\+-|-\\+|=>|!=|->|<-|\\^\\^|~==|~=|~~|inf|arcsin|arccos|arctan|sinh|cosh|tanh|coth|sin|cos|tan|cot|sec|csc|log|ln)"
-			}]
-		},
 		"texcommands": {
 			"patterns": [{
 				"name": "support.type.property-name",
@@ -53,6 +47,12 @@
 			"patterns": [{
 				"name": "constant.character.escape",
 				"match": "\\\\."
+			}]
+		},
+		"backslash": {
+			"patterns": [{
+				"name": "keyword.control.lia",
+				"match": "\\\\\\\\"
 			}]
 		},
 		"variables": {
@@ -77,6 +77,27 @@
 			"patterns": [{
 				"name": "comment.line.lia",
 				"match": "(%(.+?)(\n|$))|(%)"
+			}]
+		},
+		"equations": {
+			"name": "source.lia",
+			"begin": "eq((\\*?)\\s+?)?{",
+			"end": "}",
+			"patterns": [{
+				"name": "keyword.control.lia",
+				"match": "(<->|<=>|<=|>=|\\+-|-\\+|=>|!=|->|<-|\\^\\^|~==|~=|~~|inf|arcsin|arccos|arctan|sinh|cosh|tanh|coth|sin|cos|tan|cot|sec|csc|log|ln)"
+			},
+			{
+				"include": "#mdsyms"
+			},
+			{
+				"include": "#numbers"
+			},
+			{
+				"include": "#texcommands"
+			},
+			{
+				"include": "#escapedsym"
 			}]
 		}
 	},

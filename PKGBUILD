@@ -1,5 +1,5 @@
 pkgname=lia
-pkgver=0.2.1
+pkgver=0.2.2
 pkgrel=1
 makedepends=('rust' 'cargo')
 arch=('i686' 'x86_64' 'armv6h' 'armv7h')

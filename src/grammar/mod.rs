@@ -44,3 +44,17 @@ pub fn token_from_list(tokens: &Vec<AtExpToken>, pos: i32) -> AtExpToken {
         tokens[pos as usize].clone()
     }
 }
+
+pub fn check_either_side_for_opers(tokens: &Vec<AtExpToken>, pos: i32, len: i32, operators: Vec<&str>) -> bool {
+    for operator in operators {
+        if check_either_side_for_oper_single(tokens, pos, len, operator) {
+            return true;
+        }
+    }
+    false
+}
+
+pub fn check_either_side_for_oper_single(tokens: &Vec<AtExpToken>, pos: i32, len: i32, operator: &str) -> bool {
+    token_from_list(tokens, pos - 1).is_opertor_or_keyword(operator) 
+    || token_from_list(tokens, pos + len).is_opertor_or_keyword(operator)
+}

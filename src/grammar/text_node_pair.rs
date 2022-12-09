@@ -5,6 +5,8 @@ use crate::grammar::token_from_list;
 use crate::typed_value::TypedValue;
 use crate::at_expression::AtExpToken;
 
+use super::check_either_side_for_opers;
+
 pub struct TextNodePair {
     children: (AtExpToken, AtExpToken),
 }
@@ -36,24 +38,11 @@ impl AstNode for TextNodePair {
 pub fn parse(tokens: &Vec<AtExpToken>, start: i32) -> Result<OpAstNode, String> {
     if token_from_list(tokens, start).is_ast_node() &&
     token_from_list(tokens, start + 1).is_ast_node() &&
-    // Should refactor but it works for now.
-    !token_from_list(tokens, start + 2).is_opertor_or_keyword("+") &&
-    !token_from_list(tokens, start - 1).is_opertor_or_keyword("+") &&
-    !token_from_list(tokens, start + 2).is_opertor_or_keyword("-") &&
-    !token_from_list(tokens, start - 1).is_opertor_or_keyword("-") &&
-    !token_from_list(tokens, start + 2).is_opertor_or_keyword("*") &&
-    !token_from_list(tokens, start - 1).is_opertor_or_keyword("*") &&
-    !token_from_list(tokens, start + 2).is_opertor_or_keyword("/") &&
-    !token_from_list(tokens, start - 1).is_opertor_or_keyword("/") &&
-    !token_from_list(tokens, start + 2).is_opertor_or_keyword("%") &&
-    !token_from_list(tokens, start - 1).is_opertor_or_keyword("%") &&
-    !token_from_list(tokens, start + 2).is_opertor_or_keyword("^") &&
-    !token_from_list(tokens, start - 1).is_opertor_or_keyword("^")
+    !check_either_side_for_opers(tokens, start, 2, vec!["+", "-", "*", "/", "%", "^"])
     {
         Ok(Some((Rc::new(TextNodePair { children:
             (token_from_list(tokens, start).clone(), token_from_list(tokens, start + 1).clone())
         }), 2)))
-
     } else {
         Ok(None)
     }

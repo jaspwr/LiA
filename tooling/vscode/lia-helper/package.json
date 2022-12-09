@@ -1,0 +1,25 @@
+{
+  "name": "lia-helper",
+  "displayName": "LiA Helper",
+  "description": "Language support for LiA in vscode.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "lia",
+      "aliases": ["LiA", "lia"],
+      "extensions": [".lia"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "lia",
+      "scopeName": "source.lia",
+      "path": "./syntaxes/lia.tmLanguage.json"
+    }]
+  }
+}

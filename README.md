@@ -11,12 +11,15 @@ This is more for my personal use however you're welcome to use it or contribute.
 
 ## Example #1
 ### LiA code
+[COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 eq {
     dy/dx = x*(a - b) + [[1, 2], [3, 4]] + sin(x)
 }
 ```
+[COMPILATION_INPUT_END]: <> (Do not remove this line.)
 ### Resulting TeX
+[COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
 \begin{document}
     \begin{equation}
@@ -24,9 +27,11 @@ eq {
     \end{equation}
 \end{document}
 ```
+[COMPILATION_RESULT_END]: <> (Do not remove this line.)
 
 ## Example #2
 ### LiA code
+[COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 use graphicx, [utf8]inputenc
 @cat = 🐈
@@ -41,7 +46,9 @@ use graphicx, [utf8]inputenc
 ## A subsection
 @img(cat.png, Meow @cat!)
 ```
+[COMPILATION_INPUT_END]: <> (Do not remove this line.)
 ### Resulting TeX
+[COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
@@ -63,8 +70,10 @@ use graphicx, [utf8]inputenc
   \img{images/cat.png}{Meow \cat!}
 \end{document}
 ```
+[COMPILATION_RESULT_END]: <> (Do not remove this line.)
 ## Example #3
 ### LiA code
+[COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 @muliplication = (a: Number, b: Number) => { $@a \times @b = @(a * b)$ }
 * I'm a **Markdown** style ***list***
@@ -75,8 +84,9 @@ use graphicx, [utf8]inputenc
 * {I'm a multiline
    list item}
 ```
-
+[COMPILATION_INPUT_END]: <> (Do not remove this line.)
 ### Resulting TeX
+[COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
 \newcommand{\img}[3]{
   $#1 \times #2 = #3$
@@ -97,6 +107,7 @@ use graphicx, [utf8]inputenc
   \end{itemize}
 \end{document}
 ```
+[COMPILATION_RESULT_END]: <> (Do not remove this line.)
 # Installation
 
 |__OS__|__Instructions__|
@@ -115,4 +126,10 @@ Requires [Rust](https://www.rust-lang.org/tools/install) to be installed.
 git clone https://github.com/jaspwr/LiA
 cd LiA
 cargo install --path
+```
+
+### Building docs and tooling.
+If you have made changes to the code that alter the language in anyway, it is a good idea to run the following command. This will recompile all of the code examples in the documentation, update list of known macros and keywords, etc.
+```bash
+cargo run --bin docs_and_tooling_builder
 ```

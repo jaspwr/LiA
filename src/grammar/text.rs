@@ -13,7 +13,9 @@ struct TxtRpl {
     replacment: &'static str
 }
 
-static REPLACMENTS: [TxtRpl; 27] = [
+static REPLACMENTS: [TxtRpl; 30] = [
+    TxtRpl { text: "<->", replacment: "\\leftrightarrow" },
+    TxtRpl { text: "<=>", replacment: "\\leftrightharpoons" },
     TxtRpl { text: "<=", replacment: "\\le" },
     TxtRpl { text: ">=", replacment: "\\ge" },
     TxtRpl { text: "+-", replacment: "\\pm" },
@@ -22,6 +24,7 @@ static REPLACMENTS: [TxtRpl; 27] = [
     TxtRpl { text: "!=", replacment: "\\ne" },
     TxtRpl { text: "->", replacment: "\\rightarrow" },
     TxtRpl { text: "<-", replacment: "\\leftarrow" },
+    TxtRpl { text: "^^", replacment: "\\uparrow" },
     TxtRpl { text: "~==", replacment: "\\cong" },
     TxtRpl { text: "~=", replacment: "\\simeq" },
     TxtRpl { text: "~~", replacment: "\\approx" },

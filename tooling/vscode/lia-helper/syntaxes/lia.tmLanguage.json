@@ -1,0 +1,50 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "LiA",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#macros"
+		},
+		{
+			"include": "#variables"
+		},
+		{
+			"include": "#equations"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.lia",
+				"match": "\\b(env|use|eq)\\b"
+			}]
+		},
+		"macros": {
+			"patterns": [{
+				"name": "keyword.control.lia",
+				"match": "(\\+-)|sin|inf|cos|tan"
+			}]
+		},
+		"variables": {
+			"patterns": [{
+				"name": "keyword.control.lia",
+				"match": "@[a-zA-Z0-9]+"
+			}]
+		},
+		"equations": {
+			"name": "string.quoted.double.lia",
+			"begin": "eq(\\*?)\\s+{",
+			"end": "}",
+			"patterns": [
+				{
+					"name": "constant.character.escape.lia",
+					"match": "\\\\."
+				}
+			]
+		}
+	},
+	"scopeName": "source.lia"
+}

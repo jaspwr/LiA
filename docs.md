@@ -1,4 +1,4 @@
-# LiA 0.2.2
+# LiA {VERSIONSTART} 0.2.2 {VERSIONEND}
 
 >⚠️This is the documentation for version 0.2.2. This is only an early version and is still in development. Do not expect any of these features to stay the same in future versions. Additionally, the compiler has not been thoroughly tested and may not work as expected. If you find any bugs or have any suggestions please open an issue or pull request on the [GitHub repository](https://github.com/jaspwr/LiA). 
 

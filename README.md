@@ -134,5 +134,5 @@ If you have made changes to the code that alter the language in anyway or bumped
 cargo run --bin docs_and_tooling_builder
 ```
 
-### VSCode extension
-For syntax highlighting and other features in VSCode, you can use the extension. To install it, copy `tooling/vscode/lia-helper` to your VSCode extensions directory then restart VSCode.
+# VSCode extension
+For syntax highlighting and other features in VSCode, you can use the extension. To install it, copy `tooling/vscode/lia-helper` to your VSCode extensions directory (normally `~\.vscode\extensions`) then restart VSCode.

@@ -13,7 +13,9 @@ struct TxtRpl {
     replacment: &'static str
 }
 
-static REPLACMENTS: [TxtRpl; 27] = [
+static REPLACMENTS: [TxtRpl; 30] = [
+    TxtRpl { text: "<->", replacment: "\\leftrightarrow" },
+    TxtRpl { text: "<=>", replacment: "\\leftrightharpoons" },
     TxtRpl { text: "<=", replacment: "\\le" },
     TxtRpl { text: ">=", replacment: "\\ge" },
     TxtRpl { text: "+-", replacment: "\\pm" },
@@ -22,6 +24,7 @@ static REPLACMENTS: [TxtRpl; 27] = [
     TxtRpl { text: "!=", replacment: "\\ne" },
     TxtRpl { text: "->", replacment: "\\rightarrow" },
     TxtRpl { text: "<-", replacment: "\\leftarrow" },
+    TxtRpl { text: "^^", replacment: "\\uparrow" },
     TxtRpl { text: "~==", replacment: "\\cong" },
     TxtRpl { text: "~=", replacment: "\\simeq" },
     TxtRpl { text: "~~", replacment: "\\approx" },
@@ -54,7 +57,7 @@ fn do_replacements(text: &str) -> String {
 }
 
 #[allow(unused)]
-fn generate_docs() {
+pub fn generate_docs() {
     let mut result = "| Token | Replacment | LaTeX |\n|-|-|-|\n".to_string();
     for rpl in REPLACMENTS.iter() {
         result = format!("{}| `{}` | `{}` | ${}$ |\n", result, rpl.text, rpl.replacment, rpl.replacment);
@@ -62,6 +65,32 @@ fn generate_docs() {
     println!("{}", result);
 }
 
+#[allow(unused)]
+pub fn generate_regex() {
+    let mut result = "(".to_string();
+    for rpl in REPLACMENTS.iter() {
+        result = format!("{}|{}", result, do_regex_escapes(rpl.text));
+    }
+    result = format!("{})", result[1..].to_string());
+    println!("{}", result);
+}
+
+static ESCAPES: [char; 2] = [
+    '^', '+'
+];
+
+fn do_regex_escapes(s: &str) -> String {
+    let mut result = String::new();
+    for c in s.chars() {
+        if ESCAPES.contains(&c) {
+            result.push('\\');
+            result.push('\\');
+        }
+        result.push(c);
+    }
+    result
+}
+ 
 
 #[allow(unused)]
 impl AstNode for AstText {

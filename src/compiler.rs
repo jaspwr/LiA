@@ -19,9 +19,7 @@ pub fn compile (job: Job) -> Result<(), String> {
         Ok(contents) => { contents },
         Err(e) => { return Err(format!("{}. Aborted.",e)); }
     };
-    let tokens = tokeniser::to_tokens(lia_file);
-    let doc = hierachy_construction::contruct_doc(tokens)?;
-    let output = doc.codegen();
+    let output = run_compiler(lia_file)?;
     if job.debug_printing {
         println!("{}", output);
     }
@@ -50,4 +48,11 @@ pub fn compile (job: Job) -> Result<(), String> {
         Ok(_) => { Ok(()) },
         Err(e) => { Err(format!("{}. Aborted.",e)) }
     }
+}
+
+pub fn run_compiler(lia_file: String) -> Result<String, String> {
+    let tokens = tokeniser::to_tokens(lia_file);
+    let doc = hierachy_construction::contruct_doc(tokens)?;
+    let output = doc.codegen();
+    Ok(output)
 }

@@ -11,22 +11,27 @@ This is more for my personal use however you're welcome to use it or contribute.
 
 ## Example #1
 ### LiA code
+[COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 eq {
     dy/dx = x*(a - b) + [[1, 2], [3, 4]] + sin(x)
 }
 ```
+[COMPILATION_INPUT_END]: <> (Do not remove this line.)
 ### Resulting TeX
+[COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
 \begin{document}
     \begin{equation}
-        \frac{dy}{dx} = x \times \left(a - b\right) + \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} + \sin \left(x\right)
+        \frac{dy}{dx} = x \times \left(a - b\right) + \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} +\sin \left(x\right)
     \end{equation}
 \end{document}
 ```
+[COMPILATION_RESULT_END]: <> (Do not remove this line.)
 
 ## Example #2
 ### LiA code
+[COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 use graphicx, [utf8]inputenc
 @cat = 🐈
@@ -41,30 +46,34 @@ use graphicx, [utf8]inputenc
 ## A subsection
 @img(cat.png, Meow @cat!)
 ```
+[COMPILATION_INPUT_END]: <> (Do not remove this line.)
 ### Resulting TeX
+[COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
 
 
 \newcommand{\cat}{🐈}
-\newcommand{\img}[2]{
-  \begin{center}
-    \image{#1, 10cm}
-    \linebreak
-    \textit{#2}
-  \end{center}
+\newcommand{\img}[3]{
+    \begin{center}
+        \image{#3, 10cm}
+        \linebreak
+        \textit{#2}
+    \end{center}
 }
 
 
 \begin{document}
-  \section*{Cool Cat Image}
-  \subsection{A subsection}
-  \img{images/cat.png}{Meow \cat!}
+    \section*{Cool Cat Image}
+    \subsection{A subsection}
+    \img{cat.png}{Meow \cat!}{images/cat.png}
 \end{document}
 ```
+[COMPILATION_RESULT_END]: <> (Do not remove this line.)
 ## Example #3
 ### LiA code
+[COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 @muliplication = (a: Number, b: Number) => { $@a \times @b = @(a * b)$ }
 * I'm a **Markdown** style ***list***
@@ -75,28 +84,30 @@ use graphicx, [utf8]inputenc
 * {I'm a multiline
    list item}
 ```
-
+[COMPILATION_INPUT_END]: <> (Do not remove this line.)
 ### Resulting TeX
+[COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\newcommand{\img}[3]{
-  $#1 \times #2 = #3$
+\newcommand{\muliplication}[3]{
+    $#1 \times #2 = #3$ 
 }
 
 
 \begin{document}
-  \being{itemize}
-    \item I'm a \textit{Markdown} style \textbf{list}
-    \item \muliplication{2, 3, 6}
-    \item \muliplication{6, 6, 36}
-    \item \muliplication{2, 9, 18}
-    \being{itemize}
-      \item I'm indented
+    \begin{itemize}
+        \item I'm a \textit{Markdown} style \textbf{list}
+        \item \muliplication{2}{3}{6}
+        \item \muliplication{6}{6}{36}
+        \item \muliplication{2}{9}{18}
+        \begin{itemize}
+            \item I'm indented
+        \end{itemize}
+        \item {I'm a multiline
+        list item}
     \end{itemize}
-    \item I'm a multiline
-          list item
-  \end{itemize}
 \end{document}
 ```
+[COMPILATION_RESULT_END]: <> (Do not remove this line.)
 # Installation
 
 |__OS__|__Instructions__|
@@ -116,3 +127,12 @@ git clone https://github.com/jaspwr/LiA
 cd LiA
 cargo install --path
 ```
+
+### Building docs and tooling.
+If you have made changes to the code that alter the language in anyway or bumped the version, it is a good idea to run the following command. This will recompile all of the code examples in the documentation, update list of known macros and keywords, etc.
+```bash
+cargo run --bin docs_and_tooling_builder
+```
+
+### VSCode extension
+For syntax highlighting and other features in VSCode, you can use the extension. To install it, copy `tooling/vscode/lia-helper` to your VSCode extensions directory then restart VSCode.

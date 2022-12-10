@@ -53,7 +53,6 @@ fn do_replacements(text: &str) -> String {
             result = result.replace(rpl.text, rpl.replacment);
         }
     }
-    //generate_regex();
     result
 }
 
@@ -72,7 +71,7 @@ pub fn generate_regex() {
     for rpl in REPLACMENTS.iter() {
         result = format!("{}|{}", result, do_regex_escapes(rpl.text));
     }
-    result = format!("{})", result);
+    result = format!("{})", result[1..].to_string());
     println!("{}", result);
 }
 

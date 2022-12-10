@@ -18,11 +18,9 @@ env environmenttype {
 #### TeX
 [COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\begin{document}
-    \begin{environmenttype}
-        content
-    \end{environmenttype}
-\end{document}
+\begin{environmenttype}
+    content
+\end{environmenttype}
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
 
@@ -87,19 +85,17 @@ Any line opened with a `*` will be treated as a list item. You can create nested
 #### TeX
 [COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\begin{document}
+\begin{itemize}
+    \item List item.
+    \item List item.
     \begin{itemize}
-        \item List item.
-        \item List item.
+        \item Nested item.
         \begin{itemize}
-            \item Nested item.
-            \begin{itemize}
-                \item Double nested item.
-            \end{itemize}
+            \item Double nested item.
         \end{itemize}
-        \item List item.
     \end{itemize}
-\end{document}
+    \item List item.
+\end{itemize}
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
  List items consume the remainder of the line. For multiline enclose list item contents in `{}`.
@@ -121,19 +117,17 @@ Any line opened with `1.` will be treated as an enumerated list item, this can b
 #### TeX
 [COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\begin{document}
+\begin{enumerate}
+    \item List item.
+    \item List item.
     \begin{enumerate}
-        \item List item.
-        \item List item.
+        \item Nested item.
         \begin{enumerate}
-            \item Nested item.
-            \begin{enumerate}
-                \item Double nested item.
-            \end{enumerate}
+            \item Double nested item.
         \end{enumerate}
-        \item List item.
     \end{enumerate}
-\end{document}
+    \item List item.
+\end{enumerate}
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
 List items consume the remainder of the line. For multiline enclose list item contents in `{}`.
@@ -199,11 +193,9 @@ eq {
 ##### TeX
 [COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\begin{document}
-    \begin{equation}
-        a \times b
-    \end{equation}
-\end{document}
+\begin{equation}
+    a \times b
+\end{equation}
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
 #### Anonymous
@@ -218,11 +210,9 @@ eq* {
 ##### TeX
 [COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\begin{document}
-    \[
-        a \times b
-    \]
-\end{document}
+\[
+    a \times b
+\]
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
 The content inside the equation expression uses a separate syntax to more easily
@@ -241,11 +231,9 @@ eq* {
 ##### TeX
 [COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\begin{document}
-    \[
-        x = \left(\frac{1}{2} + 2^3\right) +\alpha
-    \]
-\end{document}
+\[
+    x = \left(\frac{1}{2} + 2^3\right) +\alpha
+\]
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
 Operations are grouped by precedence, so `1 + 2 / 3` will be parsed as `1 + (2 / 3)` (it won't literally add brackets). operators are `+`, `-`, `*`, `/`, `%` and `^`. Other symbols such as `=` are treated as regular tokens or replaced if a [macro](#macros).
@@ -261,11 +249,9 @@ eq* {
 ##### TeX
 [COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\begin{document}
-    \[
-        f \left(x\right) = \frac{1}{{2 + 2^3}}
-    \]
-\end{document}
+\[
+    f \left(x\right) = \frac{1}{{2 + 2^3}}
+\]
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
 Note that tokens are separated by spaces, so `xyz` will be grouped but `x y z` will be separate which differs from pronumerals in LaTeX equations. This saves grouping pronumerals in `{}` in situations like `dy/dx`.
@@ -282,11 +268,9 @@ eq* {
 ##### TeX
 [COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
-\begin{document}
-    \[
-        \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}
-    \]
-\end{document}
+\[
+    \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}
+\]
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
 

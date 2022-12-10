@@ -34,13 +34,13 @@
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.control.lia",
-				"match": "\\b(env\\b|use\\b|eq(\\*|\\b))"
+				"match": "(\\benv\\b|^(\\s+?)?use\\b|\\beq(\\*|\\b))"
 			}]
 		},
 		"texcommands": {
 			"patterns": [{
 				"name": "support.type.property-name",
-				"match": "\\\\[a-zA-Z0-9]+"
+				"match": "\\\\[a-zA-Z0-9]+|\\\\\\[|\\\\\\]"
 			}]
 		},
 		"escapedsym": {
@@ -70,7 +70,7 @@
 		"mdsyms": {
 			"patterns": [{
 				"name": "keyword.control.lia",
-				"match": "(^(\\s+?)?(((###|##|#)(\\*?))|([0-9]+\\.(?![a-zA-Z0-9]))(?![0-9])|(\\*)))|(\\*\\*+)"
+				"match": "(^(\\s+?)?(((###|##|#)(\\*?))|([0-9]+\\.(?![a-zA-Z0-9]))(?![0-9])|(\\*(?!(\\*|#)))))|(\\*\\*+)"
 			}]
 		},
 		"comments": {
@@ -80,7 +80,7 @@
 			}]
 		},
 		"equations": {
-			"name": "source.lia",
+			"name": "equation.lia",
 			"begin": "eq((\\*?)\\s+?)?{",
 			"end": "}",
 			"patterns": [{
@@ -88,7 +88,25 @@
 				"match": "(<->|<=>|<=|>=|\\+-|-\\+|=>|!=|->|<-|\\^\\^|~==|~=|~~|inf|arcsin|arccos|arctan|sinh|cosh|tanh|coth|sin|cos|tan|cot|sec|csc|log|ln)"
 			},
 			{
-				"include": "#mdsyms"
+				"include": "#numbers"
+			},
+			{
+				"include": "#texcommands"
+			},
+			{
+				"include": "#escapedsym"
+			},
+			{
+				"include": "#equationinnerscope"
+			}]
+		},
+		"equationinnerscope": {
+			"name": "equation.lia",
+			"begin": "{",
+			"end": "}",
+			"patterns": [{
+				"name": "keyword.control.lia",
+				"match": "(<->|<=>|<=|>=|\\+-|-\\+|=>|!=|->|<-|\\^\\^|~==|~=|~~|inf|arcsin|arccos|arctan|sinh|cosh|tanh|coth|sin|cos|tan|cot|sec|csc|log|ln)"
 			},
 			{
 				"include": "#numbers"

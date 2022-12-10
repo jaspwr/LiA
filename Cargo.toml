@@ -2,6 +2,7 @@
 name = "lia"
 version = "0.2.2"
 edition = "2021"
+default-run = "lia"
 
 [dependencies]
 owo-colors = "3.5.0"

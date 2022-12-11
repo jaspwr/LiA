@@ -113,7 +113,6 @@ use graphicx, [utf8]inputenc
 |__OS__|__Instructions__|
 |---|---|
 |__Windows__| Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually. If you have Rust intalled it is recommended that you use the instructions in the [building](#building) section.
-|__Arch Linux__| Clone this repository and use the PKGBUILD. I'm working on adding this to the AUR.
 |__Other__| Follow the instructions in the [building](#building) section.
 # Usage
 ```bash
@@ -125,8 +124,9 @@ Requires [Rust](https://www.rust-lang.org/tools/install) to be installed.
 ```bash
 git clone https://github.com/jaspwr/LiA
 cd LiA
-cargo install --path
+cargo build --release
 ```
+Your binary will then be located at `target/release/`
 
 ### Building docs and tooling.
 If you have made changes to the code that alter the language in anyway or bumped the version, it is a good idea to run the following command. This will recompile all of the code examples in the documentation, update list of known macros and keywords, etc.

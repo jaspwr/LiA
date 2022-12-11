@@ -113,6 +113,7 @@ use graphicx, [utf8]inputenc
 |__OS__|__Instructions__|
 |---|---|
 |__Windows__| Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually. If you have Rust intalled it is recommended that you use the instructions in the [building](#building) section.
+|__Arch Linux__| Clone this repo and use the `PKGBUILD` |
 |__Other__| Follow the instructions in the [building](#building) section.
 # Usage
 ```bash
@@ -123,8 +124,7 @@ lia file.lia
 Requires [Rust](https://www.rust-lang.org/tools/install) to be installed.
 ```bash
 git clone https://github.com/jaspwr/LiA
-cd LiA
-cargo build --release
+cargo install --path [path-to-cloned-repo]
 ```
 Your binary will then be located at `target/release/`
 

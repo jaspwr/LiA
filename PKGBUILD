@@ -9,5 +9,5 @@ build() {
 }
 
 package() {
-    cargo install --root="$pkgdir" lia
+    cargo install --path $pkgdir
 }

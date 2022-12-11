@@ -126,13 +126,14 @@ Requires [Rust](https://www.rust-lang.org/tools/install) to be installed.
 git clone https://github.com/jaspwr/LiA
 cargo install --path [path-to-cloned-repo]
 ```
-Your binary will then be located at `target/release/`
+You will need to add Cargo's bin directory to your PATH environment variable.
 
 ### Building docs and tooling.
 If you have made changes to the code that alter the language in anyway or bumped the version, it is a good idea to run the following command. This will recompile all of the code examples in the documentation, update list of known macros and keywords, etc.
 ```bash
 cargo run --bin docs_and_tooling_builder
 ```
+
 
 # VSCode extension
 For syntax highlighting and other features in VSCode, you can use the extension. To install it, copy `tooling/vscode/lia-helper` to your VSCode extensions directory (normally `~\.vscode\extensions`) then restart VSCode.

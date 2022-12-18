@@ -1,7 +1,7 @@
 # LiA
 ### A transpiled superset of TeX for writing LaTeX.
 
-![status](https://img.shields.io/github/workflow/status/jaspwr/LiA/Rust)
+![status](https://img.shields.io/github/actions/workflow/status/jaspwr/LiA/rust.yml?branch=main)
 
 This is more for my personal use however you're welcome to use it or contribute. These added features are just designed to make LaTeX code less verbose, faster to write but also just catered more towards my personal preference.
 

@@ -4,10 +4,16 @@ pkgrel=1
 makedepends=('rust' 'cargo')
 arch=('i686' 'x86_64' 'armv6h' 'armv7h')
 
+prepare() {
+    cargo fetch --target "$CARCH-unknown-linux-gnu"
+}
+
 build() {
-    return 0
+    export RUSTUP_TOOLCHAIN=stable
+    export CARGO_TARGET_DIR=target
+    cargo build --release
 }
 
 package() {
-    cargo install --path $pkgdir
+    install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/$pkgname"
 }

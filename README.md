@@ -2,6 +2,7 @@
 ### A transpiled superset of TeX for writing LaTeX.
 
 ![status](https://img.shields.io/github/actions/workflow/status/jaspwr/LiA/rust.yml?branch=main)
+![AUR](https://img.shields.io/aur/version/lia-git)
 
 This is more for my personal use however you're welcome to use it or contribute. These added features are just designed to make LaTeX code less verbose, faster to write but also just catered more towards my personal preference.
 
@@ -113,7 +114,7 @@ use graphicx, [utf8]inputenc
 |__OS__|__Instructions__|
 |---|---|
 |__Windows__| Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually. If you have Rust intalled it is recommended that you use the instructions in the [building](#building) section.
-|__Arch Linux__| Clone this repo and use the `PKGBUILD` |
+|__Arch Linux__| Install from the AUR [https://aur.archlinux.org/packages/lia-git](https://aur.archlinux.org/packages/lia-git) |
 |__Other__| Follow the instructions in the [building](#building) section.
 # Usage
 ```bash

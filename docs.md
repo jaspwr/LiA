@@ -155,6 +155,7 @@ Any word annotated with a `@` will be treated as a variable.
 |--------------------------|--------------------------|
 | `@varname = () => {Some content}`| `\newcommand{\varname}[0]{Some content}`|
 |`@varname = (arg, otherarg) => {Hello @arg @otherarg}`|`\newcommand{\varname}[2]{Hello #1 #2}`|
+
 Will consume until unnested `}`.
 ##### Computed functions
 If inside the contents of a function an expression in `@()` is found it will be evaluated and whenever it is referenced the result will be computed and passed in as an additional argument.

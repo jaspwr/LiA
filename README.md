@@ -118,13 +118,14 @@ use graphicx, [utf8]inputenc
 |__OS__|__Instructions__|
 |---|---|
 |__Windows__| Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually. If you have Rust intalled it is recommended that you use the instructions in the [building](#building) section.
-|__Arch Linux__| Install from the AUR [https://aur.archlinux.org/packages/lia-git](https://aur.archlinux.org/packages/lia-git) |
+|__Arch Linux__| Install from the AUR [https://aur.archlinux.org/packages/lia-git](https://aur.archlinux.org/packages/lia-git). |
 |__Other__| Follow the instructions in the [building](#building) section.
 # Usage
 ```bash
-lia file.lia
+lia file.lia -w
 ```
 * Run `lia --help` for more information on usage.
+* The `-w` flag will tell the compiler to watch the file for changes and recompile it.
 # Building
 Requires [Rust](https://www.rust-lang.org/tools/install) to be installed.
 ```bash

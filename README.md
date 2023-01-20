@@ -42,7 +42,7 @@ use graphicx, [utf8]inputenc
 @cat = 🐈
 @img = (src, desc) => {
     env center {
-        \image{@("images/" + src), 10cm}
+        \image{@("images/" + src)}{10cm}
         \linebreak
         **@desc**
     }
@@ -62,7 +62,7 @@ use graphicx, [utf8]inputenc
 \newcommand{\cat}{🐈}
 \newcommand{\img}[3]{
     \begin{center}
-        \image{#3, 10cm}
+        \image{#3}{10cm}
         \linebreak
         \textit{#2}
     \end{center}

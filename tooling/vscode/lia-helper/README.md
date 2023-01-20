@@ -1,6 +1,6 @@
 # LiA Helper
 
-This extension provides VS Code support for the Lia programming language.
+This extension provides VS Code support for the LiA language.
 This plugin currently only supports syntax highlighting however more features such as linting are planned.
 
 ## Installation

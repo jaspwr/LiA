@@ -36,7 +36,7 @@ pub fn compile (job: Job) -> Result<(), String> {
                 }
         } else {
             if Command::new("sh")
-                .args(&["/C", &command])
+                .args(&["-ic", &command])
                 .spawn()
                 .is_err() {
                     return Err(format!("Failed to run command \"{}\".", command));

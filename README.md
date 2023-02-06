@@ -8,7 +8,8 @@
     ![AUR](https://img.shields.io/aur/version/lia-git)
 ](https://aur.archlinux.org/packages/lia-git)
 
-This is more for my personal use however you're welcome to use it or contribute. These added features are just designed to make LaTeX code less verbose, faster to write but also just catered more towards my personal preference.
+
+This is more for my personal use however you're welcome to use it or contribute. This is a superset of TeX that extends its syntax adding new several new features. These added features are just designed to make LaTeX code less verbose and faster to write but also just catered more towards my personal preference.
 
 > For a more detailed explanation of the features see the [documentation](docs.md).
 
@@ -117,7 +118,7 @@ use graphicx, [utf8]inputenc
 
 |__OS__|__Instructions__|
 |---|---|
-|__Windows__| Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually. If you have Rust intalled it is recommended that you use the instructions in the [building](#building) section.
+|__Windows__| Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually.
 |__Arch Linux__| Install from the AUR [https://aur.archlinux.org/packages/lia-git](https://aur.archlinux.org/packages/lia-git). |
 |__Other__| Follow the instructions in the [building](#building) section.
 # Usage
@@ -134,12 +135,17 @@ cargo install --path [path-to-cloned-repo]
 ```
 You will need to add Cargo's bin directory to your PATH environment variable.
 
+If you would prefer to install the binary yourself instead of using Cargo, you can run `cargo build --release` and copy the binary from `target/release/lia` to your desired location.
+
+
+# VSCode extension
+For syntax highlighting and other features in VSCode, you can use the extension. To install it, copy `tooling/vscode/lia-helper` to your VSCode extensions directory (normally `~\.vscode\extensions`) then restart VSCode.
+
+
+# Contributing
+Any contributions are welcome. If you would like to contribute, please open an issue or pull request. Refer to TODO.md for a list of planned features and known issues.
 ### Building docs and tooling.
 If you have made changes to the code that alter the language in anyway or bumped the version, it is a good idea to run the following command. This will recompile all of the code examples in the documentation, update list of known macros and keywords, etc.
 ```bash
 cargo run --bin docs_and_tooling_builder
 ```
-
-
-# VSCode extension
-For syntax highlighting and other features in VSCode, you can use the extension. To install it, copy `tooling/vscode/lia-helper` to your VSCode extensions directory (normally `~\.vscode\extensions`) then restart VSCode.

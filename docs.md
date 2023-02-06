@@ -1,12 +1,37 @@
-# LiA 0.2.2
+# LiA 0.2.2 Documentation
 
 >⚠️ This is the documentation for version 0.2.2. This is only an early version and is still in development. Do not expect any of these features to stay the same in future versions. Additionally, the compiler has not been thoroughly tested and may not work as expected. If you find any bugs or have any suggestions please open an issue or pull request on the [GitHub repository](https://github.com/jaspwr/LiA). 
 
-Most TeX is valid in LiA so you are able to write LaTeX as normal however with the addition of the features listed below.
+
+## Contents
+1. [Language features](#language-features)
+    1. [Environments](#environments)
+    1. [Imports](#imports)
+    1. [Italic](#italic)
+    1. [Bold](#bold)
+    1. [Markdown style sections](#markdown-style-sections)
+    1. [Markdown style lists](#markdown-style-lists)
+    1. [Markdown style enumerated lists](#markdown-style-enumerated-lists)
+    1. [Variables](#variables)
+        1. [Referencing variables](#referencing-variables)
+        1. [Declaring variables](#declaring-variables)
+    1. [Equations](#equations)
+        1. [Numbered](#numbered)
+        1. [Anonymous](#anonymous)
+        1. [General expressions](#general-expressions)
+        1. [Expression with grouping](#expression-with-grouping)
+        1. [Matrices](#matrices)
+        1. [Macros](#macros)
+    1. [Explicit version specification](#explicit-version-specification)
+1. [Document Structure](#document-structure)
+
 
 ## Language features
 
+Most TeX is valid in LiA so you are able to write LaTeX as normal however with the addition of the features listed below.
+
 ### Environments
+Environment statements provide a less verbose way to open environments.
 #### Lia
 [COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
@@ -40,6 +65,7 @@ Consumes remainder of line.
 -------------------
 
 ### Italic
+This is an alternative syntax for the `textit` command.
 | LiA                    | TeX                      |
 |------------------------|--------------------------|
 | `**Inner text**`       | `\textit{Inner text}`    |
@@ -47,6 +73,8 @@ Consumes remainder of line.
 -------------------
 
 ### Bold
+This is an alternative syntax for the `textbf` command.
+
 | LiA                     | TeX                      |
 |-------------------------|--------------------------|
 | `***Inner text***`      | `\textbf{Inner text}`    |
@@ -71,7 +99,8 @@ Consumes remainder of line. For multiline enclose the section title in `{}`.
 -------------------
 
 ### Markdown style lists
-Any line opened with a `*` will be treated as a list item. You can create nested lists with indentation. In most cases the indentation type will be inferred. 
+Any line opened with a `*` will be treated as a list item. You can create nested lists with indentation. In most cases the indentation type will be inferred.
+> ⚠️ As of version 0.2.2, indentation types other than 4 spaces are unthoroughly tested and may not work as expected.
 #### Lia
 [COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
@@ -104,6 +133,7 @@ Any line opened with a `*` will be treated as a list item. You can create nested
 
 ### Markdown style enumerated lists
 Any line opened with `1.` will be treated as an enumerated list item, this can be any number. You can create nested lists with indentation. In most cases the indentation type will be inferred. 
+> ⚠️ As of version 0.2.2, indentation types other than 4 spaces are unthoroughly tested and may not work as expected.
 #### Lia
 [COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
@@ -135,6 +165,7 @@ List items consume the remainder of the line. For multiline enclose list item co
 -------------------
 
 ### Variables
+LiA variables provide a less verbose way to define new commands.
 
 Any word annotated with a `@` will be treated as a variable.
 #### Referencing variables
@@ -181,8 +212,9 @@ Will consume until unnested `}`.
 -------------------
 
 ### Equations
-
+Equation statements provide an alternative and commonly less verbose way to write LaTeX equations.
 #### Numbered
+Equations formatted like this with `eq` will be transpiled to a regular equation in an `equation` environment.
 ##### Lia
 [COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
@@ -200,6 +232,7 @@ eq {
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
 #### Anonymous
+Equations formatted like this with `eq*` will be transpiled to an anonymous equation in `\[`...`\]`.
 ##### Lia
 [COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
@@ -216,6 +249,8 @@ eq* {
 \]
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
+$a \times b$
+
 The content inside the equation expression uses a separate syntax to more easily
 represent mathematical expressions. The content will be parsed and converted to
 LaTeX. Most TeX commands should work as normal.
@@ -237,6 +272,8 @@ eq* {
 \]
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
+$x = \left(\frac{1}{2} + 2^3\right) +\alpha$
+
 Operations are grouped by precedence, so `1 + 2 / 3` will be parsed as `1 + (2 / 3)` (it won't literally add brackets). operators are `+`, `-`, `*`, `/`, `%` and `^`. Other symbols such as `=` are treated as regular tokens or replaced if a [macro](#macros).
 #### Expression with grouping
 ##### Lia
@@ -255,6 +292,8 @@ eq* {
 \]
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
+$f \left(x\right) = \frac{1}{{2 + 2^3}}$
+
 Note that tokens are separated by spaces, so `xyz` will be grouped but `x y z` will be separate which differs from pronumerals in LaTeX equations. This saves grouping pronumerals in `{}` in situations like `dy/dx`.
 #### Matrices
 ##### Lia
@@ -274,6 +313,7 @@ eq* {
 \]
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
+$\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}$
 
 #### Macros
 | Token | Replacment | LaTeX |
@@ -309,7 +349,7 @@ eq* {
 > If you don't want a macro to be replaced, you can separate it with spaces e.g. `s i n` will be parsed as the separate pronumerals $s$, $i$ and $n$ and not `\sin`.
 -------------------
 
-### Version specification
+### Explicit version specification
 The variable `@LIAVERSION` is reserved for specifying the version that the document is written in. If you specify a version, the document will be compiled with that version of the compiler otherwise it will use the latest version. It is recommended to specify a version to ensure that your document will compile correctly in the future. Always specify the version as the first line of the document.
 ```tex
 @LIAVERSION = 0.2.2
@@ -318,3 +358,4 @@ The variable `@LIAVERSION` is reserved for specifying the version that the docum
 ## Document structure
 * As LiA is designed for LaTeX documents, all document content will be automatically encased in a `document` environment. If there is a `document` environment annotated it will be ignored.
 * Imports will be placed at the top of the document followed by variable declarations and then the document content.
+* Things such as `documentclass` will not be automatically added to the document. You will need to add them manually as regular LaTeX commands.

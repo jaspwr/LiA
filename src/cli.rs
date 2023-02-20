@@ -52,7 +52,8 @@ fn parse_flag (flag: &str) -> Result<Flag, String> {
                 println!("Flags:");
                 println!("  -o [output file] - Sets the output file.");
                 println!("  -w / --watch - Watch file for changes and automatically recompile.");
-                println!("  -c / --chain [command] - Chain a command to run after compilation. E.g. your LaTeX compiler.");
+                println!("  --pdflatex - Run pdflatex on the output file after compilation.");
+                println!("  -c / --chain [command] - Chain a command to run after compilation.");
                 println!("  --help - Prints this help message.");
                 println!("  --version - Prints the version of the LiA.");
                 ShouldContinue::Aborts

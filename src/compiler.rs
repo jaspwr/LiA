@@ -55,7 +55,7 @@ pub fn compile (job: Job) -> Result<(), String> {
         let abs_path = PathBuf::from(output_path).canonicalize().unwrap(); // 
         let mut child = Command::new("pdflatex")
             .arg(abs_path)
-            .spawn().unwrap();
+            .spawn().expect("Failed to run pdflatex. Is it installed?");
 
         thread::sleep(Duration::from_millis(1000));
         child.kill().expect("Failed to kill sed");  

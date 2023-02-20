@@ -18,6 +18,12 @@ fn parse_flag (flag: &str) -> Result<Flag, String> {
                 ShouldContinue::Continues
             })))
         },
+        "--pdflatex" => {
+            Ok(Flag::OnlySelf(Rc::new(|job: &mut Job| -> ShouldContinue {
+                job.pdflatex = true;
+                ShouldContinue::Continues
+            })))
+        },
         "--watch" | "-w" => {
             Ok(Flag::OnlySelf(Rc::new(|job: &mut Job| -> ShouldContinue {
                 job.watches = true;

@@ -1,4 +1,7 @@
+use std::path::PathBuf;
 use std::process::Command;
+use std::thread;
+use std::time::Duration;
 
 use crate::hierarchy::Node;
 use crate::tokeniser;
@@ -11,7 +14,8 @@ pub struct Job {
     pub output_path: String,
     pub chained_command: Option<String>,
     pub watches: bool,
-    pub debug_printing: bool
+    pub debug_printing: bool,
+    pub pdflatex: bool,
 }
 
 pub fn compile (job: Job) -> Result<(), String> {
@@ -23,6 +27,9 @@ pub fn compile (job: Job) -> Result<(), String> {
     if job.debug_printing {
         println!("{}", output);
     }
+
+    let output_path = job.output_path.clone();
+
     let file_res = write_utf8_file(job.output_path, output);
 
     if job.chained_command.is_some() {
@@ -42,6 +49,16 @@ pub fn compile (job: Job) -> Result<(), String> {
                     return Err(format!("Failed to run command \"{}\".", command));
                 }
         };
+    }
+
+    if job.pdflatex {
+        let abs_path = PathBuf::from(output_path).canonicalize().unwrap(); // 
+        let mut child = Command::new("pdflatex")
+            .arg(abs_path)
+            .spawn().unwrap();
+
+        thread::sleep(Duration::from_millis(1000));
+        child.kill().expect("Failed to kill sed");  
     }
 
     match file_res {

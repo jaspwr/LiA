@@ -2,7 +2,10 @@
 
 use std::error::Error;
 
-use lia::{utils::{load_utf8_file, write_utf8_file}, compiler::run_compiler};
+use lia::{
+    compiler::run_compiler,
+    utils::{load_utf8_file, write_utf8_file},
+};
 
 static COMP_IN_OPEN: &str = "[COMPILATION_INPUT_START]: <> (Do not remove this line.)";
 static COMP_IN_CLOSE: &str = "[COMPILATION_INPUT_END]: <> (Do not remove this line.)";
@@ -36,7 +39,8 @@ fn do_compilations(s: String, strips_doc_env: bool) -> String {
     out.push_str(spl[0]);
     for i in 1..spl.len() {
         let spl_ = spl[i];
-        let in_code = strip_codeblock(spl_.split(COMP_IN_CLOSE).collect::<Vec<&str>>()[0].to_string());
+        let in_code =
+            strip_codeblock(spl_.split(COMP_IN_CLOSE).collect::<Vec<&str>>()[0].to_string());
         let compilation_result = run_compiler(in_code).unwrap();
         let a = spl_.split(COMP_OUT_OPEN).collect::<Vec<&str>>();
         out.push_str(COMP_IN_OPEN);
@@ -56,7 +60,11 @@ fn do_compilations(s: String, strips_doc_env: bool) -> String {
 }
 
 fn strip_codeblock(s: String) -> String {
-    s.split("```tex").collect::<Vec<&str>>()[1].to_string().split("```").collect::<Vec<&str>>()[0].to_string()
+    s.split("```tex").collect::<Vec<&str>>()[1]
+        .to_string()
+        .split("```")
+        .collect::<Vec<&str>>()[0]
+        .to_string()
 }
 
 fn add_codeblock(s: String) -> String {

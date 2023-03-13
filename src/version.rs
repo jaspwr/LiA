@@ -1,4 +1,4 @@
-use std::{num::ParseIntError, error::Error};
+use std::{error::Error, num::ParseIntError};
 
 use owo_colors::OwoColorize;
 
@@ -7,15 +7,17 @@ use crate::utils::{load_utf8_file, write_utf8_file};
 pub fn parse_version_string(version: &str) -> Result<(u8, u8, u8), String> {
     let mut version_spl = version.split(".");
     if version_spl.clone().count() != 3 {
-        return Err(format!{"Invalid version string \"{}\".", version});
+        return Err(format! {"Invalid version string \"{}\".", version});
     }
     match try_ver_number_num_casts(&mut version_spl) {
-        Ok(v) =>  Ok(v),
-        Err(_) => Err(format!{"Invalid version string \"{}\".", version})
+        Ok(v) => Ok(v),
+        Err(_) => Err(format! {"Invalid version string \"{}\".", version}),
     }
 }
 
-fn try_ver_number_num_casts(version_spl: &mut std::str::Split<&str>) -> Result<(u8, u8, u8), ParseIntError> {
+fn try_ver_number_num_casts(
+    version_spl: &mut std::str::Split<&str>,
+) -> Result<(u8, u8, u8), ParseIntError> {
     let major = version_spl.next().unwrap().parse::<u8>()?;
     let minor = version_spl.next().unwrap().parse::<u8>()?;
     let patch = version_spl.next().unwrap().parse::<u8>()?;
@@ -46,23 +48,31 @@ pub fn version_cmp(version1: (u8, u8, u8), version2str: &str) -> i8 {
     }
 }
 
-
-// This file may be used to store other things in the future, but for now 
+// This file may be used to store other things in the future, but for now
 // it's just needed for a timestamp of last ping and version.
 static CACHE_FILE: &'static str = ".liacache";
-static CARGO_TOML_URL: &'static str = "https://raw.githubusercontent.com/jaspwr/LiA/main/Cargo.toml";
+static CARGO_TOML_URL: &'static str =
+    "https://raw.githubusercontent.com/jaspwr/LiA/main/Cargo.toml";
 
 pub fn check_for_new_version() -> Result<(), Box<dyn Error>> {
-    let path = home::home_dir().unwrap().join(CACHE_FILE).to_str().unwrap().to_string();
+    let path = home::home_dir()
+        .unwrap()
+        .join(CACHE_FILE)
+        .to_str()
+        .unwrap()
+        .to_string();
     let f = match load_utf8_file(path.clone()) {
         Ok(f) => f,
-        Err(_) => "0\n0.0.0".to_string() 
+        Err(_) => "0\n0.0.0".to_string(),
     };
     let mut lines = f.lines();
     let last_ping = lines.next().unwrap().parse::<u64>()?;
     let last_version = lines.next().unwrap();
-    let current_time = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)?.as_secs();
-    if current_time - last_ping < 86400 { // One day
+    let current_time = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)?
+        .as_secs();
+    if current_time - last_ping < 86400 {
+        // One day
         return Ok(());
     }
     let latest_version = fetch_latest_version_string()?;
@@ -78,5 +88,12 @@ pub fn check_for_new_version() -> Result<(), Box<dyn Error>> {
 
 fn fetch_latest_version_string() -> Result<String, Box<dyn Error>> {
     let resp = reqwest::blocking::get(CARGO_TOML_URL)?.text()?;
-    Ok(resp.split("version = \"").nth(1).unwrap().split("\"").next().unwrap().to_string())
+    Ok(resp
+        .split("version = \"")
+        .nth(1)
+        .unwrap()
+        .split("\"")
+        .next()
+        .unwrap()
+        .to_string())
 }

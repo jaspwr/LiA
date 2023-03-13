@@ -1,13 +1,20 @@
 use std::rc::Rc;
 
-use crate::{tokeniser::TokenList, token::*, hierachy_construction::{NodeParser, node_list, IndentationType, ParseResult, CompilerGlobals}, hierarchy::{TexCommand, Arg, ArgType, ArgList, Text, Node, NodeList, DocSection}, utils::{count_whitespace, delta_bracket_depth, is_bracket, untokenise, strip_all_whitespace}, bracket_depth::BrackDepths, feature_matrix::get_status_list};
-
+use crate::{
+    bracket_depth::BrackDepths,
+    feature_matrix::get_status_list,
+    hierachy_construction::{node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult},
+    hierarchy::{Arg, ArgList, ArgType, DocSection, Node, NodeList, TexCommand, Text},
+    token::*,
+    tokeniser::TokenList,
+    utils::{count_whitespace, delta_bracket_depth, is_bracket, strip_all_whitespace, untokenise},
+};
 
 pub mod var_definition;
-use crate::at_expression::*;
 use crate::ast::Ast;
-use var_definition::*;
+use crate::at_expression::*;
 use crate::typed_value::TypedValue;
+use var_definition::*;
 
 #[derive(Default)]
 pub struct LiaVariableParser {
@@ -20,30 +27,41 @@ pub struct LiaVariableParser {
 #[derive(Clone)]
 pub struct Function {
     name: String,
-    args: Vec<LiaVarName>
+    args: Vec<LiaVarName>,
 }
 
 #[derive(Default)]
 enum StatmentType {
     #[default]
     Read, // else
-    Call, // next_token = '('
-    Assign // next_token_no_white_space = '='
+    Call,   // next_token = '('
+    Assign, // next_token_no_white_space = '='
 }
 
 #[allow(unused)]
 impl NodeParser for LiaVariableParser {
-    fn is_opener(&mut self, token: &Token, identation: i32, other_doc_locations: &mut CompilerGlobals) -> bool {
+    fn is_opener(
+        &mut self,
+        token: &Token,
+        identation: i32,
+        other_doc_locations: &mut CompilerGlobals,
+    ) -> bool {
         self.statement_type = None;
         self.consuming_rest_of_line = false;
         self.trailing_whitespace = 0;
         match token {
-            Token::LiaVariable(_, _) => { true },
-            _ => { false }
+            Token::LiaVariable(_, _) => true,
+            _ => false,
         }
     }
 
-    fn is_closer(&mut self, token: &Token, next_token: &Token, next_token_no_white_space: &Token, bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(
+        &mut self,
+        token: &Token,
+        next_token: &Token,
+        next_token_no_white_space: &Token,
+        bracket_depths: &BrackDepths,
+    ) -> bool {
         if self.statement_type.is_none() {
             if let Token::Nothing(next_token, _) = next_token {
                 if next_token == "(" {
@@ -68,27 +86,44 @@ impl NodeParser for LiaVariableParser {
                 return false;
             } else {
                 match self.statement_type {
-                    Some(StatmentType::Read) => { return true; },
-                    Some(StatmentType::Call) => { return bracket_depths.round == 0 },
-                    Some(StatmentType::Assign) => { 
+                    Some(StatmentType::Read) => {
+                        return true;
+                    }
+                    Some(StatmentType::Call) => return bracket_depths.round == 0,
+                    Some(StatmentType::Assign) => {
                         return bracket_depths.curly == 0
-                        && match token {
-                            Token::Newline => { self.terminated_by_newline = true; true }
-                            Token::Nothing(t, _) => { if t == "}" { 
-                                self.consuming_rest_of_line = true;
-                                self.terminated_by_newline = false; false
-                            } else { false }},
-                            _ => { false }
-                        } 
-                    },
-                    None => { return true; }
+                            && match token {
+                                Token::Newline => {
+                                    self.terminated_by_newline = true;
+                                    true
+                                }
+                                Token::Nothing(t, _) => {
+                                    if t == "}" {
+                                        self.consuming_rest_of_line = true;
+                                        self.terminated_by_newline = false;
+                                        false
+                                    } else {
+                                        false
+                                    }
+                                }
+                                _ => false,
+                            }
+                    }
+                    None => {
+                        return true;
+                    }
                 }
             }
         }
         false
     }
 
-    fn parse (&mut self, tokens: TokenList, indentation_type: Option<IndentationType>, other_doc_locations: &mut CompilerGlobals) -> ParseResult {
+    fn parse(
+        &mut self,
+        tokens: TokenList,
+        indentation_type: Option<IndentationType>,
+        other_doc_locations: &mut CompilerGlobals,
+    ) -> ParseResult {
         let command = match &tokens[0] {
             Token::LiaVariable(command, loc) => { 
                     let command = &command[1..];
@@ -104,30 +139,54 @@ impl NodeParser for LiaVariableParser {
         // TODO: Check for legal name
 
         match self.statement_type {
-            Some(StatmentType::Read) => {
-                Ok((vec!{Rc::new( TexCommand {
+            Some(StatmentType::Read) => Ok((
+                vec![Rc::new(TexCommand {
                     command,
-                    args: vec![]
-                })}, DocSection::Document))
-            },
-            Some(StatmentType::Call) => {
-                Ok((vec!{Rc::new( TexCommand {
+                    args: vec![],
+                })],
+                DocSection::Document,
+            )),
+            Some(StatmentType::Call) => Ok((
+                vec![Rc::new(TexCommand {
                     command: command.clone(),
-                    args: split_call_args(&tokens, 2, tokens.len() - 1, other_doc_locations, is_defined_function(command, other_doc_locations.fucntions.clone()))?
-                })}, DocSection::Document))
-            },
+                    args: split_call_args(
+                        &tokens,
+                        2,
+                        tokens.len() - 1,
+                        other_doc_locations,
+                        is_defined_function(command, other_doc_locations.fucntions.clone()),
+                    )?,
+                })],
+                DocSection::Document,
+            )),
             Some(StatmentType::Assign) => {
                 if command == "LIAVERSION" {
-                    other_doc_locations.feature_status_list = get_status_list(&strip_all_whitespace(untokenise(&tokens).split('=').last().unwrap()))?;
+                    other_doc_locations.feature_status_list = get_status_list(
+                        &strip_all_whitespace(untokenise(&tokens).split('=').last().unwrap()),
+                    )?;
                     Ok((vec![], DocSection::Document))
                 } else {
-                    Ok((vec!{parse_var_declaration(command, &tokens, self.terminated_by_newline, other_doc_locations, self.trailing_whitespace)?, Rc::new(Text { text: "\n".to_string() })}
-                    , DocSection::Declarations))
+                    Ok((
+                        vec![
+                            parse_var_declaration(
+                                command,
+                                &tokens,
+                                self.terminated_by_newline,
+                                other_doc_locations,
+                                self.trailing_whitespace,
+                            )?,
+                            Rc::new(Text {
+                                text: "\n".to_string(),
+                            }),
+                        ],
+                        DocSection::Declarations,
+                    ))
                 }
-            },
-            None => { todo!() }
+            }
+            None => {
+                todo!()
+            }
         }
-
     }
 }
 
@@ -140,8 +199,13 @@ fn is_defined_function(name: String, functions: Vec<Function>) -> Option<Functio
     None
 }
 
-fn split_call_args(tokens: &TokenList, start: usize, end: usize, 
-    other_doc_locations: &mut CompilerGlobals, function: Option<Function>) -> Result<Vec<Arg>, String> {
+fn split_call_args(
+    tokens: &TokenList,
+    start: usize,
+    end: usize,
+    other_doc_locations: &mut CompilerGlobals,
+    function: Option<Function>,
+) -> Result<Vec<Arg>, String> {
     let mut args: ArgList = Vec::new();
     let mut tokens_buffer: TokenList = Vec::new();
     let mut str_args: Vec<Token> = Vec::new();
@@ -151,13 +215,20 @@ fn split_call_args(tokens: &TokenList, start: usize, end: usize,
                 if t == "," {
                     let len = tokens_buffer.len();
                     //let whitespace = count_whitespace(&tokens_buffer, 0);
-                    append_arg(&mut args, &tokens_buffer, len, other_doc_locations, tokens, &mut str_args)?;
+                    append_arg(
+                        &mut args,
+                        &tokens_buffer,
+                        len,
+                        other_doc_locations,
+                        tokens,
+                        &mut str_args,
+                    )?;
 
                     tokens_buffer = Vec::new();
                 } else {
                     tokens_buffer.push(tokens[i].clone());
                 }
-            },
+            }
             _ => {
                 tokens_buffer.push(tokens[i].clone());
             }
@@ -165,29 +236,61 @@ fn split_call_args(tokens: &TokenList, start: usize, end: usize,
     }
     let len = tokens_buffer.len();
     if len > 0 {
-        append_arg(&mut args, &tokens_buffer, len, other_doc_locations, tokens, &mut str_args)?;
+        append_arg(
+            &mut args,
+            &tokens_buffer,
+            len,
+            other_doc_locations,
+            tokens,
+            &mut str_args,
+        )?;
     }
     if function.is_some() {
         let function = function.unwrap();
 
         // TODO: Not this.
-        let a: Vec<LiaVarName> = function.clone().args.into_iter().filter(|f| {
-            if let LiaVarName::Lamda(_) = f { true } else { false }
-        }).collect();
-        let b: Vec<LiaVarName> = function.clone().args.into_iter().filter(|f| {
-            if let LiaVarName::Lamda(_) = f { false } else { true }
-        }).collect();
+        let a: Vec<LiaVarName> = function
+            .clone()
+            .args
+            .into_iter()
+            .filter(|f| {
+                if let LiaVarName::Lamda(_) = f {
+                    true
+                } else {
+                    false
+                }
+            })
+            .collect();
+        let b: Vec<LiaVarName> = function
+            .clone()
+            .args
+            .into_iter()
+            .filter(|f| {
+                if let LiaVarName::Lamda(_) = f {
+                    false
+                } else {
+                    true
+                }
+            })
+            .collect();
         let args_to_parse_in = to_typed_values(str_args)?;
         if args.len() != b.len() {
-            return Err(format!("{} Function {} takes {} arguments, but {} were given.", 
-            tokens[0].get_location().stringify(), 
-            function.name, b.len(), args.len()));
+            return Err(format!(
+                "{} Function {} takes {} arguments, but {} were given.",
+                tokens[0].get_location().stringify(),
+                function.name,
+                b.len(),
+                args.len()
+            ));
         }
         for i in 0..args.len() {
             if !args_to_parse_in[i].matches_declaration_type(&b[i]) {
-                return Err(format!("{} Recieved mismatched types for argument {} of function {}.", 
-                tokens[0].get_location().stringify(), 
-                i + 1, function.name));
+                return Err(format!(
+                    "{} Recieved mismatched types for argument {} of function {}.",
+                    tokens[0].get_location().stringify(),
+                    i + 1,
+                    function.name
+                ));
             }
         }
         let mut errs: Vec<String> = Vec::new();
@@ -195,12 +298,16 @@ fn split_call_args(tokens: &TokenList, start: usize, end: usize,
             if let LiaVarName::Lamda(l) = f {
                 args.push(Arg {
                     arg_type: ArgType::Curly,
-                    arg: vec!{Rc::new( Text { text:
-                        match l.evaluate(&args_to_parse_in, "Failed for run @() expression.") {
+                    arg: vec![Rc::new(Text {
+                        text: match l.evaluate(&args_to_parse_in, "Failed for run @() expression.")
+                        {
                             Ok(r) => r.stringify(),
-                            Err(e) => { errs.push(e); "".to_string() }
-                        }
-                    })}
+                            Err(e) => {
+                                errs.push(e);
+                                "".to_string()
+                            }
+                        },
+                    })],
                 });
             }
         });
@@ -211,50 +318,75 @@ fn split_call_args(tokens: &TokenList, start: usize, end: usize,
     Ok(args)
 }
 
-fn append_arg(args: &mut Vec<Arg>, tokens_buffer: &Vec<Token>, len: usize, 
-    other_doc_locations: &mut CompilerGlobals, tokens: &Vec<Token>, 
-    str_args: &mut Vec<Token>) -> Result<(), String> {
+fn append_arg(
+    args: &mut Vec<Arg>,
+    tokens_buffer: &Vec<Token>,
+    len: usize,
+    other_doc_locations: &mut CompilerGlobals,
+    tokens: &Vec<Token>,
+    str_args: &mut Vec<Token>,
+) -> Result<(), String> {
     args.push(Arg {
         arg_type: ArgType::Curly,
-        arg: node_list(tokens_buffer.clone(), 0, len, other_doc_locations)?
+        arg: node_list(tokens_buffer.clone(), 0, len, other_doc_locations)?,
     });
     let mut ws = count_whitespace(tokens, 0);
-    if ws > len - 1 { ws = len - 1 }
+    if ws > len - 1 {
+        ws = len - 1
+    }
     let a = &tokens_buffer[ws];
     str_args.push(a.clone());
     Ok(())
 }
 
-fn to_typed_values (args: Vec<Token>) -> Result<Vec<TypedValue>, String> {
+fn to_typed_values(args: Vec<Token>) -> Result<Vec<TypedValue>, String> {
     let mut err: Option<String> = None;
-    let args = args.into_iter().filter_map(|a| {
-        match a {
-            Token::Nothing(t, _) => { Some(string_to_typed_value(t).unwrap()) },
-            _ => { err = Some(format!{"{} Tried to pass an illegal argument.", a.get_location().stringify()}); None }
-        }
-    }).collect();
+    let args = args
+        .into_iter()
+        .filter_map(|a| match a {
+            Token::Nothing(t, _) => Some(string_to_typed_value(t).unwrap()),
+            _ => {
+                err = Some(
+                    format! {"{} Tried to pass an illegal argument.", a.get_location().stringify()},
+                );
+                None
+            }
+        })
+        .collect();
     match err {
         Some(e) => Err(e),
-        None => Ok(args)
+        None => Ok(args),
     }
 }
 
-fn parse_var_declaration(command: String, tokens: &TokenList,
-    terminated_by_newline: bool, other_doc_locations: &mut CompilerGlobals, trailing_whitespace: usize) -> Result<Rc<dyn Node>, String> {
-    Ok(Rc::new( TexCommand {
+fn parse_var_declaration(
+    command: String,
+    tokens: &TokenList,
+    terminated_by_newline: bool,
+    other_doc_locations: &mut CompilerGlobals,
+    trailing_whitespace: usize,
+) -> Result<Rc<dyn Node>, String> {
+    Ok(Rc::new(TexCommand {
         command: "newcommand".to_string(),
         args: match find_nothing_token(tokens, "=>") {
             None => {
                 // There was no =>, so it is a const declaration.
-                const_declaration_args(command, &tokens, terminated_by_newline, other_doc_locations)?
-            },
+                const_declaration_args(
+                    command,
+                    &tokens,
+                    terminated_by_newline,
+                    other_doc_locations,
+                )?
+            }
             Some(arrow_pos) => {
-
                 let spl = tokens.split_at(arrow_pos);
                 let mut lia_variables: Vec<LiaVarName> = parse_fn_declaration_lhs(spl.0.to_vec())?;
-                
-                let function_inner: NodeList = parse_fn_declaration_rhs(spl.1[0..(spl.1.len() - trailing_whitespace)].to_vec(),
-                &mut lia_variables, other_doc_locations)?;
+
+                let function_inner: NodeList = parse_fn_declaration_rhs(
+                    spl.1[0..(spl.1.len() - trailing_whitespace)].to_vec(),
+                    &mut lia_variables,
+                    other_doc_locations,
+                )?;
                 let len = lia_variables.len();
                 other_doc_locations.fucntions.push(Function {
                     name: command.clone(),
@@ -262,28 +394,32 @@ fn parse_var_declaration(command: String, tokens: &TokenList,
                 });
                 function_declaration_args(command, len, function_inner)
             }
-        }
+        },
     }))
 }
 
-fn function_declaration_args (command: String, argc: usize, fn_contents: NodeList) -> ArgList {
+fn function_declaration_args(command: String, argc: usize, fn_contents: NodeList) -> ArgList {
     vec![
         Arg {
             arg_type: ArgType::Curly,
-            arg: vec![Rc::new(Text { text: format!{"\\{}", command} })]
+            arg: vec![Rc::new(Text {
+                text: format! {"\\{}", command},
+            })],
         },
         Arg {
             arg_type: ArgType::Square,
-            arg: vec![Rc::new(Text { text: argc.to_string() })]
+            arg: vec![Rc::new(Text {
+                text: argc.to_string(),
+            })],
         },
         Arg {
             arg_type: ArgType::CurlyMultiline,
-            arg: fn_contents
-        }
+            arg: fn_contents,
+        },
     ]
 }
 
-fn find_nothing_token (haystack: &TokenList, needle: &str) -> Option<usize> {
+fn find_nothing_token(haystack: &TokenList, needle: &str) -> Option<usize> {
     for (i, t) in haystack.iter().enumerate() {
         if let Token::Nothing(t, _) = t {
             if t == needle {
@@ -294,19 +430,32 @@ fn find_nothing_token (haystack: &TokenList, needle: &str) -> Option<usize> {
     None
 }
 
-fn const_declaration_args(command: String, tokens: &TokenList, terminated_by_newline: bool, other_doc_locations: &mut CompilerGlobals) -> Result<ArgList, String> {
-    let mut ret = vec![
-        Arg {
-            arg_type: ArgType::Curly,
-            arg: vec![Rc::new(Text { text: format!{"\\{}", command} })]
-        }
-    ];
+fn const_declaration_args(
+    command: String,
+    tokens: &TokenList,
+    terminated_by_newline: bool,
+    other_doc_locations: &mut CompilerGlobals,
+) -> Result<ArgList, String> {
+    let mut ret = vec![Arg {
+        arg_type: ArgType::Curly,
+        arg: vec![Rc::new(Text {
+            text: format! {"\\{}", command},
+        })],
+    }];
     let equal_oper_pos = count_whitespace(tokens, 0);
     let content_pos = equal_oper_pos + count_whitespace(tokens, equal_oper_pos);
     ret.push(Arg {
         arg_type: ArgType::Curly,
-        arg: node_list(tokens.to_vec(), content_pos, if terminated_by_newline 
-        { tokens.len() - 1} else { tokens.len() }, other_doc_locations)?
+        arg: node_list(
+            tokens.to_vec(),
+            content_pos,
+            if terminated_by_newline {
+                tokens.len() - 1
+            } else {
+                tokens.len()
+            },
+            other_doc_locations,
+        )?,
     });
     Ok(ret)
 }
@@ -316,12 +465,15 @@ fn parse_fn_declaration_lhs(tokens: TokenList) -> Result<Vec<LiaVarName>, String
     let mut brack_depth = BrackDepths::default();
     let mut sleep = 0;
     for i in 1..tokens.len() {
-        if sleep > 0 { sleep -= 1; continue; }
+        if sleep > 0 {
+            sleep -= 1;
+            continue;
+        }
         let t = &tokens[i];
         brack_depth += delta_bracket_depth(&t);
         let mut type_annotation = "Any".to_string();
         match extract_type_annotation(&tokens, i) {
-            None => {},
+            None => {}
             Some((ta, s)) => {
                 type_annotation = ta;
                 sleep = s;
@@ -329,28 +481,42 @@ fn parse_fn_declaration_lhs(tokens: TokenList) -> Result<Vec<LiaVarName>, String
         }
         match t {
             Token::LiaVariable(var, loc) => {
-                ret.push(to_typed_var_name(var[1..].to_string(), type_annotation, loc)?);
-            },
+                ret.push(to_typed_var_name(
+                    var[1..].to_string(),
+                    type_annotation,
+                    loc,
+                )?);
+            }
             Token::Nothing(t, loc) => {
                 if t != "," && t != "=" && !is_bracket(t.chars().next().unwrap()) {
                     ret.push(to_typed_var_name(t.clone(), type_annotation, loc)?);
                 }
-            },
+            }
             _ => {}
         }
     }
     if !brack_depth.is_zero() {
-        return Err(format!{"{} Unbalanced brackets. Aborted.", tokens[0].get_location().stringify()});
+        return Err(
+            format! {"{} Unbalanced brackets. Aborted.", tokens[0].get_location().stringify()},
+        );
     }
     Ok(ret)
 }
 
 fn extract_type_annotation(tokens: &Vec<Token>, i: usize) -> Option<(String, usize)> {
     let ws = count_whitespace(tokens, i) + i;
-    if let Token::Nothing(t, _) = &tokens[if ws < tokens.len() { ws } else { tokens.len() - 1 }] {
+    if let Token::Nothing(t, _) = &tokens[if ws < tokens.len() {
+        ws
+    } else {
+        tokens.len() - 1
+    }] {
         if t == ":" {
             let ws = count_whitespace(tokens, ws) + ws;
-            if let Token::Nothing(t, _) = &tokens[if ws < tokens.len() { ws } else { tokens.len() - 1 }] {
+            if let Token::Nothing(t, _) = &tokens[if ws < tokens.len() {
+                ws
+            } else {
+                tokens.len() - 1
+            }] {
                 return Some((t.to_string(), ws - i));
             }
         }
@@ -358,8 +524,11 @@ fn extract_type_annotation(tokens: &Vec<Token>, i: usize) -> Option<(String, usi
     None
 }
 
-fn parse_fn_declaration_rhs(tokens: TokenList, lia_variables: &mut Vec<LiaVarName>, 
-    other_doc_locations: &mut CompilerGlobals) -> Result<NodeList, String> {
+fn parse_fn_declaration_rhs(
+    tokens: TokenList,
+    lia_variables: &mut Vec<LiaVarName>,
+    other_doc_locations: &mut CompilerGlobals,
+) -> Result<NodeList, String> {
     let start = count_whitespace(&tokens, 2) + 2;
     let mut in_at_expression = false;
     let mut in_string_literal = false;
@@ -368,86 +537,87 @@ fn parse_fn_declaration_rhs(tokens: TokenList, lia_variables: &mut Vec<LiaVarNam
     let mut at_buf: TokenList = Vec::new();
     let mut errors: Vec<String> = Vec::new();
     let mut did_error = false;
-    let tokens: TokenList = tokens.clone().into_iter().filter_map(|t| -> Option<Token> {
-        if in_at_expression {
-            brack_depth += delta_bracket_depth(&t);
-            if in_string_literal {
-                match t {
-                    Token::Nothing(ref t, loc) => {
-                        if t.ends_with('"') {
-                            in_string_literal = false;
-                            string_literal_buffer.push_str(t);
-                            at_buf.push(Token::Nothing(string_literal_buffer.clone(), loc));
-                            string_literal_buffer = String::new();
-                        } else {
-                            string_literal_buffer.push_str(t.as_str());
-                        }
-                    },
-                    Token::Whitespace(ref ws) => {
-                        string_literal_buffer.push_str(ws.as_str());
-                    },
-                    _ => {}
-                }
-                return None;
-            } else {
-                return match t {
-                    Token::Nothing(t, loc) => {
-                        if t.chars().into_iter().next() == Some('"') && !(t.ends_with('"') && t.len() > 1) {
-                            in_string_literal = true;
-                            string_literal_buffer.push_str(&t);
-                            return None;
-                        }
-                        if t == ")" && brack_depth.round == 0 {
-                            
-                            in_at_expression = false;
-                            lia_variables.push(LiaVarName::Lamda(match parse_at_exprssion(&at_buf, lia_variables.clone()) {
-                                Ok(a) => a,
-                                Err(e) => { errors.push(e); did_error = true; Ast::default() }
-                            }));
-                            at_buf = Vec::new();
-                            Some(Token::Nothing(
-                                format!{"#{}", lia_variables.len()},
-                                loc
-                            ))
-                        } else {
-                            if !(t == "(" && brack_depth.round == 1) {
-                                at_buf.push(Token::Nothing(
-                                    t,
-                                    loc
-                                ));
+    let tokens: TokenList = tokens
+        .clone()
+        .into_iter()
+        .filter_map(|t| -> Option<Token> {
+            if in_at_expression {
+                brack_depth += delta_bracket_depth(&t);
+                if in_string_literal {
+                    match t {
+                        Token::Nothing(ref t, loc) => {
+                            if t.ends_with('"') {
+                                in_string_literal = false;
+                                string_literal_buffer.push_str(t);
+                                at_buf.push(Token::Nothing(string_literal_buffer.clone(), loc));
+                                string_literal_buffer = String::new();
+                            } else {
+                                string_literal_buffer.push_str(t.as_str());
                             }
-                            None
                         }
-                        
-                    },
-                    _ => None
-                };
-            }
-        }
-        match t {
-            Token::LiaVariable(var, loc) => {
-                if var.len() == 1 {
-                    in_at_expression = true;
-                    return None;
-                }
-                for i in 0..lia_variables.len() {
-                    if lia_variables[i].matches_name(&var[1..]) {
-                        return Some(Token::Nothing(
-                            format!{"#{}", i + 1},
-                            loc
-                        ));
+                        Token::Whitespace(ref ws) => {
+                            string_literal_buffer.push_str(ws.as_str());
+                        }
+                        _ => {}
                     }
+                    return None;
+                } else {
+                    return match t {
+                        Token::Nothing(t, loc) => {
+                            if t.chars().into_iter().next() == Some('"')
+                                && !(t.ends_with('"') && t.len() > 1)
+                            {
+                                in_string_literal = true;
+                                string_literal_buffer.push_str(&t);
+                                return None;
+                            }
+                            if t == ")" && brack_depth.round == 0 {
+                                in_at_expression = false;
+                                lia_variables.push(LiaVarName::Lamda(
+                                    match parse_at_exprssion(&at_buf, lia_variables.clone()) {
+                                        Ok(a) => a,
+                                        Err(e) => {
+                                            errors.push(e);
+                                            did_error = true;
+                                            Ast::default()
+                                        }
+                                    },
+                                ));
+                                at_buf = Vec::new();
+                                Some(Token::Nothing(format! {"#{}", lia_variables.len()}, loc))
+                            } else {
+                                if !(t == "(" && brack_depth.round == 1) {
+                                    at_buf.push(Token::Nothing(t, loc));
+                                }
+                                None
+                            }
+                        }
+                        _ => None,
+                    };
                 }
-                Some(Token::LiaVariable(var, loc))
-            },
-            _ => Some(t)
-        }
-    }).collect();
+            }
+            match t {
+                Token::LiaVariable(var, loc) => {
+                    if var.len() == 1 {
+                        in_at_expression = true;
+                        return None;
+                    }
+                    for i in 0..lia_variables.len() {
+                        if lia_variables[i].matches_name(&var[1..]) {
+                            return Some(Token::Nothing(format! {"#{}", i + 1}, loc));
+                        }
+                    }
+                    Some(Token::LiaVariable(var, loc))
+                }
+                _ => Some(t),
+            }
+        })
+        .collect();
     if did_error {
         errors.push("Failed to parse @() expression. Aborted.".to_string());
         return Err(errors.join("\n"));
     }
-    
+
     // Bodge for when there is no whitespace between the curly bracket and the first token
     let mut start = start - 1;
     if let Token::Whitespace(_) = &tokens[start] {

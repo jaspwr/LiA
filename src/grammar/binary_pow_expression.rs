@@ -7,7 +7,7 @@ use crate::typed_value::TypedValue;
 use super::token_from_list;
 
 pub struct BinaryPowExpression {
-    children: (AtExpToken, AtExpToken)
+    children: (AtExpToken, AtExpToken),
 }
 
 impl AstNode for BinaryPowExpression {
@@ -33,7 +33,9 @@ impl AstNode for BinaryPowExpression {
                 panic!("BinaryAdditionOperator::codegen() called with non-AstNode token in right position.")
             }
         } else {
-            panic!("BinaryAdditionOperator::codegen() called with non-AstNode token in left position.")
+            panic!(
+                "BinaryAdditionOperator::codegen() called with non-AstNode token in left position."
+            )
         }
     }
 }
@@ -41,29 +43,31 @@ impl AstNode for BinaryPowExpression {
 impl BinaryPowExpression {
     fn operate(&self, lhs: TypedValue, rhs: TypedValue) -> Result<TypedValue, String> {
         match lhs {
-            TypedValue::Number(lhs) => {
-                match rhs {
-                    TypedValue::Number(rhs) => {
-                        Ok(TypedValue::Number(lhs.powf(rhs)))
-                    },
-                    _ => Err("Tried to raise an incompatible type to a power in @() expression.".to_string())
-                }
+            TypedValue::Number(lhs) => match rhs {
+                TypedValue::Number(rhs) => Ok(TypedValue::Number(lhs.powf(rhs))),
+                _ => Err(
+                    "Tried to raise an incompatible type to a power in @() expression.".to_string(),
+                ),
             },
-            _ => Err("Tried to raise to an incompatible type in @() expression".to_string())
+            _ => Err("Tried to raise to an incompatible type in @() expression".to_string()),
         }
     }
 }
 
 pub fn parse(tokens: &Vec<AtExpToken>, start: i32) -> Result<OpAstNode, String> {
-    if token_from_list(tokens, start).is_ast_node() &&
-    token_from_list(tokens, start + 1).is_opertor_or_keyword("^") && 
-    token_from_list(tokens, start + 2).is_ast_node() {
-        Ok(Some((Rc::new(BinaryPowExpression {
-            children: (
-                token_from_list(tokens, start),
-                token_from_list(tokens, start + 2)
-            )
-        }), 3)))
+    if token_from_list(tokens, start).is_ast_node()
+        && token_from_list(tokens, start + 1).is_opertor_or_keyword("^")
+        && token_from_list(tokens, start + 2).is_ast_node()
+    {
+        Ok(Some((
+            Rc::new(BinaryPowExpression {
+                children: (
+                    token_from_list(tokens, start),
+                    token_from_list(tokens, start + 2),
+                ),
+            }),
+            3,
+        )))
     } else {
         Ok(None)
     }

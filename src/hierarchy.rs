@@ -6,13 +6,13 @@ pub type ArgList = Vec<Arg>;
 pub struct Doc {
     pub imports: NodeList,
     pub declarations: NodeList,
-    pub document: NodeList
+    pub document: NodeList,
 }
 
 pub enum DocSection {
     Imports,
     Declarations,
-    Document
+    Document,
 }
 
 pub struct Text {
@@ -21,7 +21,7 @@ pub struct Text {
 
 pub struct TexCommand {
     pub command: String,
-    pub args: ArgList
+    pub args: ArgList,
 }
 
 pub struct TexEnvironment {
@@ -42,5 +42,5 @@ pub enum ArgType {
 
 pub struct Arg {
     pub arg: NodeList,
-    pub arg_type: ArgType
+    pub arg_type: ArgType,
 }

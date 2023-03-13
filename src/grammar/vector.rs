@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use crate::ast::{AstNode, OpAstNode};
-use crate::typed_value::TypedValue;
 use crate::at_expression::AtExpToken;
+use crate::typed_value::TypedValue;
 
 use super::token_from_list;
 
@@ -29,9 +29,7 @@ pub fn parse(tokens: &Vec<AtExpToken>, start: i32) -> Result<OpAstNode, String> 
     if token_from_list(tokens, start).is_opertor_or_keyword("[") {
         let mut end = start + 1;
         if token_from_list(tokens, start + 1).is_opertor_or_keyword("]") {
-            return Ok(Some((Rc::new(Vector_ {
-                children
-            }), 2)));
+            return Ok(Some((Rc::new(Vector_ { children }), 2)));
         }
         let len = tokens.len() as i32;
         while end < len {
@@ -44,9 +42,10 @@ pub fn parse(tokens: &Vec<AtExpToken>, start: i32) -> Result<OpAstNode, String> 
             if token_from_list(tokens, end).is_opertor_or_keyword(",") {
                 end += 1;
             } else if token_from_list(tokens, end).is_opertor_or_keyword("]") {
-                return Ok(Some((Rc::new(Vector_ {
-                    children
-                }), (end - start + 1) as usize)));
+                return Ok(Some((
+                    Rc::new(Vector_ { children }),
+                    (end - start + 1) as usize,
+                )));
             } else {
                 return Ok(None);
             }
@@ -57,7 +56,7 @@ pub fn parse(tokens: &Vec<AtExpToken>, start: i32) -> Result<OpAstNode, String> 
     }
 }
 
-fn codegen_row (children: &Vec<AtExpToken>) -> String {
+fn codegen_row(children: &Vec<AtExpToken>) -> String {
     let mut code = String::new();
     let mut first = true;
     let mut dont_add_ampersand = false;
@@ -75,7 +74,7 @@ fn codegen_row (children: &Vec<AtExpToken>) -> String {
                 if !first {
                     code.push_str(" \\\\ ");
                 }
-                let a = child_code[16..child_code.len()-14].to_string();
+                let a = child_code[16..child_code.len() - 14].to_string();
                 child_code = a.clone();
                 dont_add_ampersand = true;
             }

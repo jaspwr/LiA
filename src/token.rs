@@ -6,7 +6,7 @@ pub enum Token {
     LiaMarkDown(String, Location),
     Newline,
     Whitespace(String),
-    Nothing(String, Location)
+    Nothing(String, Location),
 }
 
 impl Token {
@@ -39,7 +39,7 @@ impl Token {
     pub fn is_newline(&self) -> bool {
         match self {
             Token::Newline => true,
-            _ => false
+            _ => false,
         }
     }
 }

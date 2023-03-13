@@ -1,4 +1,4 @@
-use std::ops::{AddAssign, Add};
+use std::ops::{Add, AddAssign};
 
 #[derive(Default, Copy, Clone, PartialEq)]
 pub struct BrackDepths {

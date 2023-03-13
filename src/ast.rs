@@ -8,18 +8,22 @@ use super::typed_value::TypedValue;
 #[derive(Clone)]
 pub struct Ast {
     pub root_node: Option<DefAstNode>,
-    pub imported_values_count: usize
+    pub imported_values_count: usize,
 }
 
 impl Ast {
-    pub fn default () -> Ast {
+    pub fn default() -> Ast {
         Ast {
             root_node: None,
-            imported_values_count: 0
+            imported_values_count: 0,
         }
     }
 
-    pub fn construct (tokens: &Vec<AtExpToken>, imported_values_count: usize, general_error_message: &str) -> Result<Ast, String> {
+    pub fn construct(
+        tokens: &Vec<AtExpToken>,
+        imported_values_count: usize,
+        general_error_message: &str,
+    ) -> Result<Ast, String> {
         let mut tokens = tokens.clone();
         const STALE: u32 = 200;
         let mut i = 0;
@@ -34,12 +38,12 @@ impl Ast {
                             new_tokens.push(tokens[k].clone());
                         }
                         new_tokens.push(AtExpToken::AstNode(node));
-                        for k in j+len..tokens.len() {
+                        for k in j + len..tokens.len() {
                             new_tokens.push(tokens[k].clone());
                         }
                         tokens = new_tokens;
                         j += len;
-                    },
+                    }
                     None => {
                         j += 1;
                     }
@@ -52,37 +56,47 @@ impl Ast {
         }
         let root_node = match tokens[0] {
             AtExpToken::AstNode(ref node) => Some(node.clone()),
-            _ => None
+            _ => None,
         };
         Ok(Ast {
             root_node,
-            imported_values_count
+            imported_values_count,
         })
     }
 
-    pub fn evaluate (&self, imported_values: &Vec<TypedValue>, invalid_arg_count_message: &str) -> Result<TypedValue, String> {
+    pub fn evaluate(
+        &self,
+        imported_values: &Vec<TypedValue>,
+        invalid_arg_count_message: &str,
+    ) -> Result<TypedValue, String> {
         if imported_values.len() != self.imported_values_count {
-            return Err(format!("{} Expected {} arguments, got {}. Aborted",
-            invalid_arg_count_message,
-            self.imported_values_count, 
-            imported_values.len()));
+            return Err(format!(
+                "{} Expected {} arguments, got {}. Aborted",
+                invalid_arg_count_message,
+                self.imported_values_count,
+                imported_values.len()
+            ));
         }
         match self.root_node {
             Some(ref root) => Ok(root.evaluate(imported_values)?),
-            None => { return Err("Attempted to evaluate an empty AST".to_string()); }
+            None => {
+                return Err("Attempted to evaluate an empty AST".to_string());
+            }
         }
     }
 
-    pub fn codegen (&self) -> String {
+    pub fn codegen(&self) -> String {
         match self.root_node {
             Some(ref root) => root.codegen(),
-            None => { return "".to_string(); }
+            None => {
+                return "".to_string();
+            }
         }
     }
 }
 
-pub type OpAstNode = Option<(Rc::<dyn AstNode>, usize)>;
-pub type DefAstNode = Rc::<dyn AstNode>;
+pub type OpAstNode = Option<(Rc<dyn AstNode>, usize)>;
+pub type DefAstNode = Rc<dyn AstNode>;
 
 pub trait AstNode {
     fn evaluate(&self, imported_values: &Vec<TypedValue>) -> Result<TypedValue, String>;

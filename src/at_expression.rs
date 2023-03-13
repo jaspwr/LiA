@@ -1,45 +1,53 @@
 use crate::token::*;
 
-use crate::parser_modules::variables::var_definition::LiaVarName;
 use super::ast::*;
 use super::typed_value::TypedValue;
+use crate::parser_modules::variables::var_definition::LiaVarName;
 
-static OPERATORS_AND_KEYWORDS: [&str; 15] = ["+", "-", "*", "/", "%", "?", ":", "(", ")", "{", "}", "^", ",", "[", "]"];
+static OPERATORS_AND_KEYWORDS: [&str; 15] = [
+    "+", "-", "*", "/", "%", "?", ":", "(", ")", "{", "}", "^", ",", "[", "]",
+];
 
-pub fn parse_at_exprssion (tokens: &Vec<Token>, lia_variables: Vec<LiaVarName>) -> Result<Ast, String> {
-    let lia_variables = lia_variables.into_iter().filter(|v| {
-        if let LiaVarName::Lamda(_) = v {
-            false
-        } else {
-            true
-        }
-    }).collect();
+pub fn parse_at_exprssion(
+    tokens: &Vec<Token>,
+    lia_variables: Vec<LiaVarName>,
+) -> Result<Ast, String> {
+    let lia_variables = lia_variables
+        .into_iter()
+        .filter(|v| {
+            if let LiaVarName::Lamda(_) = v {
+                false
+            } else {
+                true
+            }
+        })
+        .collect();
     let mut errors: Vec<String> = Vec::new();
     let mut did_error = false;
-    let tokens: Vec<AtExpToken> = tokens.into_iter()
-    .map(|t| {
-        match AtExpToken::tokenise(t, &lia_variables) {
+    let tokens: Vec<AtExpToken> = tokens
+        .into_iter()
+        .map(|t| match AtExpToken::tokenise(t, &lia_variables) {
             Ok(t) => t,
             Err(e) => {
                 errors.push(e);
                 did_error = true;
                 AtExpToken::Error
             }
-        }
-    }).collect();
+        })
+        .collect();
     if did_error {
         return Err(errors.join("\n").to_string());
     }
     if tokens.len() == 0 {
         return Err("Found empty @() expression.".to_string());
     }
-    let ast = Ast::construct(&tokens,
+    let ast = Ast::construct(
+        &tokens,
         lia_variables.len(),
-        "Could not parse @() expression")?;
+        "Could not parse @() expression",
+    )?;
     Ok(ast)
 }
-
-
 
 #[derive(Clone)]
 pub enum AtExpToken {
@@ -48,46 +56,52 @@ pub enum AtExpToken {
     OperatorOrKeyword(String),
     AstNode(DefAstNode),
     Text(String),
-    Error
+    Error,
 }
 
 impl AtExpToken {
-    pub fn is_ast_node (&self) -> bool {
+    pub fn is_ast_node(&self) -> bool {
         match self {
             AtExpToken::AstNode(_) => true,
-            _ => false
+            _ => false,
         }
     }
 
-    pub fn is_opertor_or_keyword (&self, op: &str) -> bool {
+    pub fn is_opertor_or_keyword(&self, op: &str) -> bool {
         match self {
             AtExpToken::OperatorOrKeyword(_op) => op == _op,
-            _ => false
+            _ => false,
         }
     }
 }
 
 impl AtExpToken {
-    fn tokenise(token: &Token, imported_value_names: &Vec<LiaVarName>) -> Result<AtExpToken, String> {
+    fn tokenise(
+        token: &Token,
+        imported_value_names: &Vec<LiaVarName>,
+    ) -> Result<AtExpToken, String> {
         match token {
             Token::Nothing(t, loc) => {
                 let first_char = t.chars().next().unwrap();
                 if first_char.is_numeric() {
-                    return Ok(parse_numerical_literal(t.clone(), *loc)?)
+                    return Ok(parse_numerical_literal(t.clone(), *loc)?);
                 } else if first_char == '"' {
-                    return Ok(AtExpToken::Literal(
-                        TypedValue::String(t[1..t.len()-1].to_string())
-                    ));
+                    return Ok(AtExpToken::Literal(TypedValue::String(
+                        t[1..t.len() - 1].to_string(),
+                    )));
                 }
                 for op in OPERATORS_AND_KEYWORDS {
                     if t == op {
                         return Ok(AtExpToken::OperatorOrKeyword(t.to_string()));
                     }
                 }
-            },
-            _ => panic!("Unexpected token in @() expression.")
+            }
+            _ => panic!("Unexpected token in @() expression."),
         }
-        return Ok(AtExpToken::Identifier(get_imported_value_index(token.clone(), imported_value_names)?));
+        return Ok(AtExpToken::Identifier(get_imported_value_index(
+            token.clone(),
+            imported_value_names,
+        )?));
     }
 }
 
@@ -99,14 +113,21 @@ pub fn string_to_typed_value(s: String) -> Result<TypedValue, String> {
     }
 }
 
-pub fn parse_numerical_literal (s: String, loc: Location) -> Result<AtExpToken, String> {
+pub fn parse_numerical_literal(s: String, loc: Location) -> Result<AtExpToken, String> {
     match s.parse::<f64>() {
         Ok(n) => Ok(AtExpToken::Literal(TypedValue::Number(n))),
-        Err(_) => Err(format!("{} Invalid syntanx in @(), \"{}\".", loc.stringify(), s))
+        Err(_) => Err(format!(
+            "{} Invalid syntanx in @(), \"{}\".",
+            loc.stringify(),
+            s
+        )),
     }
 }
 
-fn get_imported_value_index(token: Token, imported_value_names: &Vec<LiaVarName>) -> Result<usize, String> {
+fn get_imported_value_index(
+    token: Token,
+    imported_value_names: &Vec<LiaVarName>,
+) -> Result<usize, String> {
     match token {
         Token::Nothing(t, loc) => {
             for i in 0..imported_value_names.len() {
@@ -114,13 +135,23 @@ fn get_imported_value_index(token: Token, imported_value_names: &Vec<LiaVarName>
                     return Ok(i);
                 }
             }
-            Err(format!("{} No value with name \"{}\" in @() found.", loc.stringify(), t))
-        },
-        _ => { panic!("Unexpected token in @() expression.") }
+            Err(format!(
+                "{} No value with name \"{}\" in @() found.",
+                loc.stringify(),
+                t
+            ))
+        }
+        _ => {
+            panic!("Unexpected token in @() expression.")
+        }
     }
 }
 
-pub fn to_typed_var_name(name: String, type_annotation: String, location: &Location) -> Result<LiaVarName, String> {
+pub fn to_typed_var_name(
+    name: String,
+    type_annotation: String,
+    location: &Location,
+) -> Result<LiaVarName, String> {
     match type_annotation.as_str() {
         "Number" | "num" => Ok(LiaVarName::Number(name)),
         "String" | "txt" => Ok(LiaVarName::String(name)),
@@ -128,6 +159,8 @@ pub fn to_typed_var_name(name: String, type_annotation: String, location: &Locat
         "Colour" | "Color" | "col" => Ok(LiaVarName::Colour(name)),
         "Lamda" | "fn" | "λ" => Ok(LiaVarName::Lamda(Ast::default())),
         "Any" => Ok(LiaVarName::Any(name)),
-        _ => Err(format!{"{} Unknown type \"{}\". Aborted.", location.stringify(), type_annotation}),
+        _ => {
+            Err(format! {"{} Unknown type \"{}\". Aborted.", location.stringify(), type_annotation})
+        }
     }
 }

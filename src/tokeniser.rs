@@ -1,4 +1,4 @@
-use crate::{utils::*, token::*};
+use crate::{token::*, utils::*};
 
 #[derive(PartialEq)]
 enum CharGroup {
@@ -8,20 +8,19 @@ enum CharGroup {
     Bracket,
 }
 
-fn classify_char (c: &char) -> CharGroup {
+fn classify_char(c: &char) -> CharGroup {
     match c {
         ' ' | '\t' | '\n' | '\r' | '\x0C' | '\x0B' => CharGroup::Whitespace,
         '(' | ')' | '{' | '}' | '[' | ']' => CharGroup::Bracket,
-        '=' | '>' | ',' | '#' | '*' | ':' | '%' |
-        '<' | '~' | '!' |
-        ';' | '+' | '-' | '/' | '^' | '_' | '$' => CharGroup::Symbol,
+        '=' | '>' | ',' | '#' | '*' | ':' | '%' | '<' | '~' | '!' | ';' | '+' | '-' | '/' | '^'
+        | '_' | '$' => CharGroup::Symbol,
         _ => CharGroup::String,
     }
 }
 
 pub type TokenList = Vec<Token>;
 
-pub fn to_tokens (input_lia: String) -> TokenList {
+pub fn to_tokens(input_lia: String) -> TokenList {
     // TODO: Refactor to be less hard coded for the specific use case.
 
     let mut ret = Vec::<Token>::new();
@@ -33,26 +32,33 @@ pub fn to_tokens (input_lia: String) -> TokenList {
     let mut start_of_token = Location::default();
     let mut pre_c = ' ';
     input_lia.chars().for_each(|c| {
-        if c == '\r' { return; }
+        if c == '\r' {
+            return;
+        }
         if c == '\n' {
-            line += 1; column = 1;
+            line += 1;
+            column = 1;
             let token = parse_token(&current_token, first_of_line, Location { line, column });
             ret.push(token);
             start_new_token(&mut start_of_token, line, column, &mut current_token);
-            ret.push(Token::Newline); 
+            ret.push(Token::Newline);
             first_of_line = true;
             return;
         }
         let char_group = classify_char(&c);
         if (char_group != pre_char_group
             || pre_char_group == CharGroup::Bracket
-            || c == '\\' || c == '@')
-            && pre_c != '\\' {
+            || c == '\\'
+            || c == '@')
+            && pre_c != '\\'
+        {
             if !current_token.is_empty() {
                 let token = parse_token(&current_token, first_of_line, start_of_token);
                 match token {
-                    Token::Whitespace(_) => {},
-                    _ => { first_of_line = false; }
+                    Token::Whitespace(_) => {}
+                    _ => {
+                        first_of_line = false;
+                    }
                 };
                 start_new_token(&mut start_of_token, line, column, &mut current_token);
                 ret.push(token);
@@ -69,15 +75,20 @@ pub fn to_tokens (input_lia: String) -> TokenList {
     ret
 }
 
-fn start_new_token(start_of_token: &mut Location, line: usize, column: usize, current_token: &mut String) {
+fn start_new_token(
+    start_of_token: &mut Location,
+    line: usize,
+    column: usize,
+    current_token: &mut String,
+) {
     *start_of_token = Location { line, column };
     current_token.clear();
 }
 
-fn parse_token (token: &String, begins_line: bool, location: Location) -> Token {
+fn parse_token(token: &String, begins_line: bool, location: Location) -> Token {
     let last = match token.chars().last() {
-        Some(c) => { c },
-        None => { ' ' }
+        Some(c) => c,
+        None => ' ',
     };
     if begins_line {
         if token.starts_with("#") {

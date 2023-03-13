@@ -1,11 +1,11 @@
 use std::rc::Rc;
 
 use crate::ast::{AstNode, OpAstNode};
-use crate::typed_value::TypedValue;
 use crate::at_expression::AtExpToken;
+use crate::typed_value::TypedValue;
 
 pub struct ImportedValue {
-    index: usize
+    index: usize,
 }
 
 impl AstNode for ImportedValue {

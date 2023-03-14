@@ -34,7 +34,7 @@ impl NodeParser for LiaEnvParser {
         bracket_depths: &BrackDepths,
     ) -> bool {
         match token {
-            Token::Nothing(t, _) => t == "}" && bracket_depths.curly == 0,
+            Token::Misc(t, _) => t == "}" && bracket_depths.curly == 0,
             _ => false,
         }
     }
@@ -55,7 +55,7 @@ impl NodeParser for LiaEnvParser {
             }
         }
         let command = match &tokens[command_pos] {
-            Token::Nothing(command, _) => command,
+            Token::Misc(command, _) => command,
             _ => {
                 return format_error_string(
                     "Unexpected token in environment statement. Aborted".to_string(),
@@ -68,7 +68,7 @@ impl NodeParser for LiaEnvParser {
         while command_pos < len {
             if let Token::Whitespace(_) = &tokens[command_pos] {
                 command_pos += 1;
-            } else if let Token::Nothing(t, loc) = &tokens[command_pos] {
+            } else if let Token::Misc(t, loc) = &tokens[command_pos] {
                 if t == "{" {
                     break;
                 } else {

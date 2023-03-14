@@ -44,7 +44,7 @@ impl NodeParser for LiaMardownEnumListParser {
             }
         }
         match token {
-            Token::Nothing(text, _) => {
+            Token::Misc(text, _) => {
                 if is_list_number(text.to_string()) {
                     self.initial_indentation_depth = identation as usize;
                     true
@@ -66,7 +66,7 @@ impl NodeParser for LiaMardownEnumListParser {
         bracket_depths.curly == 0
             && match token {
                 Token::Newline => match next_token_no_white_space {
-                    Token::Nothing(text, _) => {
+                    Token::Misc(text, _) => {
                         !is_list_number(next_token_no_white_space.stringify())
                     }
                     _ => true,
@@ -91,7 +91,7 @@ impl NodeParser for LiaMardownEnumListParser {
                 count_indentation(&tokens, i, &mut indentation, &mut indentation_type);
             }
             match &tokens[i] {
-                Token::Nothing(t, loc) => {
+                Token::Misc(t, loc) => {
                     if is_list_number(t.to_string()) {
                         if let Some(value) = list_item(
                             &mut item_count,
@@ -179,17 +179,17 @@ fn append_opener(inner_nodes: &mut Vec<Token>) {
         "\\begin".to_string(),
         Location::default(),
     ));
-    inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("enumerate".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("{".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("enumerate".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("}".to_string(), Location::default()));
     inner_nodes.push(Token::Newline);
 }
 
 fn append_closer(inner_nodes: &mut Vec<Token>) {
     inner_nodes.push(Token::TexCommand("\\end".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("enumerate".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("{".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("enumerate".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("}".to_string(), Location::default()));
     inner_nodes.push(Token::Newline);
 }
 

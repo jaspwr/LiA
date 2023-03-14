@@ -51,7 +51,7 @@ impl NodeParser for LiaUseParser {
         let mut start = 1;
         while start < len {
             match &tokens[start] {
-                Token::Nothing(sym, _) => {
+                Token::Misc(sym, _) => {
                     if sym == "," {
                         imports.push(parse_to_args(
                             tokens.clone(),
@@ -105,7 +105,7 @@ fn parse_to_args(
             if end + 1 >= len {
                 break;
             }
-            if let Token::Nothing(s, _) = &tokens[end + 1] {
+            if let Token::Misc(s, _) = &tokens[end + 1] {
                 if s == "[" || s == "{" {
                     end += 1;
                     continue;

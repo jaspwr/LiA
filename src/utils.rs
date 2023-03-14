@@ -70,7 +70,7 @@ pub fn parse_args(
 
 pub fn delta_bracket_depth(token: &Token) -> BrackDepths {
     let mut bracket_depths = BrackDepths::default();
-    if let Token::Nothing(str, _) = token {
+    if let Token::Misc(str, _) = token {
         if str == "{" {
             bracket_depths.curly += 1;
         } else if str == "}" {

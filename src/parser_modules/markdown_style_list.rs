@@ -156,16 +156,16 @@ fn append_opener(inner_nodes: &mut Vec<Token>) {
         "\\begin".to_string(),
         Location::default(),
     ));
-    inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("itemize".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("{".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("itemize".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("}".to_string(), Location::default()));
     inner_nodes.push(Token::Newline);
 }
 
 fn append_closer(inner_nodes: &mut Vec<Token>) {
     inner_nodes.push(Token::TexCommand("\\end".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("itemize".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("{".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("itemize".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("}".to_string(), Location::default()));
     inner_nodes.push(Token::Newline);
 }

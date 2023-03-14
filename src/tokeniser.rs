@@ -105,9 +105,11 @@ fn parse_token(token: &String, begins_line: bool, location: Location) -> Token {
         Token::Whitespace(token.clone())
     } else if token.as_str() == "env" {
         Token::LiaKeyword(token.clone(), location)
+    } else if token.as_str() == "jl" {
+        Token::LiaKeyword(token.clone(), location)
     } else if token.as_str() == "use" && begins_line {
         Token::LiaKeyword(token.clone(), location)
     } else {
-        Token::Nothing(token.clone(), location)
+        Token::Misc(token.clone(), location)
     }
 }

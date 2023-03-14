@@ -81,7 +81,7 @@ impl NodeParser for TexCommandParser {
                 bracket_depths.curly == 0
                     && bracket_depths.square == 0
                     && match next_token {
-                        Token::Nothing(t, _) => t != "{" && t != "[",
+                        Token::Misc(t, _) => t != "{" && t != "[",
                         Token::Newline => {
                             self.next = true;
                             false
@@ -89,7 +89,7 @@ impl NodeParser for TexCommandParser {
                         _ => true,
                     }
                     && match next_token_no_white_space {
-                        Token::Nothing(t, _) => {
+                        Token::Misc(t, _) => {
                             if t == "=" {
                                 // Needs to consume rest of line
                                 self.is_dec = true;
@@ -103,7 +103,7 @@ impl NodeParser for TexCommandParser {
             }
             EnvParsingState::BeginOpeningCurly => {
                 match token {
-                    Token::Nothing(t, _) => {
+                    Token::Misc(t, _) => {
                         if t == "{" {
                             self.env_parsing_state = EnvParsingState::BeginName
                         }
@@ -114,7 +114,7 @@ impl NodeParser for TexCommandParser {
             }
             EnvParsingState::BeginName => {
                 match token {
-                    Token::Nothing(t, _) => {
+                    Token::Misc(t, _) => {
                         self.env_name = t.clone();
                         self.env_parsing_state = EnvParsingState::BeginClosingCurly;
                     }
@@ -145,7 +145,7 @@ impl NodeParser for TexCommandParser {
             }
             EnvParsingState::EndName => {
                 match token {
-                    Token::Nothing(t, _) => {
+                    Token::Misc(t, _) => {
                         if t == &self.env_name {
                             self.env_parsing_state = EnvParsingState::EndClosingCurly;
                         }

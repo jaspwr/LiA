@@ -81,7 +81,7 @@ impl AtExpToken {
         imported_value_names: &Vec<LiaVarName>,
     ) -> Result<AtExpToken, String> {
         match token {
-            Token::Nothing(t, loc) => {
+            Token::Misc(t, loc) => {
                 let first_char = t.chars().next().unwrap();
                 if first_char.is_numeric() {
                     return Ok(parse_numerical_literal(t.clone(), *loc)?);
@@ -129,7 +129,7 @@ fn get_imported_value_index(
     imported_value_names: &Vec<LiaVarName>,
 ) -> Result<usize, String> {
     match token {
-        Token::Nothing(t, loc) => {
+        Token::Misc(t, loc) => {
             for i in 0..imported_value_names.len() {
                 if imported_value_names[i].matches_name(t.as_str()) {
                     return Ok(i);

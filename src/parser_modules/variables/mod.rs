@@ -63,12 +63,12 @@ impl NodeParser for LiaVariableParser {
         bracket_depths: &BrackDepths,
     ) -> bool {
         if self.statement_type.is_none() {
-            if let Token::Nothing(next_token, _) = next_token {
+            if let Token::Misc(next_token, _) = next_token {
                 if next_token == "(" {
                     self.statement_type = Some(StatmentType::Call);
                 }
             }
-            if let Token::Nothing(next_token_no_white_space, _) = next_token_no_white_space {
+            if let Token::Misc(next_token_no_white_space, _) = next_token_no_white_space {
                 if next_token_no_white_space == "=" {
                     self.statement_type = Some(StatmentType::Assign);
                 }
@@ -97,7 +97,7 @@ impl NodeParser for LiaVariableParser {
                                     self.terminated_by_newline = true;
                                     true
                                 }
-                                Token::Nothing(t, _) => {
+                                Token::Misc(t, _) => {
                                     if t == "}" {
                                         self.consuming_rest_of_line = true;
                                         self.terminated_by_newline = false;
@@ -211,7 +211,7 @@ fn split_call_args(
     let mut str_args: Vec<Token> = Vec::new();
     for i in start..end {
         match &tokens[i] {
-            Token::Nothing(t, _) => {
+            Token::Misc(t, _) => {
                 if t == "," {
                     let len = tokens_buffer.len();
                     //let whitespace = count_whitespace(&tokens_buffer, 0);
@@ -344,7 +344,7 @@ fn to_typed_values(args: Vec<Token>) -> Result<Vec<TypedValue>, String> {
     let args = args
         .into_iter()
         .filter_map(|a| match a {
-            Token::Nothing(t, _) => Some(string_to_typed_value(t).unwrap()),
+            Token::Misc(t, _) => Some(string_to_typed_value(t).unwrap()),
             _ => {
                 err = Some(
                     format! {"{} Tried to pass an illegal argument.", a.get_location().stringify()},
@@ -421,7 +421,7 @@ fn function_declaration_args(command: String, argc: usize, fn_contents: NodeList
 
 fn find_nothing_token(haystack: &TokenList, needle: &str) -> Option<usize> {
     for (i, t) in haystack.iter().enumerate() {
-        if let Token::Nothing(t, _) = t {
+        if let Token::Misc(t, _) = t {
             if t == needle {
                 return Some(i);
             }
@@ -487,7 +487,7 @@ fn parse_fn_declaration_lhs(tokens: TokenList) -> Result<Vec<LiaVarName>, String
                     loc,
                 )?);
             }
-            Token::Nothing(t, loc) => {
+            Token::Misc(t, loc) => {
                 if t != "," && t != "=" && !is_bracket(t.chars().next().unwrap()) {
                     ret.push(to_typed_var_name(t.clone(), type_annotation, loc)?);
                 }
@@ -505,14 +505,14 @@ fn parse_fn_declaration_lhs(tokens: TokenList) -> Result<Vec<LiaVarName>, String
 
 fn extract_type_annotation(tokens: &Vec<Token>, i: usize) -> Option<(String, usize)> {
     let ws = count_whitespace(tokens, i) + i;
-    if let Token::Nothing(t, _) = &tokens[if ws < tokens.len() {
+    if let Token::Misc(t, _) = &tokens[if ws < tokens.len() {
         ws
     } else {
         tokens.len() - 1
     }] {
         if t == ":" {
             let ws = count_whitespace(tokens, ws) + ws;
-            if let Token::Nothing(t, _) = &tokens[if ws < tokens.len() {
+            if let Token::Misc(t, _) = &tokens[if ws < tokens.len() {
                 ws
             } else {
                 tokens.len() - 1
@@ -545,11 +545,11 @@ fn parse_fn_declaration_rhs(
                 brack_depth += delta_bracket_depth(&t);
                 if in_string_literal {
                     match t {
-                        Token::Nothing(ref t, loc) => {
+                        Token::Misc(ref t, loc) => {
                             if t.ends_with('"') {
                                 in_string_literal = false;
                                 string_literal_buffer.push_str(t);
-                                at_buf.push(Token::Nothing(string_literal_buffer.clone(), loc));
+                                at_buf.push(Token::Misc(string_literal_buffer.clone(), loc));
                                 string_literal_buffer = String::new();
                             } else {
                                 string_literal_buffer.push_str(t.as_str());
@@ -563,7 +563,7 @@ fn parse_fn_declaration_rhs(
                     return None;
                 } else {
                     return match t {
-                        Token::Nothing(t, loc) => {
+                        Token::Misc(t, loc) => {
                             if t.chars().into_iter().next() == Some('"')
                                 && !(t.ends_with('"') && t.len() > 1)
                             {
@@ -584,10 +584,10 @@ fn parse_fn_declaration_rhs(
                                     },
                                 ));
                                 at_buf = Vec::new();
-                                Some(Token::Nothing(format! {"#{}", lia_variables.len()}, loc))
+                                Some(Token::Misc(format! {"#{}", lia_variables.len()}, loc))
                             } else {
                                 if !(t == "(" && brack_depth.round == 1) {
-                                    at_buf.push(Token::Nothing(t, loc));
+                                    at_buf.push(Token::Misc(t, loc));
                                 }
                                 None
                             }
@@ -604,7 +604,7 @@ fn parse_fn_declaration_rhs(
                     }
                     for i in 0..lia_variables.len() {
                         if lia_variables[i].matches_name(&var[1..]) {
-                            return Some(Token::Nothing(format! {"#{}", i + 1}, loc));
+                            return Some(Token::Misc(format! {"#{}", i + 1}, loc));
                         }
                     }
                     Some(Token::LiaVariable(var, loc))
@@ -622,7 +622,7 @@ fn parse_fn_declaration_rhs(
     let mut start = start - 1;
     if let Token::Whitespace(_) = &tokens[start] {
         start += 1;
-    } else if let Token::Nothing(t, _) = &tokens[start] {
+    } else if let Token::Misc(t, _) = &tokens[start] {
         if t == "{" {
             start += 1;
         }

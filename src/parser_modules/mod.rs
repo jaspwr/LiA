@@ -7,3 +7,4 @@ pub mod markdown_style_list;
 pub mod markdown_style_section;
 pub mod tex_command;
 pub mod variables;
+pub mod inline_julia;

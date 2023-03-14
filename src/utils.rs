@@ -11,7 +11,7 @@ use crate::{
     tokeniser::TokenList,
 };
 
-pub fn load_utf8_file(path: String) -> Result<String, std::io::Error> {
+pub fn load_utf8_file(path: &String) -> Result<String, std::io::Error> {
     let mut file = File::open(path)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;

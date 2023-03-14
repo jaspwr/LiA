@@ -1,22 +1,22 @@
-use std::{error::Error, num::ParseIntError};
+use std::{ error::Error, num::ParseIntError };
 
 use owo_colors::OwoColorize;
 
-use crate::utils::{load_utf8_file, write_utf8_file};
+use crate::{ utils::{ load_utf8_file, write_utf8_file }, cli::print_info };
 
 pub fn parse_version_string(version: &str) -> Result<(u8, u8, u8), String> {
     let mut version_spl = version.split(".");
     if version_spl.clone().count() != 3 {
-        return Err(format! {"Invalid version string \"{}\".", version});
+        return Err(format!("Invalid version string \"{}\".", version));
     }
     match try_ver_number_num_casts(&mut version_spl) {
         Ok(v) => Ok(v),
-        Err(_) => Err(format! {"Invalid version string \"{}\".", version}),
+        Err(_) => Err(format!("Invalid version string \"{}\".", version)),
     }
 }
 
 fn try_ver_number_num_casts(
-    version_spl: &mut std::str::Split<&str>,
+    version_spl: &mut std::str::Split<&str>
 ) -> Result<(u8, u8, u8), ParseIntError> {
     let major = version_spl.next().unwrap().parse::<u8>()?;
     let minor = version_spl.next().unwrap().parse::<u8>()?;
@@ -55,20 +55,16 @@ static CARGO_TOML_URL: &'static str =
     "https://raw.githubusercontent.com/jaspwr/LiA/main/Cargo.toml";
 
 pub fn check_for_new_version() -> Result<(), Box<dyn Error>> {
-    let path = home::home_dir()
-        .unwrap()
-        .join(CACHE_FILE)
-        .to_str()
-        .unwrap()
-        .to_string();
-    let f = match load_utf8_file(path.clone()) {
+    let path = home::home_dir().unwrap().join(CACHE_FILE).to_str().unwrap().to_string();
+    let f = match load_utf8_file(&path) {
         Ok(f) => f,
         Err(_) => "0\n0.0.0".to_string(),
     };
     let mut lines = f.lines();
     let last_ping = lines.next().unwrap().parse::<u64>()?;
     let last_version = lines.next().unwrap();
-    let current_time = std::time::SystemTime::now()
+    let current_time = std::time::SystemTime
+        ::now()
         .duration_since(std::time::UNIX_EPOCH)?
         .as_secs();
     if current_time - last_ping < 86400 {
@@ -79,7 +75,13 @@ pub fn check_for_new_version() -> Result<(), Box<dyn Error>> {
     if last_version != latest_version {
         let current_version = parse_version_string(env!("CARGO_PKG_VERSION"))?;
         if version_cmp(current_version, latest_version.as_str()) < 0 {
-            println!("[{}] There is a new version of LiA available at https://github.com/jaspwr/LiA. You are running {} and the latest is {}", "INFO".yellow(), env!("CARGO_PKG_VERSION"), latest_version);
+            print_info(
+                format!(
+                    "There is a new version of LiA available at https://github.com/jaspwr/LiA. You are running {} and the latest is {}",
+                    env!("CARGO_PKG_VERSION"),
+                    latest_version
+                )
+            );
         }
     }
     let _ = write_utf8_file(path, format!("{}\n{}", current_time, latest_version));
@@ -88,12 +90,5 @@ pub fn check_for_new_version() -> Result<(), Box<dyn Error>> {
 
 fn fetch_latest_version_string() -> Result<String, Box<dyn Error>> {
     let resp = reqwest::blocking::get(CARGO_TOML_URL)?.text()?;
-    Ok(resp
-        .split("version = \"")
-        .nth(1)
-        .unwrap()
-        .split("\"")
-        .next()
-        .unwrap()
-        .to_string())
+    Ok(resp.split("version = \"").nth(1).unwrap().split("\"").next().unwrap().to_string())
 }

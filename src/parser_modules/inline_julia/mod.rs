@@ -77,7 +77,7 @@ impl NodeParser for InlineJulia {
         print!("\n");
 
         let text_node = Rc::new(Text {
-            text: execute(jl_code)?,
+            text: execute(jl_code, other_doc_locations)?,
         });
 
         Ok((

@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
+use crate::compiler::Job;
 use crate::feature_matrix::get_status_list;
 use crate::feature_matrix::FeatureStatusList;
 use crate::hierarchy::*;
@@ -25,11 +26,13 @@ pub struct CompilerGlobals {
     decs: NodeList,
     pub fucntions: Vec<Function>,
     pub feature_status_list: FeatureStatusList,
+    pub job: Job,
 }
 
-pub fn contruct_doc(tokens: TokenList) -> Result<Doc, String> {
+pub fn contruct_doc(tokens: TokenList, job: Job) -> Result<Doc, String> {
     let len = tokens.len();
     let mut other_doc_locations = CompilerGlobals::default();
+    other_doc_locations.job = job;
     other_doc_locations.feature_status_list = get_status_list(env!("CARGO_PKG_VERSION"))?;
 
     let doc = node_list(tokens, 0, len, &mut other_doc_locations)?;

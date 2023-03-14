@@ -64,8 +64,8 @@ fn test_compilation_result(
     };
     match compile(job.clone()) {
         Ok(_) => {
-            let output = load_utf8_file(job.output_path.clone()).unwrap();
-            let correct_output = load_utf8_file(correct_output_path.clone()).unwrap();
+            let output = load_utf8_file(&job.output_path).unwrap();
+            let correct_output = load_utf8_file(&correct_output_path).unwrap();
             remove_file(job.output_path.clone()).unwrap();
             if output != correct_output {
                 print_diff(&output, &correct_output, " ");

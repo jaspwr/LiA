@@ -26,7 +26,7 @@ fn build_docs() -> Result<(), Box<dyn Error>> {
 }
 
 fn proc_file(path: &str, strips_doc_env: bool) -> Result<(), Box<dyn Error>> {
-    let f = load_utf8_file(path.to_string())?;
+    let f = load_utf8_file(&path.to_string())?;
     let f = do_compilations(f, strips_doc_env);
     write_utf8_file(path.to_string(), f)?;
     Ok(())

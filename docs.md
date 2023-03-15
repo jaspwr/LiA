@@ -1,6 +1,6 @@
-# LiA 0.2.2 Documentation
+# LiA 0.3.0 Documentation
 
->⚠️ This is the documentation for version 0.2.2. This is only an early version and is still in development. Do not expect any of these features to stay the same in future versions. Additionally, the compiler has not been thoroughly tested and may not work as expected. If you find any bugs or have any suggestions please open an issue or pull request on the [GitHub repository](https://github.com/jaspwr/LiA). 
+>⚠️ This is the documentation for version 0.3.0. This is only an early version and is still in development. Do not expect any of these features to stay the same in future versions. Additionally, the compiler has not been thoroughly tested and may not work as expected. If you find any bugs or have any suggestions please open an issue or pull request on the [GitHub repository](https://github.com/jaspwr/LiA).
 
 
 ## Contents
@@ -22,6 +22,8 @@
         1. [Expression with grouping](#expression-with-grouping)
         1. [Matrices](#matrices)
         1. [Macros](#macros)
+    1. [Inline Julia](#inline-julia)
+        1. [Embedded Figures](#embedded-figures)
     1. [Explicit version specification](#explicit-version-specification)
 1. [Document Structure](#document-structure)
 
@@ -100,7 +102,7 @@ Consumes remainder of line. For multiline enclose the section title in `{}`.
 
 ### Markdown style lists
 Any line opened with a `*` will be treated as a list item. You can create nested lists with indentation. In most cases the indentation type will be inferred.
-> ⚠️ As of version 0.2.2, indentation types other than 4 spaces are unthoroughly tested and may not work as expected.
+> ⚠️ As of version 0.3.0, indentation types other than 4 spaces are unthoroughly tested and may not work as expected.
 #### Lia
 [COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
@@ -132,8 +134,8 @@ Any line opened with a `*` will be treated as a list item. You can create nested
 -------------------
 
 ### Markdown style enumerated lists
-Any line opened with `1.` will be treated as an enumerated list item, this can be any number. You can create nested lists with indentation. In most cases the indentation type will be inferred. 
-> ⚠️ As of version 0.2.2, indentation types other than 4 spaces are unthoroughly tested and may not work as expected.
+Any line opened with `1.` will be treated as an enumerated list item, this can be any number. You can create nested lists with indentation. In most cases the indentation type will be inferred.
+> ⚠️ As of version 0.3.0, indentation types other than 4 spaces are unthoroughly tested and may not work as expected.
 #### Lia
 [COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
@@ -169,7 +171,7 @@ LiA variables provide a less verbose way to define new commands.
 
 Any word annotated with a `@` will be treated as a variable.
 #### Referencing variables
-> ⚠️ As of version 0.2.2, variables with computed arguments can not be used before they are defined. This will be fixed in future versions.
+> ⚠️ As of version 0.3.0, variables with computed arguments can not be used before they are defined. This will be fixed in future versions.
 
 | LiA                      | TeX                      |
 |--------------------------|--------------------------|
@@ -254,7 +256,7 @@ $a \times b$
 The content inside the equation expression uses a separate syntax to more easily
 represent mathematical expressions. The content will be parsed and converted to
 LaTeX. Most TeX commands should work as normal.
-> ⚠️ As of version 0.2.2, TeX commands can be separated from their arguments by fractions. This can be solved by encasing the command in `{}`. This will be fixed in future versions.
+> ⚠️ As of version 0.3.0, TeX commands can be separated from their arguments by fractions. This can be solved by encasing the command in `{}`. This will be fixed in future versions.
 #### General expressions
 ##### Lia
 [COMPILATION_INPUT_START]: <> (Do not remove this line.)
@@ -349,10 +351,48 @@ $\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}$
 > If you don't want a macro to be replaced, you can separate it with spaces e.g. `s i n` will be parsed as the separate pronumerals $s$, $i$ and $n$ and not `\sin`.
 -------------------
 
+### Inline Julia
+
+If Julia is installed on the system, you can use the `jl` block which can contain any valid Julia code which will be run at compile time to generate parts of your document such as tables or figures.
+
+
+Required Julia dependencies
+* `Plots`
+
+##### Lia
+```jl
+2 + 2 = jl { 2 + 2 }
+```
+##### Resulting TeX
+```tex
+2 + 2 = 4
+```
+The result of the Julia code will be inserted into the document.
+
+#### Embedded Figures
+A function you have access to by default in inline Julia code is `embedfig`. This function takes a `Plots.plot` and a `String` for the width and returns a `String` of the LaTeX code for the figure. In the future it may be possible to specify the image directory however for now you will need to have it set to `./`.
+
+##### Lia
+```jl
+jl {
+    using Plots
+    x = range(0, 10, length=100);
+    y = sin.(x);
+    return embedfig(plot(x, y), "10cm");
+}
+```
+
+##### Resulting TeX
+```tex
+\includegraphics[width=10cm]{zK6mN78UigKM.png}
+```
+The figure will be saved to the same directory as the TeX file. Note you have to have imported `graphicx` in your document.
+
+-------------------
 ### Explicit version specification
 The variable `@LIAVERSION` is reserved for specifying the version that the document is written in. If you specify a version, the document will be compiled with that version of the compiler otherwise it will use the latest version. It is recommended to specify a version to ensure that your document will compile correctly in the future. Always specify the version as the first line of the document.
 ```tex
-@LIAVERSION = 0.2.2
+@LIAVERSION = 0.3.0
 ```
 
 ## Document structure

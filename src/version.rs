@@ -1,7 +1,4 @@
 use std::{ error::Error, num::ParseIntError };
-
-use owo_colors::OwoColorize;
-
 use crate::{ utils::{ load_utf8_file, write_utf8_file }, cli::print_info };
 
 pub fn parse_version_string(version: &str) -> Result<(u8, u8, u8), String> {

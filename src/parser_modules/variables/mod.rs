@@ -125,7 +125,7 @@ impl NodeParser for LiaVariableParser {
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
         let command = match &tokens[0] {
-            Token::LiaVariable(command, loc) => { 
+            Token::LiaVariable(command, loc) => {
                     let command = &command[1..];
                     if command.len() == 0 {
                         return Err(
@@ -137,6 +137,7 @@ impl NodeParser for LiaVariableParser {
             _ => { panic!("Should not be here.") }
         }.to_string();
         // TODO: Check for legal name
+
 
         match self.statement_type {
             Some(StatmentType::Read) => Ok((

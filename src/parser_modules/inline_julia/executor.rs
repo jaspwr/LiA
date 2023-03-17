@@ -19,7 +19,7 @@ pub fn execute(code: String, compiler_globals: &mut CompilerGlobals) -> Result<S
     if jl.is_none() {
         *jl = Some(JuliaSession::new(compiler_globals)?);
     }
-    let mut jl = jl.as_mut().unwrap();
+    let jl = jl.as_mut().unwrap();
 
     let val = (match jl.session.eval_string(&code) {
         Ok(v) => { Ok(v) }

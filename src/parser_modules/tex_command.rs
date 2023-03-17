@@ -90,13 +90,16 @@ impl NodeParser for TexCommandParser {
                     }
                     && match next_token_no_white_space {
                         Token::Misc(t, _) => {
-                            if t == "=" {
-                                // Needs to consume rest of line
-                                self.is_dec = true;
-                                false
-                            } else {
-                                true
-                            }
+                            // if t == "=" {
+                            //     // Needs to consume rest of line
+                            //     self.is_dec = true;
+                            //     false
+                            // } else {
+                            //     true
+                            // }
+
+                            // This was causing issues. e.g. $ \theta = 0 $ would be moved to the declarations section.
+                            true
                         }
                         _ => true,
                     }
@@ -246,6 +249,7 @@ impl TexCommandParser {
             }
             _ => DocSection::Document,
         };
+
         let mut v = vec![Rc::new(TexCommand {
             command,
             args: parse_args(&tokens, 1, tokens.len(), other_doc_locations)?,

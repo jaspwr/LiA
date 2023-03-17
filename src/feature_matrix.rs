@@ -1,6 +1,4 @@
-use owo_colors::OwoColorize;
-
-use crate::{version::{ parse_version_string, version_cmp }, cli::print_info};
+use crate::{ version::{ parse_version_string, version_cmp }, cli::print_info };
 
 pub fn get_status_list(version_: &str) -> Result<FeatureStatusList, String> {
     let mut status_list = FeatureStatusList::default();

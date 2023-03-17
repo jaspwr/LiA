@@ -3,7 +3,7 @@
 use std::error::Error;
 
 use lia::{
-    compiler::run_compiler,
+    compiler::{run_compiler, Job},
     utils::{load_utf8_file, write_utf8_file},
 };
 
@@ -41,7 +41,7 @@ fn do_compilations(s: String, strips_doc_env: bool) -> String {
         let spl_ = spl[i];
         let in_code =
             strip_codeblock(spl_.split(COMP_IN_CLOSE).collect::<Vec<&str>>()[0].to_string());
-        let compilation_result = run_compiler(in_code).unwrap();
+        let compilation_result = run_compiler(in_code, Job::default()).unwrap();
         let a = spl_.split(COMP_OUT_OPEN).collect::<Vec<&str>>();
         out.push_str(COMP_IN_OPEN);
         out.push_str(a[0]);

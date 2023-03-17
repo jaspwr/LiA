@@ -1,14 +1,11 @@
-# LiA
-### A transpiled superset of TeX for writing LaTeX.
-
-<center>
+# $\text{LiA}$
+### A transpiled superset of $\text{TeX}$ for writing $\text{LaTeX}$.
 [
     ![status](https://img.shields.io/github/actions/workflow/status/jaspwr/LiA/rust.yml?branch=main)
 ](https://github.com/jaspwr/LiA/actions/workflows/rust.yml)
 [
     ![AUR](https://img.shields.io/aur/version/lia-git)
 ](https://aur.archlinux.org/packages/lia-git)
-</center>
 
 This is more for my personal use however you're welcome to use it or contribute. This is a superset of TeX that extends its syntax adding new several new features. These added features are just designed to make LaTeX code less verbose and faster to write but also just catered more towards my personal preference.
 

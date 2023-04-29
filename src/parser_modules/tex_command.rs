@@ -27,6 +27,7 @@ pub struct TexCommandParser {
     env_parsing_state: EnvParsingState,
     env_name: String,
     env_depth: i32,
+    curly_depth: i32,
     is_dec: bool,
     next: bool,
 }
@@ -41,6 +42,7 @@ impl NodeParser for TexCommandParser {
     ) -> bool {
         self.env_parsing_state = EnvParsingState::NotEnv;
         self.env_depth = 0;
+        self.curly_depth = -1;
         self.is_dec = false;
         self.next = false;
         match token {
@@ -65,6 +67,10 @@ impl NodeParser for TexCommandParser {
         next_token_no_white_space: &Token,
         bracket_depths: &BrackDepths,
     ) -> bool {
+        if self.curly_depth == -1 {
+            self.curly_depth = bracket_depths.curly;
+        }
+
         if self.is_dec {
             if let Token::Newline = token {
                 return true;
@@ -78,7 +84,7 @@ impl NodeParser for TexCommandParser {
 
         match self.env_parsing_state {
             EnvParsingState::NotEnv => {
-                bracket_depths.curly == 0
+                bracket_depths.curly == self.curly_depth
                     && bracket_depths.square == 0
                     && match next_token {
                         Token::Misc(t, _) => t != "{" && t != "[",
@@ -229,6 +235,8 @@ impl TexCommandParser {
             }
         }
         .to_string();
+        println!("Command: {}", command);
+
         if self.is_dec {
             let mut v = vec![Rc::new(TexCommand {
                 command,
@@ -259,6 +267,10 @@ impl TexCommandParser {
                 text: "\n".to_string(),
             }));
         }
+        println!("Section: {:?}", section);
+        println!("tokesn: {:?}", tokens);
+        println!("args: {:?}", parse_args(&tokens, 1, tokens.len(), other_doc_locations).unwrap().len());
+
         Ok((v, section))
     }
 }

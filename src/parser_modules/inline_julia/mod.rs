@@ -8,7 +8,9 @@ use crate::token::*;
 use crate::hierachy_construction::{ NodeParser, IndentationType, ParseResult, CompilerGlobals };
 
 #[derive(Default)]
-pub struct InlineJulia {}
+pub struct InlineJulia {
+    curly_depth: i32,
+}
 
 mod executor;
 use executor::*;
@@ -21,6 +23,7 @@ impl NodeParser for InlineJulia {
         identation: i32,
         other_doc_locations: &mut CompilerGlobals
     ) -> bool {
+        self.curly_depth = -1;
         match token {
             Token::LiaKeyword(k, _) => { k == "jl" }
             _ => { false }
@@ -34,8 +37,11 @@ impl NodeParser for InlineJulia {
         next_token_no_white_space: &Token,
         bracket_depths: &BrackDepths
     ) -> bool {
+        if self.curly_depth == -1 {
+            self.curly_depth = bracket_depths.curly;
+        }
         match token {
-            Token::Misc(t, _) => { t == "}" && bracket_depths.curly == 0 }
+            Token::Misc(t, _) => { t == "}" && bracket_depths.curly == self.curly_depth }
             _ => { false }
         }
     }

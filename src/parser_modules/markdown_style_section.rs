@@ -8,7 +8,9 @@ use crate::tokeniser::TokenList;
 use crate::utils::format_error_string;
 
 #[derive(Default)]
-pub struct LiaMarkDownSections {}
+pub struct LiaMarkDownSections {
+    curly_depth: i32,
+}
 
 #[allow(unused)]
 impl NodeParser for LiaMarkDownSections {
@@ -18,6 +20,7 @@ impl NodeParser for LiaMarkDownSections {
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        self.curly_depth = -1;
         match token {
             Token::LiaMarkDown(text, _) => text.starts_with("#"),
             _ => false,
@@ -31,8 +34,11 @@ impl NodeParser for LiaMarkDownSections {
         next_token_no_white_space: &Token,
         bracket_depths: &BrackDepths,
     ) -> bool {
+        if self.curly_depth == -1 {
+            self.curly_depth = bracket_depths.curly;
+        }
         match token {
-            Token::Newline => bracket_depths.curly == 0,
+            Token::Newline => bracket_depths.curly == self.curly_depth,
             _ => false,
         }
     }
@@ -44,7 +50,7 @@ impl NodeParser for LiaMarkDownSections {
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
         let command = match &tokens[0] {
-            Token::LiaMarkDown(hash, loc) => { 
+            Token::LiaMarkDown(hash, loc) => {
                 match hash.as_str() {
                     "#" => { "section" },
                     "##" => { "subsection" },
@@ -53,8 +59,8 @@ impl NodeParser for LiaMarkDownSections {
                     "##*" => { "subsection*" },
                     "###*" => { "subsubsection*" },
                     _ => { return format_error_string(
-                        format!{"Lines opened with '#' will automatically be assumed to be a section. \"{}\" is not a valid section command. If you don't want this to parse as a section, add a '\\' to escape it.", 
-                        hash}, 
+                        format!{"Lines opened with '#' will automatically be assumed to be a section. \"{}\" is not a valid section command. If you don't want this to parse as a section, add a '\\' to escape it.",
+                        hash},
                         *loc) }
                 }
             },

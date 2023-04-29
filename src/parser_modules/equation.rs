@@ -12,7 +12,9 @@ use crate::tokeniser::TokenList;
 use crate::utils::format_error_string;
 
 #[derive(Default)]
-pub struct LiaEquation {}
+pub struct LiaEquation {
+    curly_depth: i32,
+}
 
 static OPERATORS_AND_KEYWORDS: [&str; 15] = [
     "+", "-", "*", "/", "%", "?", ":", "(", ")", "{", "}", "^", ",", "[", "]",
@@ -26,6 +28,7 @@ impl NodeParser for LiaEquation {
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        self.curly_depth = -1;
         match token {
             Token::Misc(k, _) => k == "eq",
             _ => false,
@@ -39,8 +42,11 @@ impl NodeParser for LiaEquation {
         next_token_no_white_space: &Token,
         bracket_depths: &BrackDepths,
     ) -> bool {
+        if self.curly_depth == -1 {
+            self.curly_depth = bracket_depths.curly;
+        }
         match token {
-            Token::Misc(t, _) => t == "}" && bracket_depths.curly == 0,
+            Token::Misc(t, _) => t == "}" && bracket_depths.curly == self.curly_depth,
             _ => false,
         }
     }

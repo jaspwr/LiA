@@ -22,6 +22,7 @@ pub struct LiaVariableParser {
     terminated_by_newline: bool,
     consuming_rest_of_line: bool,
     trailing_whitespace: usize,
+    curly_depth: i32,
 }
 
 #[derive(Clone)]
@@ -49,6 +50,7 @@ impl NodeParser for LiaVariableParser {
         self.statement_type = None;
         self.consuming_rest_of_line = false;
         self.trailing_whitespace = 0;
+        self.curly_depth = -1;
         match token {
             Token::LiaVariable(_, _) => true,
             _ => false,
@@ -62,6 +64,9 @@ impl NodeParser for LiaVariableParser {
         next_token_no_white_space: &Token,
         bracket_depths: &BrackDepths,
     ) -> bool {
+        if self.curly_depth == -1 {
+            self.curly_depth = bracket_depths.curly;
+        }
         if self.statement_type.is_none() {
             if let Token::Misc(next_token, _) = next_token {
                 if next_token == "(" {
@@ -91,7 +96,7 @@ impl NodeParser for LiaVariableParser {
                     }
                     Some(StatmentType::Call) => return bracket_depths.round == 0,
                     Some(StatmentType::Assign) => {
-                        return bracket_depths.curly == 0
+                        return bracket_depths.curly == self.curly_depth
                             && match token {
                                 Token::Newline => {
                                     self.terminated_by_newline = true;

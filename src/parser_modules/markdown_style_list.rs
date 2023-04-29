@@ -12,6 +12,7 @@ use crate::utils::{count_indentation, format_error_string};
 #[derive(Default)]
 pub struct LiaMardownListParser {
     initial_indentation_depth: usize,
+    curly_depth: i32,
 }
 
 #[allow(unused)]
@@ -22,6 +23,7 @@ impl NodeParser for LiaMardownListParser {
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        self.curly_depth = -1;
         match token {
             Token::LiaMarkDown(text, _) => {
                 if text == "*" {
@@ -42,7 +44,10 @@ impl NodeParser for LiaMardownListParser {
         next_token_no_white_space: &Token,
         bracket_depths: &BrackDepths,
     ) -> bool {
-        bracket_depths.curly == 0
+        if self.curly_depth == -1 {
+            self.curly_depth = bracket_depths.curly;
+        }
+        bracket_depths.curly == self.curly_depth
             && match token {
                 Token::Newline => match next_token_no_white_space {
                     Token::LiaMarkDown(text, _) => text != "*",

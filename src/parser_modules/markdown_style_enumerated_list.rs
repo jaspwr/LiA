@@ -13,6 +13,7 @@ use crate::utils::{count_indentation, format_error_string};
 pub struct LiaMardownEnumListParser {
     initial_indentation_depth: usize,
     not_start_of_line: bool,
+    curly_depth: i32,
 }
 
 #[allow(unused)]
@@ -23,6 +24,7 @@ impl NodeParser for LiaMardownEnumListParser {
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        self.curly_depth = -1;
         if !other_doc_locations
             .feature_status_list
             .enumerated_lists
@@ -63,7 +65,10 @@ impl NodeParser for LiaMardownEnumListParser {
         next_token_no_white_space: &Token,
         bracket_depths: &BrackDepths,
     ) -> bool {
-        bracket_depths.curly == 0
+        if self.curly_depth == -1 {
+            self.curly_depth = bracket_depths.curly;
+        }
+        bracket_depths.curly == self.curly_depth
             && match token {
                 Token::Newline => match next_token_no_white_space {
                     Token::Misc(text, _) => {

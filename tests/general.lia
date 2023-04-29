@@ -5,18 +5,18 @@ Test test test test $f = \frac{1}{\sqrt{2🐱}}$ test test. @a, @🐱b ect.
 
 ## Section🐱
 env center🐱 {
-*List item 
-    * List item 
-        *List item 
-            *      List item 
+*List item
+    * List item
+        *List item
+            *      List item
                 *inner most  *
     * List item 🐱
-    * {List 
-    
-    
-    
-    
-    
+    * {List
+
+
+
+
+
     🐱}
     * a*
 * a
@@ -29,19 +29,27 @@ env center🐱 {
     z
     🐱
 }
-
+{
 1. num
     1. num
     1. num
-        1. num
+        1. {num
+        * hi
+        * hi
+        * hi
+        * hi
+
+
+        }
         1. num
         3223428349. num
         1234243. num
+}
 a *
 a use
 a 1.
 a ##
-a *a 
+a *a
 a use a
 a 2222. sin
 a ###text

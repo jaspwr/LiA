@@ -235,7 +235,6 @@ impl TexCommandParser {
             }
         }
         .to_string();
-        println!("Command: {}", command);
 
         if self.is_dec {
             let mut v = vec![Rc::new(TexCommand {
@@ -267,9 +266,6 @@ impl TexCommandParser {
                 text: "\n".to_string(),
             }));
         }
-        println!("Section: {:?}", section);
-        println!("tokesn: {:?}", tokens);
-        println!("args: {:?}", parse_args(&tokens, 1, tokens.len(), other_doc_locations).unwrap().len());
 
         Ok((v, section))
     }

@@ -60,3 +60,45 @@ a ###text
                 1. this should
 
 \documentclass{xyz}
+
+* {
+    * {
+        asd
+    }
+}
+
+{
+    * {
+        hajksd
+    }
+}
+
+1. {
+    * {
+        asdjl
+    }
+}
+
+* {
+    1. {
+        * jkasdlf
+        * {
+            askjdl
+        }
+    }
+}
+
+1. {
+    1. asjkdl
+    1. {
+        asjhdk
+    }
+    1. {asjkdh}
+    1. {
+        ioqwueo
+    }
+}
+1. {
+    ajskldjasld
+}
+    1. askljdl

@@ -1,13 +1,13 @@
 use std::rc::Rc;
 
-use crate::bracket_depth::BrackDepths;
+use crate::bracket_depth::{BrackDepths, self};
 use crate::hierachy_construction::{
     node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
 };
 use crate::hierarchy::{DocSection, Node, TexEnvironment, Text};
 use crate::token::*;
 use crate::tokeniser::TokenList;
-use crate::utils::{count_indentation, format_error_string};
+use crate::utils::{count_indentation, format_error_string, delta_bracket_depth};
 
 #[derive(Default)]
 pub struct LiaMardownEnumListParser {
@@ -91,13 +91,15 @@ impl NodeParser for LiaMardownEnumListParser {
         let mut pre_indentation = self.initial_indentation_depth;
         let mut item_count = 0;
         let mut inner_nodes: TokenList = vec![Token::Newline];
+        let mut brack_depth = BrackDepths::default();
         for i in 0..tokens.len() {
+            brack_depth += delta_bracket_depth(&tokens[i]);
             if item_count > 0 {
                 count_indentation(&tokens, i, &mut indentation, &mut indentation_type);
             }
             match &tokens[i] {
                 Token::Misc(t, loc) => {
-                    if is_list_number(t.to_string()) {
+                    if is_list_number(t.to_string()) && brack_depth.curly == 0 {
                         if let Some(value) = list_item(
                             &mut item_count,
                             indentation,

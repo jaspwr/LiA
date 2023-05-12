@@ -1,6 +1,6 @@
-<center>
+<p align="center">
     <img src="misc/lia.png" width="120px" alt="LiA logo">
-</center>
+</p>
 
 ### A transpiled superset of $\text{TeX}$ for writing $\text{LaTeX}$.
 [

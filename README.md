@@ -1,4 +1,7 @@
-# $\text{LiA}$
+<center>
+    <img src="misc/lia.png" width="120px" alt="LiA logo">
+</center>
+
 ### A transpiled superset of $\text{TeX}$ for writing $\text{LaTeX}$.
 [
     ![status](https://img.shields.io/github/actions/workflow/status/jaspwr/LiA/rust.yml?branch=main)

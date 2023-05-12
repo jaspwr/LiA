@@ -12,7 +12,6 @@
 - [ ] Compile multiple files at once.
 
 # Known issues
-- [ ] Comments don't really work. `%` should open comments like in TeX which prevent things from being transpiled.
 - [ ] Comments are very broken in the syntax highlighter.
 - [ ] `eq` and `eq*` are broken in the syntax highlighter.
 - [ ] Commas break in equation statements. They should be normal outside of square brackets.

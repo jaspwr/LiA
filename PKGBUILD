@@ -1,7 +1,7 @@
 # Maintainer: Jasper <j@sperp.dev> -> https://github.com/jaspwr
 
 pkgname=lia-git
-pkgver=0.2.2
+pkgver=0.3.0
 pkgrel=1
 pkgdesc="Compiler for LiA, a transpiled superset of TeX for writing LaTeX."
 makedepends=('rust' 'cargo')

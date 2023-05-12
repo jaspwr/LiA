@@ -9,6 +9,7 @@ pub struct Doc {
     pub document: NodeList,
 }
 
+#[derive(Debug)]
 pub enum DocSection {
     Imports,
     Declarations,

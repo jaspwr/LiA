@@ -1,51 +1,32 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
-use crate::hierachy_construction::{
+use crate::hierarchy::{DocSection, Node, TexEnvironment, Text};
+use crate::hierarchy_construction::{
     node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
 };
-use crate::hierarchy::{DocSection, Node, TexEnvironment, Text};
 use crate::token::*;
 use crate::tokeniser::TokenList;
-use crate::utils::{count_indentation, format_error_string};
+use crate::utils::{count_indentation, delta_bracket_depth, format_error_string};
 
 #[derive(Default)]
-pub struct LiaMardownEnumListParser {
+pub struct LiaMardownListParser {
     initial_indentation_depth: usize,
-    not_start_of_line: bool,
+    curly_depth: i32,
 }
 
 #[allow(unused)]
-impl NodeParser for LiaMardownEnumListParser {
+impl NodeParser for LiaMardownListParser {
     fn is_opener(
         &mut self,
         token: &Token,
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
-        if !other_doc_locations
-            .feature_status_list
-            .enumerated_lists
-            .is_supported()
-        {
-            return false;
-        }
-        if let Token::Newline = token {
-            self.not_start_of_line = false;
-            return false;
-        } else {
-            if (!self.not_start_of_line) {
-                if let Token::Whitespace(_) = token {
-                } else {
-                    self.not_start_of_line = true;
-                }
-            } else {
-                return false;
-            }
-        }
+        self.curly_depth = -1;
         match token {
-            Token::Nothing(text, _) => {
-                if is_list_number(text.to_string()) {
+            Token::LiaMarkDown(text, _) => {
+                if text == "*" {
                     self.initial_indentation_depth = identation as usize;
                     true
                 } else {
@@ -63,12 +44,13 @@ impl NodeParser for LiaMardownEnumListParser {
         next_token_no_white_space: &Token,
         bracket_depths: &BrackDepths,
     ) -> bool {
-        bracket_depths.curly == 0
+        if self.curly_depth == -1 {
+            self.curly_depth = bracket_depths.curly;
+        }
+        bracket_depths.curly == self.curly_depth
             && match token {
                 Token::Newline => match next_token_no_white_space {
-                    Token::Nothing(text, _) => {
-                        !is_list_number(next_token_no_white_space.stringify())
-                    }
+                    Token::LiaMarkDown(text, _) => text != "*",
                     _ => true,
                 },
                 _ => false,
@@ -86,13 +68,15 @@ impl NodeParser for LiaMardownEnumListParser {
         let mut pre_indentation = self.initial_indentation_depth;
         let mut item_count = 0;
         let mut inner_nodes: TokenList = vec![Token::Newline];
+        let mut brack_depth = BrackDepths::default();
         for i in 0..tokens.len() {
+            brack_depth += delta_bracket_depth(&tokens[i]);
             if item_count > 0 {
                 count_indentation(&tokens, i, &mut indentation, &mut indentation_type);
             }
             match &tokens[i] {
-                Token::Nothing(t, loc) => {
-                    if is_list_number(t.to_string()) {
+                Token::LiaMarkDown(md, loc) => {
+                    if md == "*" && brack_depth.curly == 0 {
                         if let Some(value) = list_item(
                             &mut item_count,
                             indentation,
@@ -120,7 +104,7 @@ impl NodeParser for LiaMardownEnumListParser {
         Ok((
             vec![
                 Rc::new(TexEnvironment {
-                    name: "enumerate".to_string(),
+                    name: "itemize".to_string(),
                     args: vec![],
                     children: node_list(
                         inner_nodes.clone(),
@@ -179,26 +163,16 @@ fn append_opener(inner_nodes: &mut Vec<Token>) {
         "\\begin".to_string(),
         Location::default(),
     ));
-    inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("enumerate".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("{".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("itemize".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("}".to_string(), Location::default()));
     inner_nodes.push(Token::Newline);
 }
 
 fn append_closer(inner_nodes: &mut Vec<Token>) {
     inner_nodes.push(Token::TexCommand("\\end".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("{".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("enumerate".to_string(), Location::default()));
-    inner_nodes.push(Token::Nothing("}".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("{".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("itemize".to_string(), Location::default()));
+    inner_nodes.push(Token::Misc("}".to_string(), Location::default()));
     inner_nodes.push(Token::Newline);
-}
-
-fn is_list_number(text: String) -> bool {
-    if !text.ends_with('.') {
-        return false;
-    }
-    if !text.starts_with(|c: char| c.is_numeric()) {
-        return false;
-    }
-    text.chars().all(|c| c.is_numeric() || c == '.')
 }

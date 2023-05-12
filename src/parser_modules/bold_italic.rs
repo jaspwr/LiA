@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
-use crate::hierachy_construction::*;
 use crate::hierarchy::*;
+use crate::hierarchy_construction::*;
 use crate::token::*;
 use crate::tokeniser::TokenList;
 
@@ -33,7 +33,7 @@ impl NodeParser for BoldItalic {
             return false;
         }
         match token {
-            Token::Nothing(text, _) => {
+            Token::Misc(text, _) => {
                 if text.starts_with("**") {
                     if text.starts_with("***") {
                         self.b_or_i = Some(BOrI::Bold);
@@ -59,7 +59,7 @@ impl NodeParser for BoldItalic {
         let mut ret = false;
         if !self.start {
             match token {
-                Token::Nothing(t, loc) => {
+                Token::Misc(t, loc) => {
                     ret = t.starts_with('*');
                 }
                 Token::Newline => {

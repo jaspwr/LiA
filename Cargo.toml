@@ -1,6 +1,6 @@
 [package]
 name = "lia"
-version = "0.2.2"
+version = "0.3.0"
 edition = "2021"
 default-run = "lia"
 
@@ -11,3 +11,4 @@ sha256 = "1.1.1"
 text-diff = "0.4.0"
 home = "0.5.4"
 reqwest = { version = "0.11.13", features = ["blocking"] }
+# julia = { git = "https://github.com/jaspwr/julia-rs", version = "0.2.5" }

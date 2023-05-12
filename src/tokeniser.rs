@@ -21,8 +21,6 @@ fn classify_char(c: &char) -> CharGroup {
 pub type TokenList = Vec<Token>;
 
 pub fn to_tokens(input_lia: String) -> TokenList {
-    // TODO: Refactor to be less hard coded for the specific use case.
-
     let mut ret = Vec::<Token>::new();
     let mut current_token = String::new();
     let mut pre_char_group = CharGroup::Whitespace;
@@ -105,9 +103,11 @@ fn parse_token(token: &String, begins_line: bool, location: Location) -> Token {
         Token::Whitespace(token.clone())
     } else if token.as_str() == "env" {
         Token::LiaKeyword(token.clone(), location)
+    } else if token.as_str() == "jl" {
+        Token::LiaKeyword(token.clone(), location)
     } else if token.as_str() == "use" && begins_line {
         Token::LiaKeyword(token.clone(), location)
     } else {
-        Token::Nothing(token.clone(), location)
+        Token::Misc(token.clone(), location)
     }
 }

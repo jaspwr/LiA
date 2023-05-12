@@ -1,6 +1,7 @@
-use owo_colors::OwoColorize;
-
-use crate::version::{parse_version_string, version_cmp};
+use crate::{
+    cli::print_info,
+    version::{parse_version_string, version_cmp},
+};
 
 pub fn get_status_list(version_: &str) -> Result<FeatureStatusList, String> {
     let mut status_list = FeatureStatusList::default();
@@ -9,7 +10,11 @@ pub fn get_status_list(version_: &str) -> Result<FeatureStatusList, String> {
     let current_cmp = version_cmp(version, env!("CARGO_PKG_VERSION"));
     if current_cmp > 0 {
         return Err(
-            format! {"Version {} is newer than the current version {}. Maybe update your compiler? https://github.com/jaspwr/LiA", version_, env!("CARGO_PKG_VERSION")},
+            format!(
+                "Version {} is newer than the current version {}. Maybe update your compiler? https://github.com/jaspwr/LiA",
+                version_,
+                env!("CARGO_PKG_VERSION")
+            )
         );
     }
 
@@ -20,11 +25,10 @@ pub fn get_status_list(version_: &str) -> Result<FeatureStatusList, String> {
     }
 
     if current_cmp < 0 {
-        println!(
-            "[{}] Document is being compiled for version {}.",
-            "INFO".yellow(),
+        print_info(format!(
+            "Document is being compiled for version {}.",
             version_
-        );
+        ));
     }
     Ok(status_list)
 }

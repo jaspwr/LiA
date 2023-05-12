@@ -1,14 +1,16 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
-use crate::hierachy_construction::*;
 use crate::hierarchy::*;
+use crate::hierarchy_construction::*;
 use crate::token::*;
 use crate::tokeniser::TokenList;
 use crate::utils::{delta_bracket_depth, parse_args};
 
 #[derive(Default)]
-pub struct LiaUseParser {}
+pub struct LiaUseParser {
+    curly_depth: i32,
+}
 
 #[allow(unused)]
 impl NodeParser for LiaUseParser {
@@ -18,6 +20,7 @@ impl NodeParser for LiaUseParser {
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        self.curly_depth = -1;
         match token {
             Token::LiaKeyword(k, _) => k == "use",
             _ => false,
@@ -31,8 +34,11 @@ impl NodeParser for LiaUseParser {
         next_token_no_white_space: &Token,
         bracket_depths: &BrackDepths,
     ) -> bool {
+        if self.curly_depth == -1 {
+            self.curly_depth = bracket_depths.curly;
+        }
         match token {
-            Token::Newline => bracket_depths.curly == 0,
+            Token::Newline => bracket_depths.curly == self.curly_depth,
             _ => false,
         }
     }
@@ -47,15 +53,21 @@ impl NodeParser for LiaUseParser {
 
         let len = tokens.len();
 
-        imports.push(parse_to_args(tokens.clone(), 1, other_doc_locations)?);
+        imports.push(parse_to_args(
+            tokens.clone(),
+            1,
+            self.curly_depth,
+            other_doc_locations,
+        )?);
         let mut start = 1;
         while start < len {
             match &tokens[start] {
-                Token::Nothing(sym, _) => {
+                Token::Misc(sym, _) => {
                     if sym == "," {
                         imports.push(parse_to_args(
                             tokens.clone(),
                             start + 1,
+                            self.curly_depth,
                             other_doc_locations,
                         )?);
                     }
@@ -82,6 +94,7 @@ impl NodeParser for LiaUseParser {
 fn parse_to_args(
     tokens: TokenList,
     start: usize,
+    curly_depth: i32,
     other_doc_locations: &mut CompilerGlobals,
 ) -> Result<ArgList, String> {
     let len = tokens.len();
@@ -101,11 +114,11 @@ fn parse_to_args(
     let mut end = start;
     while end < len {
         bracket_depth += delta_bracket_depth(&tokens[end]);
-        if bracket_depth.curly == 0 && bracket_depth.square == 0 {
+        if bracket_depth.curly == curly_depth && bracket_depth.square == 0 {
             if end + 1 >= len {
                 break;
             }
-            if let Token::Nothing(s, _) = &tokens[end + 1] {
+            if let Token::Misc(s, _) = &tokens[end + 1] {
                 if s == "[" || s == "{" {
                     end += 1;
                     continue;

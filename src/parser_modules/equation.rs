@@ -3,16 +3,18 @@ use std::rc::Rc;
 use crate::ast::Ast;
 use crate::at_expression::AtExpToken;
 use crate::bracket_depth::BrackDepths;
-use crate::hierachy_construction::{
+use crate::hierarchy::{DocSection, Node, TexEnvironment, Text};
+use crate::hierarchy_construction::{
     node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
 };
-use crate::hierarchy::{DocSection, Node, TexEnvironment, Text};
 use crate::token::*;
 use crate::tokeniser::TokenList;
 use crate::utils::format_error_string;
 
 #[derive(Default)]
-pub struct LiaEquation {}
+pub struct LiaEquation {
+    curly_depth: i32,
+}
 
 static OPERATORS_AND_KEYWORDS: [&str; 15] = [
     "+", "-", "*", "/", "%", "?", ":", "(", ")", "{", "}", "^", ",", "[", "]",
@@ -26,8 +28,9 @@ impl NodeParser for LiaEquation {
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        self.curly_depth = -1;
         match token {
-            Token::Nothing(k, _) => k == "eq",
+            Token::Misc(k, _) => k == "eq",
             _ => false,
         }
     }
@@ -39,8 +42,11 @@ impl NodeParser for LiaEquation {
         next_token_no_white_space: &Token,
         bracket_depths: &BrackDepths,
     ) -> bool {
+        if self.curly_depth == -1 {
+            self.curly_depth = bracket_depths.curly;
+        }
         match token {
-            Token::Nothing(t, _) => t == "}" && bracket_depths.curly == 0,
+            Token::Misc(t, _) => t == "}" && bracket_depths.curly == self.curly_depth,
             _ => false,
         }
     }
@@ -57,7 +63,7 @@ impl NodeParser for LiaEquation {
         while open_pos < len {
             if let Token::Whitespace(_) = tokens[open_pos] {
                 open_pos += 1;
-            } else if let Token::Nothing(t, loc) = &tokens[open_pos] {
+            } else if let Token::Misc(t, loc) = &tokens[open_pos] {
                 if t == "*" {
                     asterisk = true;
                     open_pos += 1;
@@ -131,7 +137,7 @@ fn to_at_exp_tokens_for_equation(
 
 fn tokenise(token: &Token) -> Result<Option<AtExpToken>, String> {
     match token {
-        Token::Nothing(t, _) => {
+        Token::Misc(t, _) => {
             for op in OPERATORS_AND_KEYWORDS {
                 if t == op {
                     return Ok(Some(AtExpToken::OperatorOrKeyword(t.to_string())));

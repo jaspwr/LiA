@@ -3,7 +3,7 @@ use std::{
     io::{Read, Write},
 };
 
-use crate::hierachy_construction::{node_list, CompilerGlobals, IndentationType, ParseResult};
+use crate::hierarchy_construction::{node_list, CompilerGlobals, IndentationType, ParseResult};
 use crate::{
     bracket_depth::BrackDepths,
     hierarchy::{Arg, ArgList, ArgType},
@@ -11,7 +11,7 @@ use crate::{
     tokeniser::TokenList,
 };
 
-pub fn load_utf8_file(path: String) -> Result<String, std::io::Error> {
+pub fn load_utf8_file(path: &String) -> Result<String, std::io::Error> {
     let mut file = File::open(path)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
@@ -70,7 +70,7 @@ pub fn parse_args(
 
 pub fn delta_bracket_depth(token: &Token) -> BrackDepths {
     let mut bracket_depths = BrackDepths::default();
-    if let Token::Nothing(str, _) = token {
+    if let Token::Misc(str, _) = token {
         if str == "{" {
             bracket_depths.curly += 1;
         } else if str == "}" {

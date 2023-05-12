@@ -3,7 +3,7 @@
 use std::error::Error;
 
 use lia::{
-    compiler::run_compiler,
+    compiler::{run_compiler, Job},
     utils::{load_utf8_file, write_utf8_file},
 };
 
@@ -26,7 +26,7 @@ fn build_docs() -> Result<(), Box<dyn Error>> {
 }
 
 fn proc_file(path: &str, strips_doc_env: bool) -> Result<(), Box<dyn Error>> {
-    let f = load_utf8_file(path.to_string())?;
+    let f = load_utf8_file(&path.to_string())?;
     let f = do_compilations(f, strips_doc_env);
     write_utf8_file(path.to_string(), f)?;
     Ok(())
@@ -41,7 +41,7 @@ fn do_compilations(s: String, strips_doc_env: bool) -> String {
         let spl_ = spl[i];
         let in_code =
             strip_codeblock(spl_.split(COMP_IN_CLOSE).collect::<Vec<&str>>()[0].to_string());
-        let compilation_result = run_compiler(in_code).unwrap();
+        let compilation_result = run_compiler(in_code, Job::default()).unwrap();
         let a = spl_.split(COMP_OUT_OPEN).collect::<Vec<&str>>();
         out.push_str(COMP_IN_OPEN);
         out.push_str(a[0]);
@@ -83,8 +83,8 @@ fn strip_doc_env(s: String) -> String {
 fn unindent(s: String) -> String {
     let mut out = String::new();
     for line in s.lines() {
-        out.push_str(&line[4..].to_string());
-        out.push_str("\n");
+        out.push_str(&line[4..]);
+        out.push('\n');
     }
     out.pop();
     out

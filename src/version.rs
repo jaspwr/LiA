@@ -1,17 +1,17 @@
+use crate::{
+    cli::print_info,
+    utils::{load_utf8_file, write_utf8_file},
+};
 use std::{error::Error, num::ParseIntError};
-
-use owo_colors::OwoColorize;
-
-use crate::utils::{load_utf8_file, write_utf8_file};
 
 pub fn parse_version_string(version: &str) -> Result<(u8, u8, u8), String> {
     let mut version_spl = version.split(".");
     if version_spl.clone().count() != 3 {
-        return Err(format! {"Invalid version string \"{}\".", version});
+        return Err(format!("Invalid version string \"{}\".", version));
     }
     match try_ver_number_num_casts(&mut version_spl) {
         Ok(v) => Ok(v),
-        Err(_) => Err(format! {"Invalid version string \"{}\".", version}),
+        Err(_) => Err(format!("Invalid version string \"{}\".", version)),
     }
 }
 
@@ -61,7 +61,7 @@ pub fn check_for_new_version() -> Result<(), Box<dyn Error>> {
         .to_str()
         .unwrap()
         .to_string();
-    let f = match load_utf8_file(path.clone()) {
+    let f = match load_utf8_file(&path) {
         Ok(f) => f,
         Err(_) => "0\n0.0.0".to_string(),
     };
@@ -79,7 +79,13 @@ pub fn check_for_new_version() -> Result<(), Box<dyn Error>> {
     if last_version != latest_version {
         let current_version = parse_version_string(env!("CARGO_PKG_VERSION"))?;
         if version_cmp(current_version, latest_version.as_str()) < 0 {
-            println!("[{}] There is a new version of LiA available at https://github.com/jaspwr/LiA. You are running {} and the latest is {}", "INFO".yellow(), env!("CARGO_PKG_VERSION"), latest_version);
+            print_info(
+                format!(
+                    "There is a new version of LiA available at https://github.com/jaspwr/LiA. You are running {} and the latest is {}",
+                    env!("CARGO_PKG_VERSION"),
+                    latest_version
+                )
+            );
         }
     }
     let _ = write_utf8_file(path, format!("{}\n{}", current_time, latest_version));

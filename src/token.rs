@@ -6,7 +6,7 @@ pub enum Token {
     LiaMarkDown(String, Location),
     Newline,
     Whitespace(String),
-    Nothing(String, Location),
+    Misc(String, Location),
 }
 
 impl Token {
@@ -18,7 +18,7 @@ impl Token {
             Token::LiaMarkDown(s, _) => s.clone(),
             Token::Newline => "\n".to_string(),
             Token::Whitespace(s) => s.clone(),
-            Token::Nothing(s, _) => s.clone(),
+            Token::Misc(s, _) => s.clone(),
         }
     }
 }
@@ -32,7 +32,7 @@ impl Token {
             Token::LiaMarkDown(_, loc) => *loc,
             Token::Newline => Location::default(),
             Token::Whitespace(_) => Location::default(),
-            Token::Nothing(_, loc) => *loc,
+            Token::Misc(_, loc) => *loc,
         }
     }
 

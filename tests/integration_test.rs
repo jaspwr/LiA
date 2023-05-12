@@ -49,14 +49,10 @@ fn equations() {
     );
 }
 
-fn test_compilation_result(
-    input_path: String,
-    output_path: String,
-    correct_output_path: String,
-) -> () {
+fn test_compilation_result(input_path: String, output_path: String, correct_output_path: String) {
     let job = Job {
-        input_path: input_path.clone(),
-        output_path: output_path.clone(),
+        input_path,
+        output_path,
         watches: false,
         debug_printing: false,
         chained_command: None,
@@ -64,14 +60,13 @@ fn test_compilation_result(
     };
     match compile(job.clone()) {
         Ok(_) => {
-            let output = load_utf8_file(job.output_path.clone()).unwrap();
-            let correct_output = load_utf8_file(correct_output_path.clone()).unwrap();
-            remove_file(job.output_path.clone()).unwrap();
+            let output = load_utf8_file(&job.output_path).unwrap();
+            let correct_output = load_utf8_file(&correct_output_path).unwrap();
+            remove_file(job.output_path).unwrap();
             if output != correct_output {
                 print_diff(&output, &correct_output, " ");
                 panic!("Output is not correct.");
             } else {
-                ()
             }
         }
         Err(e) => {

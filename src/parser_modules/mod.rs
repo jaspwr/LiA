@@ -1,9 +1,10 @@
+pub mod bold_italic;
+pub mod comments;
+pub mod enumerated_list;
 pub mod environments;
 pub mod equation;
 pub mod imports;
-pub mod markdown_style_bold_italic;
-pub mod markdown_style_enumerated_list;
-pub mod markdown_style_list;
-pub mod markdown_style_section;
+pub mod list;
+pub mod section;
 pub mod tex_command;
 pub mod variables;

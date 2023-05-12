@@ -9,6 +9,10 @@ enum Flag {
     OnlySelf(Rc<dyn Fn(&mut Job) -> ShouldContinue>),
 }
 
+pub fn print_info(msg: String) {
+    println!("[{}] {}", "INFO".yellow(), msg);
+}
+
 fn parse_flag(flag: &str) -> Result<Flag, String> {
     // TODO: Compound small flags. Not needed for now.
     match flag {
@@ -122,7 +126,7 @@ pub fn parse_args(args: Vec<String>) -> Result<Vec<Job>, String> {
                     // Flagless arg
                     working_job.input_path = arg.clone();
                     file_count += 1;
-                    // Remove if adding mulitple file support
+                    // Remove if adding multiple file support
                     if file_count > 1 {
                         return Err(format! {"Unexpected argument \"{}\".", arg});
                     }
@@ -139,7 +143,7 @@ pub fn parse_args(args: Vec<String>) -> Result<Vec<Job>, String> {
     // Default output path if not specified
     if working_job.output_path == "" {
         let input = working_job.input_path.clone();
-        if input[input.len() - 4..] == *".lia" {
+        if input.len() > 4 && input[input.len() - 4..] == *".lia" {
             working_job.output_path = input[0..input.len() - 4].to_string() + ".tex";
         } else {
             working_job.output_path = input + ".tex";

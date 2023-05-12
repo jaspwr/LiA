@@ -3,8 +3,8 @@ use std::process::Command;
 use std::thread;
 use std::time::Duration;
 
-use crate::hierachy_construction;
 use crate::hierarchy::Node;
+use crate::hierarchy_construction;
 use crate::tokeniser;
 use crate::utils::{load_utf8_file, write_utf8_file};
 
@@ -19,13 +19,13 @@ pub struct Job {
 }
 
 pub fn compile(job: Job) -> Result<(), String> {
-    let lia_file = match load_utf8_file(job.input_path) {
+    let lia_file = match load_utf8_file(&job.input_path) {
         Ok(contents) => contents,
         Err(e) => {
             return Err(format!("{}. Aborted.", e));
         }
     };
-    let output = run_compiler(lia_file)?;
+    let output = run_compiler(lia_file, job.clone())?;
     if job.debug_printing {
         println!("{}", output);
     }
@@ -64,9 +64,9 @@ pub fn compile(job: Job) -> Result<(), String> {
     }
 }
 
-pub fn run_compiler(lia_file: String) -> Result<String, String> {
+pub fn run_compiler(lia_file: String, job: Job) -> Result<String, String> {
     let tokens = tokeniser::to_tokens(lia_file);
-    let doc = hierachy_construction::contruct_doc(tokens)?;
+    let doc = hierarchy_construction::contruct_doc(tokens, job)?;
     let output = doc.codegen();
     Ok(output)
 }

@@ -1,10 +1,10 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
-use crate::hierachy_construction::{
+use crate::hierarchy::{DocSection, Node, TexCommand, TexEnvironment, Text};
+use crate::hierarchy_construction::{
     node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
 };
-use crate::hierarchy::{DocSection, Node, TexCommand, TexEnvironment, Text};
 use crate::token::*;
 use crate::tokeniser::TokenList;
 use crate::utils::parse_args;
@@ -27,6 +27,7 @@ pub struct TexCommandParser {
     env_parsing_state: EnvParsingState,
     env_name: String,
     env_depth: i32,
+    curly_depth: i32,
     is_dec: bool,
     next: bool,
 }
@@ -41,6 +42,7 @@ impl NodeParser for TexCommandParser {
     ) -> bool {
         self.env_parsing_state = EnvParsingState::NotEnv;
         self.env_depth = 0;
+        self.curly_depth = -1;
         self.is_dec = false;
         self.next = false;
         match token {
@@ -65,6 +67,10 @@ impl NodeParser for TexCommandParser {
         next_token_no_white_space: &Token,
         bracket_depths: &BrackDepths,
     ) -> bool {
+        if self.curly_depth == -1 {
+            self.curly_depth = bracket_depths.curly;
+        }
+
         if self.is_dec {
             if let Token::Newline = token {
                 return true;
@@ -78,10 +84,10 @@ impl NodeParser for TexCommandParser {
 
         match self.env_parsing_state {
             EnvParsingState::NotEnv => {
-                bracket_depths.curly == 0
+                bracket_depths.curly == self.curly_depth
                     && bracket_depths.square == 0
                     && match next_token {
-                        Token::Nothing(t, _) => t != "{" && t != "[",
+                        Token::Misc(t, _) => t != "{" && t != "[",
                         Token::Newline => {
                             self.next = true;
                             false
@@ -89,21 +95,24 @@ impl NodeParser for TexCommandParser {
                         _ => true,
                     }
                     && match next_token_no_white_space {
-                        Token::Nothing(t, _) => {
-                            if t == "=" {
-                                // Needs to consume rest of line
-                                self.is_dec = true;
-                                false
-                            } else {
-                                true
-                            }
+                        Token::Misc(t, _) => {
+                            // if t == "=" {
+                            //     // Needs to consume rest of line
+                            //     self.is_dec = true;
+                            //     false
+                            // } else {
+                            //     true
+                            // }
+
+                            // This was causing issues. e.g. $ \theta = 0 $ would be moved to the declarations section.
+                            true
                         }
                         _ => true,
                     }
             }
             EnvParsingState::BeginOpeningCurly => {
                 match token {
-                    Token::Nothing(t, _) => {
+                    Token::Misc(t, _) => {
                         if t == "{" {
                             self.env_parsing_state = EnvParsingState::BeginName
                         }
@@ -114,7 +123,7 @@ impl NodeParser for TexCommandParser {
             }
             EnvParsingState::BeginName => {
                 match token {
-                    Token::Nothing(t, _) => {
+                    Token::Misc(t, _) => {
                         self.env_name = t.clone();
                         self.env_parsing_state = EnvParsingState::BeginClosingCurly;
                     }
@@ -145,7 +154,7 @@ impl NodeParser for TexCommandParser {
             }
             EnvParsingState::EndName => {
                 match token {
-                    Token::Nothing(t, _) => {
+                    Token::Misc(t, _) => {
                         if t == &self.env_name {
                             self.env_parsing_state = EnvParsingState::EndClosingCurly;
                         }
@@ -226,6 +235,7 @@ impl TexCommandParser {
             }
         }
         .to_string();
+
         if self.is_dec {
             let mut v = vec![Rc::new(TexCommand {
                 command,
@@ -246,6 +256,7 @@ impl TexCommandParser {
             }
             _ => DocSection::Document,
         };
+
         let mut v = vec![Rc::new(TexCommand {
             command,
             args: parse_args(&tokens, 1, tokens.len(), other_doc_locations)?,
@@ -255,6 +266,7 @@ impl TexCommandParser {
                 text: "\n".to_string(),
             }));
         }
+
         Ok((v, section))
     }
 }

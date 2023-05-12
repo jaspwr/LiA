@@ -1,16 +1,18 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
-use crate::hierachy_construction::{
+use crate::hierarchy::{DocSection, TexEnvironment};
+use crate::hierarchy_construction::{
     node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
 };
-use crate::hierarchy::{DocSection, TexEnvironment};
 use crate::token::*;
 use crate::tokeniser::TokenList;
 use crate::utils::format_error_string;
 
 #[derive(Default)]
-pub struct LiaEnvParser {}
+pub struct LiaEnvParser {
+    curly_depth: i32,
+}
 
 #[allow(unused)]
 impl NodeParser for LiaEnvParser {
@@ -20,6 +22,7 @@ impl NodeParser for LiaEnvParser {
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        self.curly_depth = -1;
         match token {
             Token::LiaKeyword(k, _) => k == "env",
             _ => false,
@@ -33,8 +36,11 @@ impl NodeParser for LiaEnvParser {
         next_token_no_white_space: &Token,
         bracket_depths: &BrackDepths,
     ) -> bool {
+        if self.curly_depth == -1 {
+            self.curly_depth = bracket_depths.curly;
+        }
         match token {
-            Token::Nothing(t, _) => t == "}" && bracket_depths.curly == 0,
+            Token::Misc(t, _) => t == "}" && bracket_depths.curly == self.curly_depth,
             _ => false,
         }
     }
@@ -55,7 +61,7 @@ impl NodeParser for LiaEnvParser {
             }
         }
         let command = match &tokens[command_pos] {
-            Token::Nothing(command, _) => command,
+            Token::Misc(command, _) => command,
             _ => {
                 return format_error_string(
                     "Unexpected token in environment statement. Aborted".to_string(),
@@ -68,7 +74,7 @@ impl NodeParser for LiaEnvParser {
         while command_pos < len {
             if let Token::Whitespace(_) = &tokens[command_pos] {
                 command_pos += 1;
-            } else if let Token::Nothing(t, loc) = &tokens[command_pos] {
+            } else if let Token::Misc(t, loc) = &tokens[command_pos] {
                 if t == "{" {
                     break;
                 } else {

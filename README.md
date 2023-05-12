@@ -1,13 +1,14 @@
-# LiA
-### A transpiled superset of TeX for writing LaTeX.
+<p align="center">
+    <img src="misc/lia.png" width="120px" alt="LiA logo">
+</p>
 
+### A transpiled superset of $\text{TeX}$ for writing $\text{LaTeX}$.
 [
     ![status](https://img.shields.io/github/actions/workflow/status/jaspwr/LiA/rust.yml?branch=main)
 ](https://github.com/jaspwr/LiA/actions/workflows/rust.yml)
 [
     ![AUR](https://img.shields.io/aur/version/lia-git)
 ](https://aur.archlinux.org/packages/lia-git)
-
 
 This is more for my personal use however you're welcome to use it or contribute. This is a superset of TeX that extends its syntax adding new several new features. These added features are just designed to make LaTeX code less verbose and faster to write but also just catered more towards my personal preference.
 
@@ -95,7 +96,7 @@ use graphicx, [utf8]inputenc
 [COMPILATION_RESULT_START]: <> (Do not remove this line.)
 ```tex
 \newcommand{\muliplication}[3]{
-    $#1 \times #2 = #3$ 
+    $#1 \times #2 = #3$
 }
 
 

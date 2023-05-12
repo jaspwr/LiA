@@ -1,16 +1,18 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
+use crate::compiler::Job;
 use crate::feature_matrix::get_status_list;
 use crate::feature_matrix::FeatureStatusList;
 use crate::hierarchy::*;
+use crate::parser_modules::bold_italic::BoldItalic;
+use crate::parser_modules::comments::Comment;
+use crate::parser_modules::enumerated_list::LiaMardownEnumListParser;
 use crate::parser_modules::environments::LiaEnvParser;
 use crate::parser_modules::equation::LiaEquation;
 use crate::parser_modules::imports::LiaUseParser;
-use crate::parser_modules::markdown_style_bold_italic::BoldItalic;
-use crate::parser_modules::markdown_style_enumerated_list::LiaMardownEnumListParser;
-use crate::parser_modules::markdown_style_list::LiaMardownListParser;
-use crate::parser_modules::markdown_style_section::LiaMarkDownSections;
+use crate::parser_modules::list::LiaMardownListParser;
+use crate::parser_modules::section::LiaMarkDownSections;
 use crate::parser_modules::tex_command::TexCommandParser;
 use crate::parser_modules::variables::Function;
 use crate::parser_modules::variables::LiaVariableParser;
@@ -24,11 +26,13 @@ pub struct CompilerGlobals {
     decs: NodeList,
     pub fucntions: Vec<Function>,
     pub feature_status_list: FeatureStatusList,
+    pub job: Job,
 }
 
-pub fn contruct_doc(tokens: TokenList) -> Result<Doc, String> {
+pub fn contruct_doc(tokens: TokenList, job: Job) -> Result<Doc, String> {
     let len = tokens.len();
     let mut other_doc_locations = CompilerGlobals::default();
+    other_doc_locations.job = job;
     other_doc_locations.feature_status_list = get_status_list(env!("CARGO_PKG_VERSION"))?;
 
     let doc = node_list(tokens, 0, len, &mut other_doc_locations)?;
@@ -49,7 +53,7 @@ pub fn node_list(
     // TODO: Refactor this function to be more readable.
     //       It's impossible to work with at the moment.
 
-    let mut node_parsers: [Box<dyn NodeParser>; 9] = [
+    let mut node_parsers: [Box<dyn NodeParser>; 10] = [
         Box::new(LiaMarkDownSections::default()),
         Box::new(TexCommandParser::default()),
         Box::new(LiaEnvParser::default()),
@@ -59,6 +63,7 @@ pub fn node_list(
         Box::new(BoldItalic::default()),
         Box::new(LiaEquation::default()),
         Box::new(LiaMardownEnumListParser::default()),
+        Box::new(Comment::default()),
     ];
 
     let mut items: NodeList = Vec::new();
@@ -237,7 +242,7 @@ fn text_node(tokens: &TokenList) -> Result<Rc<dyn Node>, String> {
     let mut text = String::new();
     for token in tokens {
         match token {
-            Token::Nothing(text_, _) => {
+            Token::Misc(text_, _) => {
                 text.push_str(&text_);
             }
             Token::Whitespace(space) => {

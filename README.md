@@ -145,8 +145,3 @@ For syntax highlighting and other features in VSCode, you can use the extension.
 
 # Contributing
 Any contributions are welcome. If you would like to contribute, please open an issue or pull request. Refer to TODO.md for a list of planned features and known issues.
-### Building docs and tooling.
-If you have made changes to the code that alter the language in anyway or bumped the version, it is a good idea to run the following command. This will recompile all of the code examples in the documentation, update list of known macros and keywords, etc.
-```bash
-cargo run --bin docs_and_tooling_builder
-```

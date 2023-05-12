@@ -9,9 +9,9 @@
     1. [Imports](#imports)
     1. [Italic](#italic)
     1. [Bold](#bold)
-    1. [Markdown style sections](#markdown-style-sections)
-    1. [Markdown style lists](#markdown-style-lists)
-    1. [Markdown style enumerated lists](#markdown-style-enumerated-lists)
+    1. [Sections](#sections)
+    1. [Lists](#lists)
+    1. [Enumerated lists](#enumerated-lists)
     1. [Variables](#variables)
         1. [Referencing variables](#referencing-variables)
         1. [Declaring variables](#declaring-variables)
@@ -82,7 +82,7 @@ This is an alternative syntax for the `textbf` command.
 
 -------------------
 
-### Markdown style sections
+### Sections
 
 | LiA          | TeX                      |
 |--------------|--------------------------|
@@ -98,7 +98,7 @@ Consumes remainder of line. For multiline enclose the section title in `{}`.
 
 -------------------
 
-### Markdown style lists
+### Lists
 Any line opened with a `*` will be treated as a list item. You can create nested lists with indentation. In most cases the indentation type will be inferred.
 > ⚠️ As of version 0.3.0, indentation types other than 4 spaces are unthoroughly tested and may not work as expected.
 #### Lia
@@ -131,8 +131,8 @@ Any line opened with a `*` will be treated as a list item. You can create nested
 
 -------------------
 
-### Markdown style enumerated lists
-Any line opened with `1.` will be treated as an enumerated list item, this can be any number. You can create nested lists with indentation. In most cases the indentation type will be inferred.
+### Enumerated lists
+Any line opened with `1.` will be treated as an enumerated list item. This can be any number. You can create nested lists with indentation. In most cases the indentation type will be inferred.
 > ⚠️ As of version 0.3.0, indentation types other than 4 spaces are unthoroughly tested and may not work as expected.
 #### Lia
 [COMPILATION_INPUT_START]: <> (Do not remove this line.)
@@ -274,7 +274,7 @@ eq* {
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
 $x = \left(\frac{1}{2} + 2^3\right) +\alpha$
 
-Operations are grouped by precedence, so `1 + 2 / 3` will be parsed as `1 + (2 / 3)` (it won't literally add brackets). operators are `+`, `-`, `*`, `/`, `%` and `^`. Other symbols such as `=` are treated as regular tokens or replaced if a [macro](#macros).
+Operations are grouped by precedence, so `1 + 2 / 3` will be parsed as `1 + (2 / 3)` (it won't literally add brackets). Operators are `+`, `-`, `*`, `/`, `%` and `^`. Other symbols such as `=` are treated as regular tokens or replaced if a [macro](#macros).
 #### Expression with grouping
 ##### Lia
 [COMPILATION_INPUT_START]: <> (Do not remove this line.)

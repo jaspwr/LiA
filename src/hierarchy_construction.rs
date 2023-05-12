@@ -11,7 +11,6 @@ use crate::parser_modules::enumerated_list::LiaMardownEnumListParser;
 use crate::parser_modules::environments::LiaEnvParser;
 use crate::parser_modules::equation::LiaEquation;
 use crate::parser_modules::imports::LiaUseParser;
-use crate::parser_modules::inline_julia::InlineJulia;
 use crate::parser_modules::list::LiaMardownListParser;
 use crate::parser_modules::section::LiaMarkDownSections;
 use crate::parser_modules::tex_command::TexCommandParser;
@@ -54,7 +53,7 @@ pub fn node_list(
     // TODO: Refactor this function to be more readable.
     //       It's impossible to work with at the moment.
 
-    let mut node_parsers: [Box<dyn NodeParser>; 11] = [
+    let mut node_parsers: [Box<dyn NodeParser>; 10] = [
         Box::new(LiaMarkDownSections::default()),
         Box::new(TexCommandParser::default()),
         Box::new(LiaEnvParser::default()),
@@ -64,7 +63,6 @@ pub fn node_list(
         Box::new(BoldItalic::default()),
         Box::new(LiaEquation::default()),
         Box::new(LiaMardownEnumListParser::default()),
-        Box::new(InlineJulia::default()),
         Box::new(Comment::default()),
     ];
 

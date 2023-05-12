@@ -22,8 +22,6 @@
         1. [Expression with grouping](#expression-with-grouping)
         1. [Matrices](#matrices)
         1. [Macros](#macros)
-    1. [Inline Julia](#inline-julia)
-        1. [Embedded Figures](#embedded-figures)
     1. [Explicit version specification](#explicit-version-specification)
 1. [Document Structure](#document-structure)
 
@@ -351,44 +349,6 @@ $\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}$
 > If you don't want a macro to be replaced, you can separate it with spaces e.g. `s i n` will be parsed as the separate pronumerals $s$, $i$ and $n$ and not `\sin`.
 -------------------
 
-### Inline Julia
-
-If Julia is installed on the system, you can use the `jl` block which can contain any valid Julia code which will be run at compile time to generate parts of your document such as tables or figures.
-
-
-Required Julia dependencies
-* `Plots`
-
-##### Lia
-```jl
-2 + 2 = jl { 2 + 2 }
-```
-##### Resulting TeX
-```tex
-2 + 2 = 4
-```
-The result of the Julia code will be inserted into the document.
-
-#### Embedded Figures
-A function you have access to by default in inline Julia code is `embedfig`. This function takes a `Plots.plot` and a `String` for the width and returns a `String` of the LaTeX code for the figure. In the future it may be possible to specify the image directory however for now you will need to have it set to `./`.
-
-##### Lia
-```jl
-jl {
-    using Plots
-    x = range(0, 10, length=100);
-    y = sin.(x);
-    return embedfig(plot(x, y), "10cm");
-}
-```
-
-##### Resulting TeX
-```tex
-\includegraphics[width=10cm]{zK6mN78UigKM.png}
-```
-The figure will be saved to the same directory as the TeX file. Note you have to have imported `graphicx` in your document.
-
--------------------
 ### Explicit version specification
 The variable `@LIAVERSION` is reserved for specifying the version that the document is written in. If you specify a version, the document will be compiled with that version of the compiler otherwise it will use the latest version. It is recommended to specify a version to ensure that your document will compile correctly in the future. Always specify the version as the first line of the document.
 ```tex

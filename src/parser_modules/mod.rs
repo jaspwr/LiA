@@ -4,7 +4,6 @@ pub mod enumerated_list;
 pub mod environments;
 pub mod equation;
 pub mod imports;
-pub mod inline_julia;
 pub mod list;
 pub mod section;
 pub mod tex_command;

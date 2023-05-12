@@ -132,12 +132,10 @@ lia file.lia -w
 Requires [Rust](https://www.rust-lang.org/tools/install) to be installed.
 ```bash
 git clone https://github.com/jaspwr/LiA
-cargo install --path [path-to-cloned-repo]
+cd LiA
+cargo build --release
 ```
-You will need to add Cargo's bin directory to your PATH environment variable.
-
-If you would prefer to install the binary yourself instead of using Cargo, you can run `cargo build --release` and copy the binary from `target/release/lia` to your desired location.
-
+Your binary will be in `target/release`.
 
 # VSCode extension
 For syntax highlighting and other features in VSCode, you can use the extension. To install it, copy `tooling/vscode/lia-helper` to your VSCode extensions directory (normally `~\.vscode\extensions`) then restart VSCode.

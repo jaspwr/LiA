@@ -1,5 +1,8 @@
-use std::{ error::Error, num::ParseIntError };
-use crate::{ utils::{ load_utf8_file, write_utf8_file }, cli::print_info };
+use crate::{
+    cli::print_info,
+    utils::{load_utf8_file, write_utf8_file},
+};
+use std::{error::Error, num::ParseIntError};
 
 pub fn parse_version_string(version: &str) -> Result<(u8, u8, u8), String> {
     let mut version_spl = version.split(".");
@@ -13,7 +16,7 @@ pub fn parse_version_string(version: &str) -> Result<(u8, u8, u8), String> {
 }
 
 fn try_ver_number_num_casts(
-    version_spl: &mut std::str::Split<&str>
+    version_spl: &mut std::str::Split<&str>,
 ) -> Result<(u8, u8, u8), ParseIntError> {
     let major = version_spl.next().unwrap().parse::<u8>()?;
     let minor = version_spl.next().unwrap().parse::<u8>()?;
@@ -52,7 +55,12 @@ static CARGO_TOML_URL: &'static str =
     "https://raw.githubusercontent.com/jaspwr/LiA/main/Cargo.toml";
 
 pub fn check_for_new_version() -> Result<(), Box<dyn Error>> {
-    let path = home::home_dir().unwrap().join(CACHE_FILE).to_str().unwrap().to_string();
+    let path = home::home_dir()
+        .unwrap()
+        .join(CACHE_FILE)
+        .to_str()
+        .unwrap()
+        .to_string();
     let f = match load_utf8_file(&path) {
         Ok(f) => f,
         Err(_) => "0\n0.0.0".to_string(),
@@ -60,8 +68,7 @@ pub fn check_for_new_version() -> Result<(), Box<dyn Error>> {
     let mut lines = f.lines();
     let last_ping = lines.next().unwrap().parse::<u64>()?;
     let last_version = lines.next().unwrap();
-    let current_time = std::time::SystemTime
-        ::now()
+    let current_time = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)?
         .as_secs();
     if current_time - last_ping < 86400 {
@@ -87,5 +94,12 @@ pub fn check_for_new_version() -> Result<(), Box<dyn Error>> {
 
 fn fetch_latest_version_string() -> Result<String, Box<dyn Error>> {
     let resp = reqwest::blocking::get(CARGO_TOML_URL)?.text()?;
-    Ok(resp.split("version = \"").nth(1).unwrap().split("\"").next().unwrap().to_string())
+    Ok(resp
+        .split("version = \"")
+        .nth(1)
+        .unwrap()
+        .split("\"")
+        .next()
+        .unwrap()
+        .to_string())
 }

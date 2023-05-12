@@ -1,10 +1,10 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
+use crate::hierarchy::{DocSection, Node, TexCommand, TexEnvironment, Text};
 use crate::hierarchy_construction::{
     node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
 };
-use crate::hierarchy::{DocSection, Node, TexCommand, TexEnvironment, Text};
 use crate::token::*;
 use crate::tokeniser::TokenList;
 use crate::utils::parse_args;

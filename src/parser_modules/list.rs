@@ -1,13 +1,13 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
+use crate::hierarchy::{DocSection, Node, TexEnvironment, Text};
 use crate::hierarchy_construction::{
     node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
 };
-use crate::hierarchy::{DocSection, Node, TexEnvironment, Text};
 use crate::token::*;
 use crate::tokeniser::TokenList;
-use crate::utils::{count_indentation, format_error_string, delta_bracket_depth};
+use crate::utils::{count_indentation, delta_bracket_depth, format_error_string};
 
 #[derive(Default)]
 pub struct LiaMardownListParser {

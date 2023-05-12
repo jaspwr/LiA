@@ -83,8 +83,8 @@ fn strip_doc_env(s: String) -> String {
 fn unindent(s: String) -> String {
     let mut out = String::new();
     for line in s.lines() {
-        out.push_str(&line[4..].to_string());
-        out.push_str("\n");
+        out.push_str(&line[4..]);
+        out.push('\n');
     }
     out.pop();
     out

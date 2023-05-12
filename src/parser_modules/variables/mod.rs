@@ -3,8 +3,10 @@ use std::rc::Rc;
 use crate::{
     bracket_depth::BrackDepths,
     feature_matrix::get_status_list,
-    hierarchy_construction::{node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult},
     hierarchy::{Arg, ArgList, ArgType, DocSection, Node, NodeList, TexCommand, Text},
+    hierarchy_construction::{
+        node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
+    },
     token::*,
     tokeniser::TokenList,
     utils::{count_whitespace, delta_bracket_depth, is_bracket, strip_all_whitespace, untokenise},
@@ -142,7 +144,6 @@ impl NodeParser for LiaVariableParser {
             _ => { panic!("Should not be here.") }
         }.to_string();
         // TODO: Check for legal name
-
 
         match self.statement_type {
             Some(StatmentType::Read) => Ok((

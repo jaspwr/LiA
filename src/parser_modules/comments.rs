@@ -1,11 +1,10 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
-use crate::hierarchy_construction::*;
 use crate::hierarchy::*;
+use crate::hierarchy_construction::*;
 use crate::token::*;
 use crate::tokeniser::TokenList;
-
 
 #[derive(Default)]
 pub struct Comment {}
@@ -33,7 +32,7 @@ impl NodeParser for Comment {
     ) -> bool {
         match token {
             Token::Newline => true,
-            _ => false
+            _ => false,
         }
     }
 
@@ -43,6 +42,11 @@ impl NodeParser for Comment {
         indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
-        Ok((vec![Rc::new(Text { text: "\n".to_string() })], DocSection::Document))
+        Ok((
+            vec![Rc::new(Text {
+                text: "\n".to_string(),
+            })],
+            DocSection::Document,
+        ))
     }
 }

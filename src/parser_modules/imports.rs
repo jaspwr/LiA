@@ -1,15 +1,15 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
-use crate::hierarchy_construction::*;
 use crate::hierarchy::*;
+use crate::hierarchy_construction::*;
 use crate::token::*;
 use crate::tokeniser::TokenList;
 use crate::utils::{delta_bracket_depth, parse_args};
 
 #[derive(Default)]
 pub struct LiaUseParser {
-    curly_depth: i32
+    curly_depth: i32,
 }
 
 #[allow(unused)]
@@ -53,7 +53,12 @@ impl NodeParser for LiaUseParser {
 
         let len = tokens.len();
 
-        imports.push(parse_to_args(tokens.clone(), 1, self.curly_depth, other_doc_locations)?);
+        imports.push(parse_to_args(
+            tokens.clone(),
+            1,
+            self.curly_depth,
+            other_doc_locations,
+        )?);
         let mut start = 1;
         while start < len {
             match &tokens[start] {
@@ -89,7 +94,7 @@ impl NodeParser for LiaUseParser {
 fn parse_to_args(
     tokens: TokenList,
     start: usize,
-    curly_depth:  i32,
+    curly_depth: i32,
     other_doc_locations: &mut CompilerGlobals,
 ) -> Result<ArgList, String> {
     let len = tokens.len();

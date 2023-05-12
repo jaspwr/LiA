@@ -1,11 +1,11 @@
+pub mod bold_italic;
+pub mod comments;
+pub mod enumerated_list;
 pub mod environments;
 pub mod equation;
 pub mod imports;
-pub mod bold_italic;
-pub mod enumerated_list;
+pub mod inline_julia;
 pub mod list;
 pub mod section;
 pub mod tex_command;
 pub mod variables;
-pub mod inline_julia;
-pub mod comments;

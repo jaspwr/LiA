@@ -3,8 +3,8 @@ use std::process::Command;
 use std::thread;
 use std::time::Duration;
 
-use crate::hierarchy_construction;
 use crate::hierarchy::Node;
+use crate::hierarchy_construction;
 use crate::tokeniser;
 use crate::utils::{load_utf8_file, write_utf8_file};
 

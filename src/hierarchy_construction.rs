@@ -5,13 +5,13 @@ use crate::compiler::Job;
 use crate::feature_matrix::get_status_list;
 use crate::feature_matrix::FeatureStatusList;
 use crate::hierarchy::*;
+use crate::parser_modules::bold_italic::BoldItalic;
 use crate::parser_modules::comments::Comment;
+use crate::parser_modules::enumerated_list::LiaMardownEnumListParser;
 use crate::parser_modules::environments::LiaEnvParser;
 use crate::parser_modules::equation::LiaEquation;
 use crate::parser_modules::imports::LiaUseParser;
 use crate::parser_modules::inline_julia::InlineJulia;
-use crate::parser_modules::bold_italic::BoldItalic;
-use crate::parser_modules::enumerated_list::LiaMardownEnumListParser;
 use crate::parser_modules::list::LiaMardownListParser;
 use crate::parser_modules::section::LiaMarkDownSections;
 use crate::parser_modules::tex_command::TexCommandParser;
@@ -65,7 +65,7 @@ pub fn node_list(
         Box::new(LiaEquation::default()),
         Box::new(LiaMardownEnumListParser::default()),
         Box::new(InlineJulia::default()),
-        Box::new(Comment::default())
+        Box::new(Comment::default()),
     ];
 
     let mut items: NodeList = Vec::new();

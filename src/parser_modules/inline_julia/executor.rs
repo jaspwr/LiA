@@ -1,8 +1,8 @@
-use std::{ path::Path, error::Error, sync::Mutex };
+use std::{error::Error, path::Path, sync::Mutex};
 
 use julia::api::Julia;
 
-use crate::{ hierarchy_construction::CompilerGlobals, cli::print_info };
+use crate::{cli::print_info, hierarchy_construction::CompilerGlobals};
 
 struct JuliaSession {
     session: Julia,
@@ -22,8 +22,8 @@ pub fn execute(code: String, compiler_globals: &mut CompilerGlobals) -> Result<S
     let jl = jl.as_mut().unwrap();
 
     let val = (match jl.session.eval_string(&code) {
-        Ok(v) => { Ok(v) }
-        Err(e) => { Err(format!("Julia error: {}", stringify_jl_err(e))) }
+        Ok(v) => Ok(v),
+        Err(e) => Err(format!("Julia error: {}", stringify_jl_err(e))),
     })?;
 
     Ok(val.to_string())
@@ -41,7 +41,10 @@ impl JuliaSession {
             }
         };
         if let Err(e) = init_session(&mut jl, compiler_globals) {
-            return Err(format!("Failed to initialize Julia session. {}", stringify_jl_err(e)));
+            return Err(format!(
+                "Failed to initialize Julia session. {}",
+                stringify_jl_err(e)
+            ));
         }
         Ok(JuliaSession { session: jl })
     }
@@ -49,7 +52,7 @@ impl JuliaSession {
 
 fn init_session(
     jl: &mut Julia,
-    compiler_globals: &mut CompilerGlobals
+    compiler_globals: &mut CompilerGlobals,
 ) -> Result<(), julia::error::Error> {
     let api: String = String::from_utf8_lossy(include_bytes!("../../../LiaAPI.jl")).to_string();
     jl.eval_string(api)?;
@@ -57,14 +60,12 @@ fn init_session(
     let img_folder = Path::new(&compiler_globals.job.input_path);
     let img_folder = img_folder.parent().unwrap();
 
-    jl.eval_string(
-        format!(
-            "doc_info = LiaDocInfo(true, \"{}\", \"{}\", \"{}\");",
-            compiler_globals.job.input_path,
-            compiler_globals.job.output_path,
-            img_folder.to_str().unwrap()
-        )
-    )?;
+    jl.eval_string(format!(
+        "doc_info = LiaDocInfo(true, \"{}\", \"{}\", \"{}\");",
+        compiler_globals.job.input_path,
+        compiler_globals.job.output_path,
+        img_folder.to_str().unwrap()
+    ))?;
 
     Ok(())
 }
@@ -74,6 +75,8 @@ fn stringify_jl_err(e: julia::error::Error) -> String {
         julia::error::Error::UnhandledException(e) => {
             return e.description().to_string();
         }
-        _ => { format!("Unknown error: {}", e) }
+        _ => {
+            format!("Unknown error: {}", e)
+        }
     }
 }

@@ -1,11 +1,11 @@
 use std::rc::Rc;
 
-use crate::hierarchy::{ DocSection, Text };
 use crate::bracket_depth::BrackDepths;
-use crate::utils::format_error_string;
-use crate::tokeniser::TokenList;
+use crate::hierarchy::{DocSection, Text};
+use crate::hierarchy_construction::{CompilerGlobals, IndentationType, NodeParser, ParseResult};
 use crate::token::*;
-use crate::hierarchy_construction::{ NodeParser, IndentationType, ParseResult, CompilerGlobals };
+use crate::tokeniser::TokenList;
+use crate::utils::format_error_string;
 
 #[derive(Default)]
 pub struct InlineJulia {
@@ -21,12 +21,12 @@ impl NodeParser for InlineJulia {
         &mut self,
         token: &Token,
         identation: i32,
-        other_doc_locations: &mut CompilerGlobals
+        other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
         self.curly_depth = -1;
         match token {
-            Token::LiaKeyword(k, _) => { k == "jl" }
-            _ => { false }
+            Token::LiaKeyword(k, _) => k == "jl",
+            _ => false,
         }
     }
 
@@ -35,14 +35,14 @@ impl NodeParser for InlineJulia {
         token: &Token,
         next_token: &Token,
         next_token_no_white_space: &Token,
-        bracket_depths: &BrackDepths
+        bracket_depths: &BrackDepths,
     ) -> bool {
         if self.curly_depth == -1 {
             self.curly_depth = bracket_depths.curly;
         }
         match token {
-            Token::Misc(t, _) => { t == "}" && bracket_depths.curly == self.curly_depth }
-            _ => { false }
+            Token::Misc(t, _) => t == "}" && bracket_depths.curly == self.curly_depth,
+            _ => false,
         }
     }
 
@@ -50,7 +50,7 @@ impl NodeParser for InlineJulia {
         &mut self,
         tokens: TokenList,
         indentation_type: Option<IndentationType>,
-        other_doc_locations: &mut CompilerGlobals
+        other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
         let mut open_pos = 1;
         let len = tokens.len();
@@ -63,21 +63,20 @@ impl NodeParser for InlineJulia {
                 } else {
                     return format_error_string(
                         format!("Unexpected token \"{}\" in inline Julia statement.", t),
-                        *loc
+                        *loc,
                     );
                 }
             } else {
                 return format_error_string(
                     "Unexpected token in inline Julia statement.".to_string(),
-                    tokens[open_pos].get_location()
+                    tokens[open_pos].get_location(),
                 );
             }
         }
         open_pos += 1;
 
-
         let mut jl_code = String::new();
-        for i in open_pos..len-1 {
+        for i in open_pos..len - 1 {
             jl_code += &tokens[i].stringify();
         }
         print!("\n");
@@ -86,11 +85,6 @@ impl NodeParser for InlineJulia {
             text: execute(jl_code, other_doc_locations)?,
         });
 
-        Ok((
-            vec![
-                text_node.clone()
-            ],
-            DocSection::Document,
-        ))
+        Ok((vec![text_node.clone()], DocSection::Document))
     }
 }

@@ -13,7 +13,6 @@ pub fn print_info(msg: String) {
     println!("[{}] {}", "INFO".yellow(), msg);
 }
 
-
 fn parse_flag(flag: &str) -> Result<Flag, String> {
     // TODO: Compound small flags. Not needed for now.
     match flag {

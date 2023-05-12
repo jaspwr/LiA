@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
-use crate::hierarchy_construction::*;
 use crate::hierarchy::*;
+use crate::hierarchy_construction::*;
 use crate::token::*;
 use crate::tokeniser::TokenList;
 use crate::utils::format_error_string;

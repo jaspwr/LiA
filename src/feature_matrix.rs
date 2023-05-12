@@ -1,4 +1,7 @@
-use crate::{ version::{ parse_version_string, version_cmp }, cli::print_info };
+use crate::{
+    cli::print_info,
+    version::{parse_version_string, version_cmp},
+};
 
 pub fn get_status_list(version_: &str) -> Result<FeatureStatusList, String> {
     let mut status_list = FeatureStatusList::default();
@@ -15,15 +18,17 @@ pub fn get_status_list(version_: &str) -> Result<FeatureStatusList, String> {
         );
     }
 
-    if version_cmp(version, "0.1.0") >= 0 {
-    }
+    if version_cmp(version, "0.1.0") >= 0 {}
     if version_cmp(version, "0.2.0") >= 0 {
         status_list.equation_statement_internal_syntax = ImplementationStatus::Implemented;
         status_list.enumerated_lists = ImplementationStatus::Implemented;
     }
 
     if current_cmp < 0 {
-        print_info(format!("Document is being compiled for version {}.", version_));
+        print_info(format!(
+            "Document is being compiled for version {}.",
+            version_
+        ));
     }
     Ok(status_list)
 }

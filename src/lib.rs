@@ -12,7 +12,7 @@ mod codegen;
 pub mod compiler;
 mod feature_matrix;
 pub mod grammar;
-mod hierachy_construction;
+mod hierarchy_construction;
 mod hierarchy;
 mod parser_modules;
 mod token;

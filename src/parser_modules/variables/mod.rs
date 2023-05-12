@@ -3,7 +3,7 @@ use std::rc::Rc;
 use crate::{
     bracket_depth::BrackDepths,
     feature_matrix::get_status_list,
-    hierachy_construction::{node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult},
+    hierarchy_construction::{node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult},
     hierarchy::{Arg, ArgList, ArgType, DocSection, Node, NodeList, TexCommand, Text},
     token::*,
     tokeniser::TokenList,

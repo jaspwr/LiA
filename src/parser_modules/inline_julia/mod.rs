@@ -5,7 +5,7 @@ use crate::bracket_depth::BrackDepths;
 use crate::utils::format_error_string;
 use crate::tokeniser::TokenList;
 use crate::token::*;
-use crate::hierachy_construction::{ NodeParser, IndentationType, ParseResult, CompilerGlobals };
+use crate::hierarchy_construction::{ NodeParser, IndentationType, ParseResult, CompilerGlobals };
 
 #[derive(Default)]
 pub struct InlineJulia {

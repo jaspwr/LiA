@@ -5,14 +5,15 @@ use crate::compiler::Job;
 use crate::feature_matrix::get_status_list;
 use crate::feature_matrix::FeatureStatusList;
 use crate::hierarchy::*;
+use crate::parser_modules::comments::Comment;
 use crate::parser_modules::environments::LiaEnvParser;
 use crate::parser_modules::equation::LiaEquation;
 use crate::parser_modules::imports::LiaUseParser;
 use crate::parser_modules::inline_julia::InlineJulia;
-use crate::parser_modules::markdown_style_bold_italic::BoldItalic;
-use crate::parser_modules::markdown_style_enumerated_list::LiaMardownEnumListParser;
-use crate::parser_modules::markdown_style_list::LiaMardownListParser;
-use crate::parser_modules::markdown_style_section::LiaMarkDownSections;
+use crate::parser_modules::bold_italic::BoldItalic;
+use crate::parser_modules::enumerated_list::LiaMardownEnumListParser;
+use crate::parser_modules::list::LiaMardownListParser;
+use crate::parser_modules::section::LiaMarkDownSections;
 use crate::parser_modules::tex_command::TexCommandParser;
 use crate::parser_modules::variables::Function;
 use crate::parser_modules::variables::LiaVariableParser;
@@ -53,7 +54,7 @@ pub fn node_list(
     // TODO: Refactor this function to be more readable.
     //       It's impossible to work with at the moment.
 
-    let mut node_parsers: [Box<dyn NodeParser>; 10] = [
+    let mut node_parsers: [Box<dyn NodeParser>; 11] = [
         Box::new(LiaMarkDownSections::default()),
         Box::new(TexCommandParser::default()),
         Box::new(LiaEnvParser::default()),
@@ -64,6 +65,7 @@ pub fn node_list(
         Box::new(LiaEquation::default()),
         Box::new(LiaMardownEnumListParser::default()),
         Box::new(InlineJulia::default()),
+        Box::new(Comment::default())
     ];
 
     let mut items: NodeList = Vec::new();

@@ -3,7 +3,7 @@ use std::process::Command;
 use std::thread;
 use std::time::Duration;
 
-use crate::hierachy_construction;
+use crate::hierarchy_construction;
 use crate::hierarchy::Node;
 use crate::tokeniser;
 use crate::utils::{load_utf8_file, write_utf8_file};
@@ -66,7 +66,7 @@ pub fn compile(job: Job) -> Result<(), String> {
 
 pub fn run_compiler(lia_file: String, job: Job) -> Result<String, String> {
     let tokens = tokeniser::to_tokens(lia_file);
-    let doc = hierachy_construction::contruct_doc(tokens, job)?;
+    let doc = hierarchy_construction::contruct_doc(tokens, job)?;
     let output = doc.codegen();
     Ok(output)
 }

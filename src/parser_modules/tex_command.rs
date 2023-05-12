@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
-use crate::hierachy_construction::{
+use crate::hierarchy_construction::{
     node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
 };
 use crate::hierarchy::{DocSection, Node, TexCommand, TexEnvironment, Text};

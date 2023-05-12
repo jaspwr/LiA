@@ -3,7 +3,7 @@ use std::{
     io::{Read, Write},
 };
 
-use crate::hierachy_construction::{node_list, CompilerGlobals, IndentationType, ParseResult};
+use crate::hierarchy_construction::{node_list, CompilerGlobals, IndentationType, ParseResult};
 use crate::{
     bracket_depth::BrackDepths,
     hierarchy::{Arg, ArgList, ArgType},

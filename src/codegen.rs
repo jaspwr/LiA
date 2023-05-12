@@ -1,4 +1,4 @@
-use crate::hierachy_construction::IndentationType;
+use crate::hierarchy_construction::IndentationType;
 use crate::hierarchy::*;
 use crate::utils::indent;
 

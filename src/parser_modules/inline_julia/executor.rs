@@ -2,7 +2,7 @@ use std::{ path::Path, error::Error, sync::Mutex };
 
 use julia::api::Julia;
 
-use crate::{ hierachy_construction::CompilerGlobals, cli::print_info };
+use crate::{ hierarchy_construction::CompilerGlobals, cli::print_info };
 
 struct JuliaSession {
     session: Julia,

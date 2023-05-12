@@ -120,9 +120,8 @@ use graphicx, [utf8]inputenc
 
 |__OS__|__Instructions__|
 |---|---|
-|__Windows__| Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually.
 |__Arch Linux__| Install from the AUR [https://aur.archlinux.org/packages/lia-git](https://aur.archlinux.org/packages/lia-git). |
-|__Other__| Follow the instructions in the [building](#building) section.
+|__Other__| Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually. |
 # Usage
 ```bash
 lia file.lia -w

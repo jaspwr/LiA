@@ -64,10 +64,8 @@ pub fn compile(job: Job) -> Result<(), String> {
 
 fn wait_for_child(child: &mut Result<std::process::Child, std::io::Error>) -> bool {
     if let Ok(child) = child {
-        if let Ok(status) = child.try_wait() {
-            if let Some(status) = status {
-                return status.success();
-            }
+        if let Ok(status) = child.wait() {
+            return status.success();
         }
     }
     false

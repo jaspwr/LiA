@@ -8,14 +8,12 @@
 - [ ] Vim syntax highlighting.
 - [ ] Create linter. Should also show LaTeX errors.
 - [ ] Add shorthands for Greek letters.
-- [ ] Configure automatic builds and releases on GH actions and set up a proper changelog file.
 - [ ] Compile multiple files at once.
 
 # Known issues
 - [ ] Comments are very broken in the syntax highlighter.
 - [ ] `eq` and `eq*` are broken in the syntax highlighter.
 - [ ] Commas break in equation statements. They should be normal outside of square brackets.
-- [ ] Command chaining is just broken in general.
 
 # Other
 - [ ] Refactor all the ugly parts.

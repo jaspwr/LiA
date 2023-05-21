@@ -124,10 +124,11 @@ use graphicx, [utf8]inputenc
 |__Other__| Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually. |
 # Usage
 ```bash
-lia file.lia -w
+lia file.lia -w --pdflatex
 ```
 * Run `lia --help` for more information on usage.
 * The `-w` flag will tell the compiler to watch the file for changes and recompile it.
+* The `--pdflatex` flag runs `pdflatex` on the outputted TeX file.
 # Building
 Requires [Rust](https://www.rust-lang.org/tools/install) to be installed.
 ```bash

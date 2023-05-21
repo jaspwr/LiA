@@ -1,7 +1,5 @@
 use std::path::PathBuf;
 use std::process::Command;
-use std::thread;
-use std::time::Duration;
 
 use crate::hierarchy::Node;
 use crate::hierarchy_construction;
@@ -49,6 +47,7 @@ pub fn compile(job: Job) -> Result<(), String> {
         let abs_path = PathBuf::from(output_path).canonicalize().unwrap(); //
         let mut child = Command::new("pdflatex")
             .arg(abs_path)
+            .arg("--interaction=nonstopmode")
             .spawn();
 
         if !wait_for_child(&mut child) {

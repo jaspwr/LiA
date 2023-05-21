@@ -1,6 +1,6 @@
-# LiA 0.3.0 Documentation
+# LiA 0.3.1 Documentation
 
->⚠️ This is the documentation for version 0.3.0. This is only an early version and is still in development. Do not expect any of these features to stay the same in future versions. Additionally, the compiler has not been thoroughly tested and may not work as expected. If you find any bugs or have any suggestions please open an issue or pull request on the [GitHub repository](https://github.com/jaspwr/LiA).
+>⚠️ This is the documentation for version 0.3.1. This is only an early version and is still in development. Do not expect any of these features to stay the same in future versions. Additionally, the compiler has not been thoroughly tested and may not work as expected. If you find any bugs or have any suggestions please open an issue or pull request on the [GitHub repository](https://github.com/jaspwr/LiA).
 
 
 ## Contents
@@ -100,7 +100,7 @@ Consumes remainder of line. For multiline enclose the section title in `{}`.
 
 ### Lists
 Any line opened with a `*` will be treated as a list item. You can create nested lists with indentation. In most cases the indentation type will be inferred.
-> ⚠️ As of version 0.3.0, indentation types other than 4 spaces are unthoroughly tested and may not work as expected.
+> ⚠️ As of version 0.3.1, indentation types other than 4 spaces are unthoroughly tested and may not work as expected.
 #### Lia
 [COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
@@ -133,7 +133,7 @@ Any line opened with a `*` will be treated as a list item. You can create nested
 
 ### Enumerated lists
 Any line opened with `1.` will be treated as an enumerated list item. This can be any number. You can create nested lists with indentation. In most cases the indentation type will be inferred.
-> ⚠️ As of version 0.3.0, indentation types other than 4 spaces are unthoroughly tested and may not work as expected.
+> ⚠️ As of version 0.3.1, indentation types other than 4 spaces are unthoroughly tested and may not work as expected.
 #### Lia
 [COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
@@ -169,7 +169,7 @@ LiA variables provide a less verbose way to define new commands.
 
 Any word annotated with a `@` will be treated as a variable.
 #### Referencing variables
-> ⚠️ As of version 0.3.0, variables with computed arguments can not be used before they are defined. This will be fixed in future versions.
+> ⚠️ As of version 0.3.1, variables with computed arguments can not be used before they are defined. This will be fixed in future versions.
 
 | LiA                      | TeX                      |
 |--------------------------|--------------------------|
@@ -254,7 +254,7 @@ $a \times b$
 The content inside the equation expression uses a separate syntax to more easily
 represent mathematical expressions. The content will be parsed and converted to
 LaTeX. Most TeX commands should work as normal.
-> ⚠️ As of version 0.3.0, TeX commands can be separated from their arguments by fractions. This can be solved by encasing the command in `{}`. This will be fixed in future versions.
+> ⚠️ As of version 0.3.1, TeX commands can be separated from their arguments by fractions. This can be solved by encasing the command in `{}`. This will be fixed in future versions.
 #### General expressions
 ##### Lia
 [COMPILATION_INPUT_START]: <> (Do not remove this line.)
@@ -352,7 +352,7 @@ $\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}$
 ### Explicit version specification
 The variable `@LIAVERSION` is reserved for specifying the version that the document is written in. If you specify a version, the document will be compiled with that version of the compiler otherwise it will use the latest version. It is recommended to specify a version to ensure that your document will compile correctly in the future. Always specify the version as the first line of the document.
 ```tex
-@LIAVERSION = 0.3.0
+@LIAVERSION = 0.3.1
 ```
 
 ## Document structure

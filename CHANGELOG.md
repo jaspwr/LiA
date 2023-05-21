@@ -1,2 +1,2 @@
 # Changelog
-* Fixed command chaining
+* Fixed command chaining.

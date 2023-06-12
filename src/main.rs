@@ -1,5 +1,5 @@
-use lia::run_from_args;
+use lia::run;
 
 fn main() {
-    run_from_args(std::env::args().collect());
+    run(std::env::args().collect());
 }

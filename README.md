@@ -11,7 +11,7 @@
     <img src="https://img.shields.io/aur/version/lia-git" alt="build">
 </a>
 
-This is more for my personal use however you're welcome to use it or contribute. This is a superset of TeX that extends its syntax adding new several new features. These added features are just designed to make LaTeX code less verbose and faster to write but also just catered more towards my personal preference.
+This project is in development (expect bugs). This is a superset of TeX that extends its syntax adding new several new features. These added features are just designed to make LaTeX code less verbose and faster to write but also just catered more towards my personal preference.
 
 > For a more detailed explanation of the features see the [documentation](docs.md).
 
@@ -143,4 +143,4 @@ For syntax highlighting and other features in VSCode, you can use the extension.
 
 
 # Contributing
-Any contributions are welcome. If you would like to contribute, please open an issue or pull request. Refer to TODO.md for a list of planned features and known issues.
+I am planning to do a full rewrite. Please do not contribute right now.

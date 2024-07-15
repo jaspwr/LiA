@@ -66,8 +66,7 @@ fn test_compilation_result(input_path: String, output_path: String, correct_outp
             if output != correct_output {
                 print_diff(&output, &correct_output, " ");
                 panic!("Output is not correct.");
-            } else {
-            }
+            } 
         }
         Err(e) => {
             panic!("{}", format! {"Compiler Error: {}", e})

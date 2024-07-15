@@ -4,7 +4,7 @@ use crate::utils::indent;
 
 impl Node for Text {
     fn codegen(&self) -> String {
-        self.text.clone()
+        self.text.clone().replace("\\@", "@")
     }
 }
 
@@ -27,11 +27,11 @@ impl Node for TexEnvironment {
             .into_iter()
             .map(|child| -> String { child.codegen() })
             .collect::<String>();
+
         if !children.starts_with('\n') {
             children.insert(0, '\n');
         }
 
-        // This is a little scuffed.
         children = children
             .trim_end_matches(' ')
             .trim_end_matches('\t')

@@ -95,7 +95,7 @@ fn parse_token(token: &String, begins_line: bool, location: Location) -> Token {
             return Token::LiaMarkDown(token.clone(), location);
         }
     }
-    if token.starts_with('\\') {
+    if token.starts_with('\\') && token.chars().nth(1).map(|c| c != '@').unwrap_or(false) {
         Token::TexCommand(token.clone(), location)
     } else if token.starts_with('@') {
         Token::LiaVariable(token.clone(), location)

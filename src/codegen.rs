@@ -1,5 +1,5 @@
-use crate::hierarchy::*;
-use crate::hierarchy_construction::IndentationType;
+use crate::document::*;
+use crate::parse::IndentationType;
 use crate::utils::indent;
 
 impl Node for Text {

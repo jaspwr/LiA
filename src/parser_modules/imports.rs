@@ -1,10 +1,10 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
-use crate::hierarchy::*;
-use crate::hierarchy_construction::*;
+use crate::document::*;
+use crate::parse::*;
 use crate::token::*;
-use crate::tokeniser::TokenList;
+use crate::tokenize::TokenList;
 use crate::utils::{delta_bracket_depth, parse_args};
 
 #[derive(Default)]

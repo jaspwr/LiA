@@ -1,12 +1,12 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
-use crate::hierarchy::{DocSection, Node, TexEnvironment, Text};
-use crate::hierarchy_construction::{
+use crate::document::{DocSection, Node, TexEnvironment, Text};
+use crate::parse::{
     node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
 };
 use crate::token::*;
-use crate::tokeniser::TokenList;
+use crate::tokenize::TokenList;
 use crate::utils::{count_indentation, delta_bracket_depth, format_error_string};
 
 #[derive(Default)]

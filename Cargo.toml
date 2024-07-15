@@ -12,3 +12,11 @@ text-diff = "0.4.0"
 home = "0.5.4"
 reqwest = { version = "0.11.13", features = ["blocking"] }
 # julia = { git = "https://github.com/jaspwr/julia-rs", version = "0.2.5" }
+
+[[bin]]
+name="lia"
+path="src/main.rs"
+
+[[bin]]
+name="rebuild-docs"
+path="src/docs_and_tooling_builder.rs"

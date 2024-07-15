@@ -4,7 +4,7 @@ use crate::bracket_depth::BrackDepths;
 use crate::compiler::Job;
 use crate::feature_matrix::get_status_list;
 use crate::feature_matrix::FeatureStatusList;
-use crate::hierarchy::*;
+use crate::document::*;
 use crate::parser_modules::bold_italic::BoldItalic;
 use crate::parser_modules::comments::Comment;
 use crate::parser_modules::enumerated_list::LiaMardownEnumListParser;
@@ -17,7 +17,7 @@ use crate::parser_modules::tex_command::TexCommandParser;
 use crate::parser_modules::variables::Function;
 use crate::parser_modules::variables::LiaVariableParser;
 use crate::token::*;
-use crate::tokeniser::*;
+use crate::tokenize::*;
 use crate::utils::{count_indentation, count_whitespace, delta_bracket_depth};
 
 #[derive(Default)]

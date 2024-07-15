@@ -1,5 +1,6 @@
 <p align="center">
-    <img src="misc/lia.png" width="120px" alt="LiA logo">
+    <img src="misc/lia.png" width="120px" alt="LiA logo"><br>
+    (LaTeX Is Annoying)
 </p>
 
 ### A transpiled superset of $\text{TeX}$ for writing $\text{LaTeX}$.
@@ -42,7 +43,6 @@ eq {
 [COMPILATION_INPUT_START]: <> (Do not remove this line.)
 ```tex
 use graphicx, [utf8]inputenc
-@cat = 🐈
 @img = (src, desc) => {
     env center {
         \image{@("images/" + src)}{10cm}
@@ -50,9 +50,9 @@ use graphicx, [utf8]inputenc
         **@desc**
     }
 }
-#* Cool Cat Image
+#* Cool Image
 ## A subsection
-@img(cat.png, Meow @cat!)
+@img(cat.png, A cat!)
 ```
 [COMPILATION_INPUT_END]: <> (Do not remove this line.)
 ### Resulting TeX
@@ -62,7 +62,6 @@ use graphicx, [utf8]inputenc
 \usepackage[utf8]{inputenc}
 
 
-\newcommand{\cat}{🐈}
 \newcommand{\img}[3]{
     \begin{center}
         \image{#3}{10cm}
@@ -73,9 +72,9 @@ use graphicx, [utf8]inputenc
 
 
 \begin{document}
-    \section*{Cool Cat Image}
+    \section*{Cool Image}
     \subsection{A subsection}
-    \img{cat.png}{Meow \cat!}{images/cat.png}
+    \img{cat.png}{A cat!}{images/cat.png}
 \end{document}
 ```
 [COMPILATION_RESULT_END]: <> (Do not remove this line.)
@@ -124,11 +123,11 @@ use graphicx, [utf8]inputenc
 |__Other__| Download the latest release from the [releases page](https://github.com/jaspwr/LiA/releases). There is currently no installer so you will need to add the directory to your path manually. |
 # Usage
 ```bash
-lia file.lia -w --pdflatex
+lia file.lia -w -c "pdflatex -interaction=nonstopmode file.tex"
 ```
 * Run `lia --help` for more information on usage.
 * The `-w` flag will tell the compiler to watch the file for changes and recompile it.
-* The `--pdflatex` flag runs `pdflatex` on the outputted TeX file.
+* The `-c` flag chains a command to run after the build.
 # Building
 Requires [Rust](https://www.rust-lang.org/tools/install) to be installed.
 ```bash

@@ -1,9 +1,9 @@
 use std::path::PathBuf;
 use std::process::Command;
 
-use crate::hierarchy::Node;
-use crate::hierarchy_construction;
-use crate::tokeniser;
+use crate::document::Node;
+use crate::parse;
+use crate::tokenize;
 use crate::utils::{load_utf8_file, write_utf8_file};
 
 #[derive(Default, Clone)]
@@ -44,7 +44,7 @@ pub fn compile(job: Job) -> Result<(), String> {
     }
 
     if job.pdflatex {
-        let abs_path = PathBuf::from(output_path).canonicalize().unwrap(); //
+        let abs_path = PathBuf::from(output_path).canonicalize().unwrap();
         let mut child = Command::new("pdflatex")
             .arg(abs_path)
             .arg("--interaction=nonstopmode")
@@ -71,8 +71,8 @@ fn wait_for_child(child: &mut Result<std::process::Child, std::io::Error>) -> bo
 }
 
 pub fn run_compiler(lia_file: String, job: Job) -> Result<String, String> {
-    let tokens = tokeniser::to_tokens(lia_file);
-    let doc = hierarchy_construction::contruct_doc(tokens, job)?;
+    let tokens = tokenize::to_tokens(lia_file);
+    let doc = parse::contruct_doc(tokens, job)?;
     let output = doc.codegen();
     Ok(output)
 }

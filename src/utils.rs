@@ -3,12 +3,12 @@ use std::{
     io::{Read, Write},
 };
 
-use crate::hierarchy_construction::{node_list, CompilerGlobals, IndentationType, ParseResult};
+use crate::parse::{node_list, CompilerGlobals, IndentationType, ParseResult};
 use crate::{
     bracket_depth::BrackDepths,
-    hierarchy::{Arg, ArgList, ArgType},
+    document::{Arg, ArgList, ArgType},
     token::*,
-    tokeniser::TokenList,
+    tokenize::TokenList,
 };
 
 pub fn load_utf8_file(path: &String) -> Result<String, std::io::Error> {

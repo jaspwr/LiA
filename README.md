@@ -1,6 +1,5 @@
 <p align="center">
     <img src="misc/lia.png" width="120px" alt="LiA logo"><br>
-    (LaTeX Is Annoying)
 </p>
 
 ### A transpiled superset of $\text{TeX}$ for writing $\text{LaTeX}$.

@@ -49,17 +49,14 @@ impl NodeParser for LiaMarkDownSections {
         _indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
-        let tokens = &tokens[range_start..=range_end];
+        let mut tokens = &tokens[range_start..=range_end];
 
-        let command = match &tokens[0] {
+        let mut command = match &tokens[0] {
             Token::LiaMarkDown(hash, loc) => {
                 match hash.as_str() {
                     "#" => { "section" },
                     "##" => { "subsection" },
                     "###" => { "subsubsection" },
-                    "#*" => { "section*" },
-                    "##*" => { "subsection*" },
-                    "###*" => { "subsubsection*" },
                     _ => { return format_error_string(
                         format!{"Lines opened with '#' will automatically be assumed to be a section. \"{hash}\" is not a valid section command. If you don't want this to parse as a section, add a '\\' to escape it."},
                         *loc) }
@@ -67,6 +64,14 @@ impl NodeParser for LiaMarkDownSections {
             },
             _ => { panic!("Should not be here.") }
         }.to_string();
+
+        if let Some(Token::Misc(t, _)) = tokens.get(1) {
+            if t == "*" {
+                tokens = &tokens[1..];
+                command += "*";
+            }
+        }
+
         Ok((
             vec![
                 Rc::new(TexCommand {

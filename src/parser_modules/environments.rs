@@ -98,7 +98,7 @@ impl NodeParser for LiaEnvParser {
                         text: tokens
                             .iter()
                             .skip(command_pos)
-                            .take(len - 2)
+                            .take(len - command_pos - 1)
                             .map(Token::stringify)
                             .collect::<Vec<_>>()
                             .join(""),

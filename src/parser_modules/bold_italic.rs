@@ -35,10 +35,9 @@ impl NodeParser for BoldItalic {
 
         if let Token::Misc(text, _) = token {
             if text.starts_with("**") {
+                self.b_or_i = Some(BOrI::Italic);
                 if text.starts_with("***") {
                     self.b_or_i = Some(BOrI::Bold);
-                } else {
-                    self.b_or_i = Some(BOrI::Italic);
                 }
 
                 self.start = Some(cursor);

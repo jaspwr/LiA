@@ -72,7 +72,7 @@ fn wait_for_child(child: &mut Result<std::process::Child, std::io::Error>) -> bo
 
 pub fn run_compiler(lia_file: String, job: Job) -> Result<String, String> {
     let tokens = tokenize::to_tokens(lia_file);
-    let doc = parse::contruct_doc(&tokens, job)?;
+    let doc = parse::parse(&tokens, job)?;
     let output = doc.codegen();
     Ok(output)
 }

@@ -30,7 +30,7 @@ pub struct CompilerGlobals {
     pub job: Job,
 }
 
-pub fn contruct_doc(tokens: TokenList, job: Job) -> Result<Doc, String> {
+pub fn parse(tokens: TokenList, job: Job) -> Result<Doc, String> {
     let len = tokens.len();
     let mut other_doc_locations = CompilerGlobals::default();
     other_doc_locations.job = job;
@@ -131,60 +131,6 @@ pub fn node_list(
     }
 
     Ok(items)
-}
-
-fn check_range(start: usize, tokens: TokenList, end: usize) {
-    if start > tokens.len() || end > tokens.len() {
-        panic!("start or end is out of bounds");
-    }
-}
-
-fn clamp_index(i: usize, tokens: &Vec<Token>) -> usize {
-    if i + 1 < tokens.len() {
-        i + 1
-    } else {
-        i
-    }
-}
-
-// fn append_token(
-//     child_tokens_buffer: &mut Vec<Token>,
-//     tokens: &Vec<Token>,
-//     i: usize,
-//     pushed_token_flag: &mut bool,
-//     node_parser: &mut Box<dyn NodeParser>,
-//     indentation_type: Option<IndentationType>,
-//     other_doc_locations: &mut CompilerGlobals,
-//     items: &mut Vec<Rc<dyn Node>>,
-//     in_parser_module: &mut Option<usize>,
-// ) -> Result<(), String> {
-//     child_tokens_buffer.push(tokens[i].clone());
-//     *pushed_token_flag = true;
-//     let node = node_parser.parse(
-//         child_tokens_buffer.clone(),
-//         indentation_type,
-//         other_doc_locations,
-//     )?;
-//     match node.1 {
-//         DocSection::Document => items.extend(node.0),
-//         DocSection::Declarations => other_doc_locations.decs.extend(node.0),
-//         DocSection::Imports => other_doc_locations.imps.extend(node.0),
-//     }
-//     child_tokens_buffer.clear();
-//     *in_parser_module = None;
-//     Ok(())
-// }
-
-fn append_text_node(
-    items: &mut Vec<Rc<dyn Node>>,
-    child_tokens_buffer: &mut Vec<Token>,
-    in_parser_module: &mut Option<usize>,
-    j: usize,
-) -> Result<(), String> {
-    items.push(text_node(&*child_tokens_buffer)?);
-    child_tokens_buffer.clear();
-    *in_parser_module = Some(j);
-    Ok(())
 }
 
 fn text_node(tokens: &[Token]) -> Result<Rc<dyn Node>, String> {

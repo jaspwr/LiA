@@ -110,8 +110,7 @@ pub fn node_list(
             }
         } else {
             for j in 0..node_parsers.len() {
-                if (node_parsers[j]).is_opener(tokens, i, indentation as i32, other_doc_locations)
-                {
+                if (node_parsers[j]).is_opener(tokens, i, indentation as i32, other_doc_locations) {
                     in_parser_module = Some(j);
                     range_started = i;
                     continue 'outer;

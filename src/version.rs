@@ -47,8 +47,7 @@ pub fn version_cmp(version1: (u8, u8, u8), version2str: &str) -> i8 {
 // This file may be used to store other things in the future, but for now
 // it's just needed for a timestamp of last ping and version.
 static CACHE_FILE: &str = ".liacache";
-static CARGO_TOML_URL: &str =
-    "https://raw.githubusercontent.com/jaspwr/LiA/main/Cargo.toml";
+static CARGO_TOML_URL: &str = "https://raw.githubusercontent.com/jaspwr/LiA/main/Cargo.toml";
 
 pub fn check_for_new_version() -> Result<(), Box<dyn Error>> {
     let path = home::home_dir()

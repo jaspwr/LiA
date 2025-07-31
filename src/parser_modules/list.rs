@@ -2,9 +2,7 @@ use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
 use crate::document::{DocSection, Node, TexEnvironment, Text};
-use crate::parse::{
-    node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
-};
+use crate::parse::{node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult};
 use crate::token::*;
 use crate::tokenize::TokenList;
 use crate::utils::{count_indentation, delta_bracket_depth, format_error_string};
@@ -24,7 +22,6 @@ impl NodeParser for LiaMardownListParser {
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
-
         let token = &tokens[cursor];
         self.curly_depth = -1;
 
@@ -43,7 +40,8 @@ impl NodeParser for LiaMardownListParser {
 
     fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
         let token = &tokens[cursor];
-        let next_token_no_white_space = &crate::utils::move_past_whitespace(tokens, cursor + 1).unwrap_or(Token::Newline);
+        let next_token_no_white_space =
+            &crate::utils::move_past_whitespace(tokens, cursor + 1).unwrap_or(Token::Newline);
 
         if self.curly_depth == -1 {
             self.curly_depth = bracket_depths.curly;
@@ -111,12 +109,7 @@ impl NodeParser for LiaMardownListParser {
                 Rc::new(TexEnvironment {
                     name: "itemize".to_string(),
                     args: vec![],
-                    children: node_list(
-                        &inner_nodes,
-                        0,
-                        inner_nodes.len(),
-                        other_doc_locations,
-                    )?,
+                    children: node_list(&inner_nodes, 0, inner_nodes.len(), other_doc_locations)?,
                 }),
                 Rc::new(Text {
                     text: "\n".to_string(),

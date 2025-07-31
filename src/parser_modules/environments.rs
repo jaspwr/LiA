@@ -35,7 +35,7 @@ impl NodeParser for LiaEnvParser {
         if self.curly_depth == -1 {
             self.curly_depth = bracket_depths.curly;
         }
-    
+
         // println!("       {:?} {}", token, bracket_depths.curly);
 
         match token {

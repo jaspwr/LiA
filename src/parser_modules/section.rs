@@ -97,10 +97,5 @@ fn rest_of_line(
             break;
         }
     }
-    node_list(
-        tokens.clone(),
-        start,
-        len - 1,
-        other_doc_locations,
-    )
+    node_list(tokens.clone(), start, len - 1, other_doc_locations)
 }

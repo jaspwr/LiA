@@ -18,7 +18,8 @@ pub fn get_status_list(version_: &str) -> Result<FeatureStatusList, String> {
         );
     }
 
-    version_cmp(version, "0.1.0");0;
+    version_cmp(version, "0.1.0");
+    0;
     if version_cmp(version, "0.2.0") >= 0 {
         status_list.equation_statement_internal_syntax = ImplementationStatus::Implemented;
         status_list.enumerated_lists = ImplementationStatus::Implemented;

@@ -23,7 +23,8 @@ impl Node for TexCommand {
 
 impl Node for TexEnvironment {
     fn codegen(&self) -> String {
-        let mut children = self.children
+        let mut children = self
+            .children
             .iter()
             .map(|child| -> String { child.codegen() })
             .collect::<String>();

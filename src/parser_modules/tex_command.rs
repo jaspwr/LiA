@@ -231,12 +231,7 @@ impl TexCommandParser {
                 command,
                 args: vec![],
             }) as Rc<dyn Node>];
-            v.extend(node_list(
-                tokens,
-                1,
-                tokens.len(),
-                other_doc_locations,
-            )?);
+            v.extend(node_list(tokens, 1, tokens.len(), other_doc_locations)?);
             return Ok((v, DocSection::Declarations));
         }
         let section: DocSection = match command.as_str() {

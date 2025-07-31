@@ -51,7 +51,7 @@ impl NodeParser for InlineCode {
         indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
-        let tokens = &tokens[range_start+1..range_end];
+        let tokens = &tokens[range_start + 1..range_end];
 
         Ok((
             vec![Rc::new(TexCommand {

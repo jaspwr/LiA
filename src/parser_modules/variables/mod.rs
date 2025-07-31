@@ -61,7 +61,8 @@ impl NodeParser for LiaVariableParser {
 
     fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
         let token = &tokens[cursor];
-        let next_token_no_white_space = &crate::utils::move_past_whitespace(tokens, cursor + 1).unwrap_or(Token::Newline);
+        let next_token_no_white_space =
+            &crate::utils::move_past_whitespace(tokens, cursor + 1).unwrap_or(Token::Newline);
         let next_token = &tokens[cursor + 1];
 
         if self.curly_depth == -1 {
@@ -378,12 +379,7 @@ fn parse_var_declaration(
         args: match find_nothing_token(tokens, "=>") {
             None => {
                 // There was no =>, so it is a const declaration.
-                const_declaration_args(
-                    command,
-                    tokens,
-                    terminated_by_newline,
-                    other_doc_locations,
-                )?
+                const_declaration_args(command, tokens, terminated_by_newline, other_doc_locations)?
             }
             Some(arrow_pos) => {
                 let spl = tokens.split_at(arrow_pos);
@@ -570,9 +566,7 @@ fn parse_fn_declaration_rhs(
                 } else {
                     return match t {
                         Token::Misc(t, loc) => {
-                            if t.starts_with('"')
-                                && !(t.ends_with('"') && t.len() > 1)
-                            {
+                            if t.starts_with('"') && !(t.ends_with('"') && t.len() > 1) {
                                 in_string_literal = true;
                                 string_literal_buffer.push_str(t);
                                 return None;

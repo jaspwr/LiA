@@ -12,8 +12,8 @@ fn classify_char(c: &char) -> CharGroup {
     match c {
         ' ' | '\t' | '\n' | '\r' | '\x0C' | '\x0B' => CharGroup::Whitespace,
         '(' | ')' | '{' | '}' | '[' | ']' => CharGroup::Bracket,
-        '=' | '>' | ',' | '#' | '*' | ':' | '%' | '<' | '~' | '!' | ';' | '+' | '-' | '/' | '^' | '`'
-        | '_' | '$' => CharGroup::Symbol,
+        '=' | '>' | ',' | '#' | '*' | ':' | '%' | '<' | '~' | '!' | ';' | '+' | '-' | '/' | '^'
+        | '`' | '_' | '$' => CharGroup::Symbol,
         _ => CharGroup::String,
     }
 }
@@ -49,17 +49,18 @@ pub fn to_tokens(input_lia: String) -> Vec<Token> {
             || c == '\\'
             || c == '@')
             && pre_c != '\\'
-            && !current_token.is_empty() {
-                let token = parse_token(&current_token, first_of_line, start_of_token);
-                match token {
-                    Token::Whitespace(_) => {}
-                    _ => {
-                        first_of_line = false;
-                    }
-                };
-                start_new_token(&mut start_of_token, line, column, &mut current_token);
-                ret.push(token);
-            }
+            && !current_token.is_empty()
+        {
+            let token = parse_token(&current_token, first_of_line, start_of_token);
+            match token {
+                Token::Whitespace(_) => {}
+                _ => {
+                    first_of_line = false;
+                }
+            };
+            start_new_token(&mut start_of_token, line, column, &mut current_token);
+            ret.push(token);
+        }
         current_token.push(c);
         column += 1;
         pre_char_group = char_group;

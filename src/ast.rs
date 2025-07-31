@@ -79,18 +79,14 @@ impl Ast {
         }
         match self.root_node {
             Some(ref root) => Ok(root.evaluate(imported_values)?),
-            None => {
-                Err("Attempted to evaluate an empty AST".to_string())
-            }
+            None => Err("Attempted to evaluate an empty AST".to_string()),
         }
     }
 
     pub fn codegen(&self) -> String {
         match self.root_node {
             Some(ref root) => root.codegen(),
-            None => {
-                "".to_string()
-            }
+            None => "".to_string(),
         }
     }
 }

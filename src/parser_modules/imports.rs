@@ -93,7 +93,7 @@ impl NodeParser for LiaUseParser {
 
     fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
         let token = &tokens[cursor];
-            
+
         if self.curly_depth == -1 {
             self.curly_depth = bracket_depths.curly;
         }

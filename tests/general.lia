@@ -134,3 +134,5 @@ env verbatim {
 }
 
 **hello**: hi
+
+use equations.lia

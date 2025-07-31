@@ -20,12 +20,12 @@ pub fn compile(job: Job) -> Result<(), String> {
     let lia_file = match load_utf8_file(&job.input_path) {
         Ok(contents) => contents,
         Err(e) => {
-            return Err(format!("{}. Aborted.", e));
+            return Err(format!("{e}. Aborted."));
         }
     };
     let output = run_compiler(lia_file, job.clone())?;
     if job.debug_printing {
-        println!("{}", output);
+        println!("{output}");
     }
 
     let output_path = job.output_path.clone();
@@ -35,11 +35,11 @@ pub fn compile(job: Job) -> Result<(), String> {
     if let Some(command) = job.chained_command {
         let mut spl = command.split(" ");
         let cmd: &str = spl.next().unwrap_or("");
-        let args = spl.filter(|s| s.len() > 0).collect::<Vec<&str>>();
+        let args = spl.filter(|s| !s.is_empty()).collect::<Vec<&str>>();
 
         let mut child = Command::new(cmd).args(&args).spawn();
         if !wait_for_child(&mut child) {
-            return Err(format!("Failed to run command \"{}\".", command));
+            return Err(format!("Failed to run command \"{command}\"."));
         }
     }
 
@@ -57,7 +57,7 @@ pub fn compile(job: Job) -> Result<(), String> {
 
     match file_res {
         Ok(_) => Ok(()),
-        Err(e) => Err(format!("{}. Aborted.", e)),
+        Err(e) => Err(format!("{e}. Aborted.")),
     }
 }
 

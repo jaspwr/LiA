@@ -72,7 +72,7 @@ impl NodeParser for LiaEquation {
                     break;
                 } else {
                     return format_error_string(
-                        format! {"Unexpected token \"{}\" in equation statement.", t},
+                        format! {"Unexpected token \"{t}\" in equation statement."},
                         *loc,
                     );
                 }
@@ -144,19 +144,19 @@ fn tokenise(token: &Token) -> Result<Option<AtExpToken>, String> {
                     return Ok(Some(AtExpToken::OperatorOrKeyword(t.to_string())));
                 }
             }
-            return Ok(Some(AtExpToken::Text(token.stringify())));
+            Ok(Some(AtExpToken::Text(token.stringify())))
         }
         Token::TexCommand(_, _) => {
-            return Ok(Some(AtExpToken::Text(token.stringify())));
+            Ok(Some(AtExpToken::Text(token.stringify())))
         }
         Token::LiaKeyword(t, loc) => {
-            return Err(format!("{} Unexpected keyword \"{}\" in equation statement. This will be supposed in future versions.", loc.stringify(), t));
+            Err(format!("{} Unexpected keyword \"{}\" in equation statement. This will be supposed in future versions.", loc.stringify(), t))
         }
         Token::LiaVariable(_, _) => {
-            return Err("Variables are not current supported in equation statements outside of functions. This will be supported in the future.".to_string());
+            Err("Variables are not current supported in equation statements outside of functions. This will be supported in the future.".to_string())
         }
         _ => {
-            return Ok(None);
+            Ok(None)
         }
     }
 }

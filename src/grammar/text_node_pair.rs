@@ -29,9 +29,9 @@ impl AstNode for TextNodePair {
         let has_space =
             !(value1.ends_with('_') || value2.starts_with('_') || value2.starts_with('{'));
         if has_space {
-            format!("{} {}", value1, value2)
+            format!("{value1} {value2}")
         } else {
-            format!("{}{}", value1, value2)
+            format!("{value1}{value2}")
         }
     }
 }

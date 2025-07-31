@@ -82,41 +82,39 @@ impl NodeParser for LiaVariableParser {
                 self.statement_type = Some(StatmentType::Read);
                 return true; // Read type
             }
+        } else if self.consuming_rest_of_line {
+            self.trailing_whitespace += 1;
+            if let Token::Newline = token {
+                return true;
+            }
+            return false;
         } else {
-            if self.consuming_rest_of_line {
-                self.trailing_whitespace += 1;
-                if let Token::Newline = token {
+            match self.statement_type {
+                Some(StatmentType::Read) => {
                     return true;
                 }
-                return false;
-            } else {
-                match self.statement_type {
-                    Some(StatmentType::Read) => {
-                        return true;
-                    }
-                    Some(StatmentType::Call) => return bracket_depths.round == 0,
-                    Some(StatmentType::Assign) => {
-                        return bracket_depths.curly == self.curly_depth
-                            && match token {
-                                Token::Newline => {
-                                    self.terminated_by_newline = true;
-                                    true
-                                }
-                                Token::Misc(t, _) => {
-                                    if t == "}" {
-                                        self.consuming_rest_of_line = true;
-                                        self.terminated_by_newline = false;
-                                        false
-                                    } else {
-                                        false
-                                    }
-                                }
-                                _ => false,
+                Some(StatmentType::Call) => return bracket_depths.round == 0,
+                Some(StatmentType::Assign) => {
+                    return bracket_depths.curly == self.curly_depth
+                        && match token {
+                            Token::Newline => {
+                                self.terminated_by_newline = true;
+                                true
                             }
-                    }
-                    None => {
-                        return true;
-                    }
+                            Token::Misc(t, _) => {
+                                if t == "}" {
+                                    self.consuming_rest_of_line = true;
+                                    self.terminated_by_newline = false;
+                                    false
+                                } else {
+                                    false
+                                }
+                            }
+                            _ => false,
+                        }
+                }
+                None => {
+                    return true;
                 }
             }
         }
@@ -136,7 +134,7 @@ impl NodeParser for LiaVariableParser {
         let command = match &tokens[0] {
             Token::LiaVariable(command, loc) => {
                     let command = &command[1..];
-                    if command.len() == 0 {
+                    if command.is_empty() {
                         return Err(
                             format!{"{} Invalid variable name \"{}\". Aborted.", loc.stringify(), command}
                         );
@@ -171,7 +169,7 @@ impl NodeParser for LiaVariableParser {
             Some(StatmentType::Assign) => {
                 if command == "LIAVERSION" {
                     other_doc_locations.feature_status_list = get_status_list(
-                        &strip_all_whitespace(untokenise(&tokens).split('=').last().unwrap()),
+                        &strip_all_whitespace(untokenise(tokens).split('=').next_back().unwrap()),
                     )?;
                     Ok((vec![], DocSection::Document))
                 } else {
@@ -320,7 +318,7 @@ fn split_call_args(
                 });
             }
         });
-        if errs.len() > 0 {
+        if !errs.is_empty() {
             return Err(errs.join("\n"));
         }
     }
@@ -337,9 +335,9 @@ fn append_arg(
 ) -> Result<(), String> {
     args.push(Arg {
         arg_type: ArgType::Curly,
-        arg: node_list(&tokens_buffer, 0, len, other_doc_locations)?,
+        arg: node_list(tokens_buffer, 0, len, other_doc_locations)?,
     });
-    let mut ws = count_whitespace(&tokens, 0);
+    let mut ws = count_whitespace(tokens, 0);
     if ws > len - 1 {
         ws = len - 1
     }
@@ -382,7 +380,7 @@ fn parse_var_declaration(
                 // There was no =>, so it is a const declaration.
                 const_declaration_args(
                     command,
-                    &tokens,
+                    tokens,
                     terminated_by_newline,
                     other_doc_locations,
                 )?
@@ -412,7 +410,7 @@ fn function_declaration_args(command: String, argc: usize, fn_contents: NodeList
         Arg {
             arg_type: ArgType::Curly,
             arg: vec![Rc::new(Text {
-                text: format! {"\\{}", command},
+                text: format! {"\\{command}"},
             })],
         },
         Arg {
@@ -448,7 +446,7 @@ fn const_declaration_args(
     let mut ret = vec![Arg {
         arg_type: ArgType::Curly,
         arg: vec![Rc::new(Text {
-            text: format! {"\\{}", command},
+            text: format! {"\\{command}"},
         })],
     }];
     let equal_oper_pos = count_whitespace(tokens, 0);
@@ -479,7 +477,7 @@ fn parse_fn_declaration_lhs(tokens: TokenList) -> Result<Vec<LiaVarName>, String
             continue;
         }
         let t = &tokens[i];
-        brack_depth += delta_bracket_depth(&t);
+        brack_depth += delta_bracket_depth(t);
         let mut type_annotation = "Any".to_string();
         match extract_type_annotation(tokens, i) {
             None => {}
@@ -538,7 +536,7 @@ fn parse_fn_declaration_rhs(
     lia_variables: &mut Vec<LiaVarName>,
     other_doc_locations: &mut CompilerGlobals,
 ) -> Result<NodeList, String> {
-    let start = count_whitespace(&tokens, 2) + 2;
+    let start = count_whitespace(tokens, 2) + 2;
     let mut in_at_expression = false;
     let mut in_string_literal = false;
     let mut string_literal_buffer = String::new();
@@ -547,11 +545,10 @@ fn parse_fn_declaration_rhs(
     let mut errors: Vec<String> = Vec::new();
     let mut did_error = false;
     let tokens: Vec<Token> = tokens
-        .clone()
-        .into_iter()
+        .iter()
         .filter_map(|t| -> Option<Token> {
             if in_at_expression {
-                brack_depth += delta_bracket_depth(&t);
+                brack_depth += delta_bracket_depth(t);
                 if in_string_literal {
                     match t {
                         Token::Misc(ref t, loc) => {
@@ -573,11 +570,11 @@ fn parse_fn_declaration_rhs(
                 } else {
                     return match t {
                         Token::Misc(t, loc) => {
-                            if t.chars().into_iter().next() == Some('"')
+                            if t.starts_with('"')
                                 && !(t.ends_with('"') && t.len() > 1)
                             {
                                 in_string_literal = true;
-                                string_literal_buffer.push_str(&t);
+                                string_literal_buffer.push_str(t);
                                 return None;
                             }
                             if t == ")" && brack_depth.round == 0 {

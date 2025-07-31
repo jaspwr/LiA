@@ -16,8 +16,8 @@ impl AstNode for Literal {
 
     fn codegen(&self) -> String {
         match &self.value {
-            TypedValue::Number(n) => format!("{}", n),
-            TypedValue::String(s) => format!("\"{}\"", s),
+            TypedValue::Number(n) => format!("{n}"),
+            TypedValue::String(s) => format!("\"{s}\""),
         }
     }
 }

@@ -155,7 +155,7 @@ pub fn generate_docs() {
             result, rpl.text, rpl.replacment, rpl.replacment
         );
     }
-    println!("{}", result);
+    println!("{result}");
 }
 
 #[allow(unused)]
@@ -164,8 +164,8 @@ pub fn generate_regex() {
     for rpl in REPLACMENTS.iter() {
         result = format!("{}|{}", result, do_regex_escapes(rpl.text));
     }
-    result = format!("{})", result[1..].to_string());
-    println!("{}", result);
+    result = format!("{})", &result[1..]);
+    println!("{result}");
 }
 
 static ESCAPES: [char; 2] = ['^', '+'];

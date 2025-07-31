@@ -4,7 +4,6 @@ use crate::bracket_depth::BrackDepths;
 use crate::document::{DocSection, Node, TexCommand, TexEnvironment, Text};
 use crate::parse::{node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult};
 use crate::token::*;
-use crate::tokenize::TokenList;
 use crate::utils::parse_args;
 
 #[derive(Default, PartialEq, Debug)]
@@ -110,40 +109,31 @@ impl NodeParser for TexCommandParser {
                     }
             }
             EnvParsingState::BeginOpeningCurly => {
-                match token {
-                    Token::Misc(t, _) => {
-                        if t == "{" {
-                            self.env_parsing_state = EnvParsingState::BeginName
-                        }
+                if let Token::Misc(t, _) = token {
+                    if t == "{" {
+                        self.env_parsing_state = EnvParsingState::BeginName
                     }
-                    _ => {}
                 };
                 false
             }
             EnvParsingState::BeginName => {
-                match token {
-                    Token::Misc(t, _) => {
-                        self.env_name = t.clone();
-                        self.env_parsing_state = EnvParsingState::BeginClosingCurly;
-                    }
-                    _ => {}
+                if let Token::Misc(t, _) = token {
+                    self.env_name = t.clone();
+                    self.env_parsing_state = EnvParsingState::BeginClosingCurly;
                 }
                 false
             }
             EnvParsingState::BeginClosingCurly => {
-                match token {
-                    Token::TexCommand(com, _) => {
-                        if com == "\\end" {
-                            if self.env_depth == 0 {
-                                self.env_parsing_state = EnvParsingState::EndOpeningCurly;
-                            } else {
-                                self.env_depth -= 1
-                            };
-                        } else if com == "\\begin" {
-                            self.env_depth += 1;
-                        }
+                if let Token::TexCommand(com, _) = token {
+                    if com == "\\end" {
+                        if self.env_depth == 0 {
+                            self.env_parsing_state = EnvParsingState::EndOpeningCurly;
+                        } else {
+                            self.env_depth -= 1
+                        };
+                    } else if com == "\\begin" {
+                        self.env_depth += 1;
                     }
-                    _ => {}
                 }
                 false
             }
@@ -152,13 +142,10 @@ impl NodeParser for TexCommandParser {
                 false
             }
             EnvParsingState::EndName => {
-                match token {
-                    Token::Misc(t, _) => {
-                        if t == &self.env_name {
-                            self.env_parsing_state = EnvParsingState::EndClosingCurly;
-                        }
+                if let Token::Misc(t, _) = token {
+                    if t == &self.env_name {
+                        self.env_parsing_state = EnvParsingState::EndClosingCurly;
                     }
-                    _ => {}
                 }
                 false
             }
@@ -201,7 +188,7 @@ impl TexCommandParser {
             4
         };
         let children = node_list(
-            tokens.clone(),
+            tokens,
             edge_size,
             tokens.len() - edge_size,
             other_doc_locations,
@@ -232,7 +219,7 @@ impl TexCommandParser {
                 // This should really be panicing as the code should never be here.
                 // Will cold fix eventually.
                 return Ok((
-                    node_list(tokens.clone(), 0, tokens.len(), other_doc_locations)?,
+                    node_list(tokens, 0, tokens.len(), other_doc_locations)?,
                     DocSection::Document,
                 ));
             }

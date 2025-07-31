@@ -58,25 +58,22 @@ impl NodeParser for LiaUseParser {
         let len = tokens.len();
 
         imports.push(parse_to_args(
-            tokens.clone(),
+            tokens,
             1,
             self.curly_depth,
             other_doc_locations,
         )?);
         let mut start = 1;
         while start < len {
-            match &tokens[start] {
-                Token::Misc(sym, _) => {
-                    if sym == "," {
-                        imports.push(parse_to_args(
-                            tokens.clone(),
-                            start + 1,
-                            self.curly_depth,
-                            other_doc_locations,
-                        )?);
-                    }
+            if let Token::Misc(sym, _) = &tokens[start] {
+                if sym == "," {
+                    imports.push(parse_to_args(
+                        tokens,
+                        start + 1,
+                        self.curly_depth,
+                        other_doc_locations,
+                    )?);
                 }
-                _ => {}
             };
             start += 1;
         }
@@ -154,7 +151,7 @@ fn parse_to_args(
     if end + 1 > len {
         panic!("No package name");
     }
-    if args.len() == 0 {
+    if args.is_empty() {
         end -= 1;
     }
     args.push(Arg {

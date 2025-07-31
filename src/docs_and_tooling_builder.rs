@@ -15,7 +15,7 @@ static COMP_OUT_CLOSE: &str = "[COMPILATION_RESULT_END]: <> (Do not remove this 
 fn main() {
     match build_docs() {
         Ok(_) => println!("Documentation built successfully!"),
-        Err(e) => println!("Error building documentation: {}", e),
+        Err(e) => println!("Error building documentation: {e}"),
     }
 }
 
@@ -68,7 +68,7 @@ fn strip_codeblock(s: String) -> String {
 }
 
 fn add_codeblock(s: String) -> String {
-    format!("\n```tex\n{}\n```\n", s)
+    format!("\n```tex\n{s}\n```\n")
 }
 
 fn strip_doc_env(s: String) -> String {

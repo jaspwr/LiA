@@ -23,7 +23,7 @@ impl NodeParser for InlineCode {
 
         if let Token::Misc(ref t, _) = token {
             self.start = Some(cursor);
-            return &*t == "`";
+            return t == "`";
         }
 
         false
@@ -37,7 +37,7 @@ impl NodeParser for InlineCode {
         }
 
         if let Token::Misc(ref t, _) = token {
-            return &*t == "`";
+            return t == "`";
         }
 
         false
@@ -58,7 +58,7 @@ impl NodeParser for InlineCode {
                 command: "texttt".to_string(),
                 args: vec![Arg {
                     arg: vec![Rc::new(Text {
-                        text: untokenise(&tokens),
+                        text: untokenise(tokens),
                     })],
                     arg_type: ArgType::Curly,
                 }],

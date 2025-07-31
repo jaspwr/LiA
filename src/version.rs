@@ -7,11 +7,11 @@ use std::{error::Error, num::ParseIntError};
 pub fn parse_version_string(version: &str) -> Result<(u8, u8, u8), String> {
     let mut version_spl = version.split(".");
     if version_spl.clone().count() != 3 {
-        return Err(format!("Invalid version string \"{}\".", version));
+        return Err(format!("Invalid version string \"{version}\"."));
     }
     match try_ver_number_num_casts(&mut version_spl) {
         Ok(v) => Ok(v),
-        Err(_) => Err(format!("Invalid version string \"{}\".", version)),
+        Err(_) => Err(format!("Invalid version string \"{version}\".")),
     }
 }
 
@@ -28,30 +28,26 @@ pub fn version_cmp(version1: (u8, u8, u8), version2str: &str) -> i8 {
     let (major1, minor1, patch1) = version1;
     let (major2, minor2, patch2) = parse_version_string(version2str).unwrap();
     if major1 > major2 {
-        return 1;
+        1
     } else if major1 < major2 {
         return -1;
+    } else if minor1 > minor2 {
+        return 1;
+    } else if minor1 < minor2 {
+        return -1;
+    } else if patch1 > patch2 {
+        return 1;
+    } else if patch1 < patch2 {
+        return -1;
     } else {
-        if minor1 > minor2 {
-            return 1;
-        } else if minor1 < minor2 {
-            return -1;
-        } else {
-            if patch1 > patch2 {
-                return 1;
-            } else if patch1 < patch2 {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
+        return 0;
     }
 }
 
 // This file may be used to store other things in the future, but for now
 // it's just needed for a timestamp of last ping and version.
-static CACHE_FILE: &'static str = ".liacache";
-static CARGO_TOML_URL: &'static str =
+static CACHE_FILE: &str = ".liacache";
+static CARGO_TOML_URL: &str =
     "https://raw.githubusercontent.com/jaspwr/LiA/main/Cargo.toml";
 
 pub fn check_for_new_version() -> Result<(), Box<dyn Error>> {
@@ -88,7 +84,7 @@ pub fn check_for_new_version() -> Result<(), Box<dyn Error>> {
             );
         }
     }
-    let _ = write_utf8_file(path, format!("{}\n{}", current_time, latest_version));
+    let _ = write_utf8_file(path, format!("{current_time}\n{latest_version}"));
     Ok(())
 }
 

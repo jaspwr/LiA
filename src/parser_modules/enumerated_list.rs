@@ -35,15 +35,13 @@ impl NodeParser for LiaMardownEnumListParser {
         if let Token::Newline = token {
             self.not_start_of_line = false;
             return false;
-        } else {
-            if !self.not_start_of_line {
-                if let Token::Whitespace(_) = token {
-                } else {
-                    self.not_start_of_line = true;
-                }
+        } else if !self.not_start_of_line {
+            if let Token::Whitespace(_) = token {
             } else {
-                return false;
+                self.not_start_of_line = true;
             }
+        } else {
+            return false;
         }
         match token {
             Token::Misc(text, _) => {

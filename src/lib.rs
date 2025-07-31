@@ -58,7 +58,7 @@ pub fn run_from_args(args: Vec<String>) {
     }
 }
 
-fn run_job(job: &Job) -> () {
+fn run_job(job: &Job) {
     match compile(job.clone()) {
         Ok(_) => {
             println!(

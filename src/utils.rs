@@ -55,15 +55,14 @@ pub fn parse_args(
             }
         }
         bracket_depths += delta;
-        if bracket_depths.curly == 0 && bracket_depths.square == 0 {
-            if arg_type.is_some() {
+        if bracket_depths.curly == 0 && bracket_depths.square == 0
+            && arg_type.is_some() {
                 ret.push(Arg {
                     arg_type: arg_type.unwrap(),
                     arg: node_list(tokens.clone(), arg_start, i, other_doc_locations)?,
                 });
                 arg_type = None;
             }
-        }
     }
     Ok(ret)
 }
@@ -95,12 +94,10 @@ pub fn count_whitespace(tokens: TokenList, start: usize) -> usize {
     while start + count < len {
         if let Token::Whitespace(_) = tokens[start + count] {
             count += 1;
+        } else if let Token::Newline = tokens[start + count] {
+            count += 1;
         } else {
-            if let Token::Newline = tokens[start + count] {
-                count += 1;
-            } else {
-                break;
-            }
+            break;
         }
     }
     count
@@ -148,8 +145,8 @@ pub fn format_error_string(message: String, location: Location) -> ParseResult {
 
 pub fn hash_file(path: &String) -> String {
     let bytes: &[u8] = &std::fs::read(path).unwrap();
-    let hash = sha256::digest(bytes);
-    hash
+    
+    sha256::digest(bytes)
 }
 
 pub fn indent(string: String, indentation: usize, indentation_type: IndentationType) -> String {
@@ -160,20 +157,14 @@ pub fn indent(string: String, indentation: usize, indentation_type: IndentationT
     for line in string.lines() {
         // Remove random single leading space.
         let mut line = line;
-        match line.chars().nth(0) {
-            Some(c) => match line.chars().nth(1) {
-                Some(c2) => {
-                    if c == ' ' && c2 != ' ' {
-                        line = &line[1..];
-                    }
-                }
-                None => {}
-            },
-            None => {}
-        }
+        if let Some(c) = line.chars().next() { if let Some(c2) = line.chars().nth(1) {
+            if c == ' ' && c2 != ' ' {
+                line = &line[1..];
+            }
+        } }
         // Don't indent empty lines.
-        if line.len() < 1 {
-            ret.push_str("\n");
+        if line.is_empty() {
+            ret.push('\n');
             continue;
         }
         for _ in 0..indentation {
@@ -189,7 +180,7 @@ pub fn indent(string: String, indentation: usize, indentation_type: IndentationT
             }
         }
         ret.push_str(line);
-        ret.push_str("\n");
+        ret.push('\n');
     }
     ret
 }
@@ -198,8 +189,7 @@ pub fn strip_tailing_whitespace_and_newlines(string: String) -> String {
     let mut white_space_count = 0;
     while is_whitespace(
         string[string.len() - white_space_count - 1..]
-            .chars()
-            .nth(0)
+            .chars().next()
             .unwrap(),
     ) {
         white_space_count += 1;

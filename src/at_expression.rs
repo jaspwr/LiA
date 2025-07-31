@@ -25,7 +25,7 @@ pub fn parse_at_exprssion(
     let mut errors: Vec<String> = Vec::new();
     let mut did_error = false;
     let tokens: Vec<AtExpToken> = tokens
-        .into_iter()
+        .iter()
         .map(|t| match AtExpToken::tokenise(t, &lia_variables) {
             Ok(t) => t,
             Err(e) => {
@@ -38,7 +38,7 @@ pub fn parse_at_exprssion(
     if did_error {
         return Err(errors.join("\n").to_string());
     }
-    if tokens.len() == 0 {
+    if tokens.is_empty() {
         return Err("Found empty @() expression.".to_string());
     }
     let ast = Ast::construct(
@@ -84,7 +84,7 @@ impl AtExpToken {
             Token::Misc(t, loc) => {
                 let first_char = t.chars().next().unwrap();
                 if first_char.is_numeric() {
-                    return Ok(parse_numerical_literal(t.clone(), *loc)?);
+                    return parse_numerical_literal(t.clone(), *loc);
                 } else if first_char == '"' {
                     return Ok(AtExpToken::Literal(TypedValue::String(
                         t[1..t.len() - 1].to_string(),
@@ -98,10 +98,10 @@ impl AtExpToken {
             }
             _ => panic!("Unexpected token in @() expression."),
         }
-        return Ok(AtExpToken::Identifier(get_imported_value_index(
+        Ok(AtExpToken::Identifier(get_imported_value_index(
             token.clone(),
             imported_value_names,
-        )?));
+        )?))
     }
 }
 

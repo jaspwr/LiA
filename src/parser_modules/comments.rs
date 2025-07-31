@@ -4,7 +4,6 @@ use crate::bracket_depth::BrackDepths;
 use crate::document::*;
 use crate::parse::*;
 use crate::token::*;
-use crate::tokenize::TokenList;
 
 #[derive(Default)]
 pub struct Comment {}

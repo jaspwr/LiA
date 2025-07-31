@@ -7,7 +7,7 @@ use crate::parse::{
 };
 use crate::token::*;
 use crate::tokenize::TokenList;
-use crate::utils::{count_indentation, delta_bracket_depth, format_error_string, move_past_whitespace};
+use crate::utils::{count_indentation, delta_bracket_depth, format_error_string};
 
 #[derive(Default)]
 pub struct LiaMardownListParser {

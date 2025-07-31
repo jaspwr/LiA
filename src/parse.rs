@@ -19,7 +19,7 @@ use crate::parser_modules::variables::Function;
 use crate::parser_modules::variables::LiaVariableParser;
 use crate::token::*;
 use crate::tokenize::*;
-use crate::utils::{count_indentation, count_whitespace, delta_bracket_depth};
+use crate::utils::{count_indentation, delta_bracket_depth};
 
 #[derive(Default)]
 pub struct CompilerGlobals {
@@ -91,9 +91,9 @@ pub fn node_list(
         count_indentation(&tokens, i, &mut indentation, &mut indentation_type);
 
         if let Some(m) = in_parser_module {
-            if node_parsers[m].is_closer(&tokens, i, &bracket_depths) {
+            if node_parsers[m].is_closer(tokens, i, &bracket_depths) {
                 let (nodes, section) = node_parsers[m].parse(
-                    &tokens,
+                    tokens,
                     range_started,
                     i,
                     indentation_type,
@@ -110,7 +110,7 @@ pub fn node_list(
             }
         } else {
             for j in 0..node_parsers.len() {
-                if (node_parsers[j]).is_opener(&tokens, i, indentation as i32, other_doc_locations)
+                if (node_parsers[j]).is_opener(tokens, i, indentation as i32, other_doc_locations)
                 {
                     in_parser_module = Some(j);
                     range_started = i;
@@ -186,15 +186,15 @@ fn text_node(tokens: &[Token]) -> Result<Rc<dyn Node>, String> {
     for token in tokens {
         match token {
             Token::Misc(text_, _) => {
-                text.push_str(&text_);
+                text.push_str(text_);
             }
             Token::Whitespace(space) => {
                 if space.contains(" ") {
-                    text.push_str(&" ".to_string());
+                    text.push(' ');
                 }
             }
             Token::Newline => {
-                text.push_str(&"\n".to_string());
+                text.push('\n');
             }
             Token::LiaKeyword(s, loc) => {
                 return Err(format! {"{} Malformed {} statement.", loc.stringify(), s})
@@ -208,7 +208,7 @@ fn text_node(tokens: &[Token]) -> Result<Rc<dyn Node>, String> {
                 )
             }
             Token::TexCommand(_, _) => {
-                return Err(format! {"Environment was opened but never closed."})
+                return Err("Environment was opened but never closed.".to_string())
             }
         }
     }

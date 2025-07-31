@@ -71,7 +71,7 @@ fn test_compilation_result(input_path: String, output_path: String, correct_outp
             }
         }
         Err(e) => {
-            panic!("{}", format! {"Compiler Error: {}", e})
+            panic!("{}", format! {"Compiler Error: {e}"})
         }
     };
 }

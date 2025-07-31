@@ -49,8 +49,7 @@ pub fn to_tokens(input_lia: String) -> Vec<Token> {
             || c == '\\'
             || c == '@')
             && pre_c != '\\'
-        {
-            if !current_token.is_empty() {
+            && !current_token.is_empty() {
                 let token = parse_token(&current_token, first_of_line, start_of_token);
                 match token {
                     Token::Whitespace(_) => {}
@@ -61,7 +60,6 @@ pub fn to_tokens(input_lia: String) -> Vec<Token> {
                 start_new_token(&mut start_of_token, line, column, &mut current_token);
                 ret.push(token);
             }
-        }
         current_token.push(c);
         column += 1;
         pre_char_group = char_group;
@@ -84,10 +82,7 @@ fn start_new_token(
 }
 
 fn parse_token(token: &String, begins_line: bool, location: Location) -> Token {
-    let last = match token.chars().last() {
-        Some(c) => c,
-        None => ' ',
-    };
+    let last = token.chars().last().unwrap_or(' ');
     if begins_line {
         if token.starts_with("#") {
             return Token::LiaMarkDown(token.clone(), location);

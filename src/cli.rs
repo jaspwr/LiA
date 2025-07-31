@@ -66,7 +66,7 @@ fn parse_flag(flag: &str) -> Result<Flag, String> {
                 ShouldContinue::Aborts
             },
         ))),
-        _ => Err(format!("Unrecognised flag: {}", flag)),
+        _ => Err(format!("Unrecognised flag: {flag}")),
     }
 }
 
@@ -90,21 +90,18 @@ pub fn parse_args(args: Vec<String>) -> Result<Vec<Job>, String> {
         }
         if arg[0..1] == *"-" {
             if flag.is_some() {
-                return Err(format! {"Expected value after flag; got {}.", arg});
+                return Err(format! {"Expected value after flag; got {arg}."});
             }
             let fl = parse_flag(&arg)?;
             flag = Some(fl.clone());
-            match fl {
-                Flag::OnlySelf(f) => {
-                    match f(&mut working_job) {
-                        ShouldContinue::Continues => {}
-                        ShouldContinue::Aborts => {
-                            return Ok(vec![]);
-                        }
-                    };
-                    flag = None;
-                }
-                _ => {}
+            if let Flag::OnlySelf(f) = fl {
+                match f(&mut working_job) {
+                    ShouldContinue::Continues => {}
+                    ShouldContinue::Aborts => {
+                        return Ok(vec![]);
+                    }
+                };
+                flag = None;
             }
         } else {
             match flag.clone() {
@@ -128,7 +125,7 @@ pub fn parse_args(args: Vec<String>) -> Result<Vec<Job>, String> {
                     file_count += 1;
                     // Remove if adding multiple file support
                     if file_count > 1 {
-                        return Err(format! {"Unexpected argument \"{}\".", arg});
+                        return Err(format! {"Unexpected argument \"{arg}\"."});
                     }
                 }
             }
@@ -141,7 +138,7 @@ pub fn parse_args(args: Vec<String>) -> Result<Vec<Job>, String> {
         return Err("No file was provided. Aborted.".to_string());
     }
     // Default output path if not specified
-    if working_job.output_path == "" {
+    if working_job.output_path.is_empty() {
         let input = working_job.input_path.clone();
         if input.len() > 4 && input[input.len() - 4..] == *".lia" {
             working_job.output_path = input[0..input.len() - 4].to_string() + ".tex";

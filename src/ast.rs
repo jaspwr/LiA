@@ -80,7 +80,7 @@ impl Ast {
         match self.root_node {
             Some(ref root) => Ok(root.evaluate(imported_values)?),
             None => {
-                return Err("Attempted to evaluate an empty AST".to_string());
+                Err("Attempted to evaluate an empty AST".to_string())
             }
         }
     }
@@ -89,7 +89,7 @@ impl Ast {
         match self.root_node {
             Some(ref root) => root.codegen(),
             None => {
-                return "".to_string();
+                "".to_string()
             }
         }
     }

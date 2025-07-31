@@ -13,8 +13,8 @@ impl Node for TexCommand {
         format!(
             "\\{}{}",
             self.command,
-            (&self.args)
-                .into_iter()
+            self.args
+                .iter()
                 .map(|arg| -> String { arg.codegen() })
                 .collect::<String>()
         )
@@ -23,8 +23,9 @@ impl Node for TexCommand {
 
 impl Node for TexEnvironment {
     fn codegen(&self) -> String {
-        let mut children = (&self.children)
-            .into_iter()
+        let mut children = self
+            .children
+            .iter()
             .map(|child| -> String { child.codegen() })
             .collect::<String>();
 
@@ -45,8 +46,8 @@ impl Node for TexEnvironment {
             format!(
                 "\\begin{{{}}}{}{}\\end{{{}}}",
                 self.name,
-                (&self.args)
-                    .into_iter()
+                self.args
+                    .iter()
                     .map(|arg| -> String { arg.codegen() })
                     .collect::<String>(),
                 indent(children, 1, IndentationType::Space(4)),
@@ -67,23 +68,23 @@ impl Node for Doc {
             .to_string();
 
         let spacing = (
-            if (decs.len() > 0 && imps.len() > 0)
-                || (inner.len() > 0 && imps.len() > 0 && decs.len() == 0)
+            if (!decs.is_empty() && !imps.is_empty())
+                || (!inner.is_empty() && !imps.is_empty() && decs.is_empty())
             {
                 "\n\n\n"
             } else {
                 ""
             },
-            if inner.len() > 0 && decs.len() > 0 {
+            if !inner.is_empty() && !decs.is_empty() {
                 "\n\n\n"
             } else {
                 ""
             },
         );
 
-        let doc = if inner.len() > 0 {
+        let doc = if !inner.is_empty() {
             let inner = indent(inner, 1, IndentationType::Space(4));
-            format! {"\\begin{{document}}\n{}\\end{{document}}", inner}
+            format! {"\\begin{{document}}\n{inner}\\end{{document}}"}
         } else {
             "".to_string()
         };
@@ -92,7 +93,7 @@ impl Node for Doc {
 }
 
 fn codegen_section(sec: &NodeList) -> String {
-    let decs = if sec.len() > 0 {
+    let decs = if !sec.is_empty() {
         codegen_nodelist(sec).trim_end_matches('\n').to_string()
     } else {
         "".to_string()
@@ -101,7 +102,7 @@ fn codegen_section(sec: &NodeList) -> String {
 }
 
 fn codegen_nodelist(list: &NodeList) -> String {
-    list.into_iter()
+    list.iter()
         .map(|node| -> String { node.codegen().clone() })
         .collect::<String>()
 }

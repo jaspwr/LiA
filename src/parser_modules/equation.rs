@@ -36,7 +36,13 @@ impl NodeParser for LiaEquation {
         }
     }
 
-    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths, start_bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(
+        &mut self,
+        tokens: &[Token],
+        cursor: usize,
+        bracket_depths: &BrackDepths,
+        start_bracket_depths: &BrackDepths,
+    ) -> bool {
         let token = &tokens[cursor];
 
         if self.curly_depth == -1 {

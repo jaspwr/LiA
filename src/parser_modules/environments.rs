@@ -7,9 +7,7 @@ use crate::token::*;
 use crate::utils::format_error_string;
 
 #[derive(Default)]
-pub struct LiaEnvParser {
-    curly_depth: i32,
-}
+pub struct LiaEnvParser {}
 
 #[allow(unused)]
 impl NodeParser for LiaEnvParser {
@@ -22,24 +20,23 @@ impl NodeParser for LiaEnvParser {
     ) -> bool {
         let token = &tokens[cursor];
 
-        self.curly_depth = -1;
         match token {
             Token::LiaKeyword(k, _) => k == "env",
             _ => false,
         }
     }
 
-    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(
+        &mut self,
+        tokens: &[Token],
+        cursor: usize,
+        bracket_depths: &BrackDepths,
+        start_bracket_depths: &BrackDepths,
+    ) -> bool {
         let token = &tokens[cursor];
 
-        if self.curly_depth == -1 {
-            self.curly_depth = bracket_depths.curly;
-        }
-
-        // println!("       {:?} {}", token, bracket_depths.curly);
-
         match token {
-            Token::Misc(t, _) => t == "}" && bracket_depths.curly == self.curly_depth,
+            Token::Misc(t, _) => t == "}" && bracket_depths.curly == start_bracket_depths.curly,
             _ => false,
         }
     }

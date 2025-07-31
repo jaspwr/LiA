@@ -34,8 +34,8 @@ impl NodeParser for TexCommandParser {
         &mut self,
         tokens: &[Token],
         cursor: usize,
-        identation: i32,
-        other_doc_locations: &mut CompilerGlobals,
+        _identation: i32,
+        _other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
         let token = &tokens[cursor];
 
@@ -44,22 +44,31 @@ impl NodeParser for TexCommandParser {
         self.curly_depth = -1;
         self.is_dec = false;
         self.next = false;
-        match token {
-            Token::TexCommand(com, _) => {
-                if com == "\\begin" {
-                    self.env_parsing_state = EnvParsingState::BeginOpeningCurly;
-                } else if com == "\\[" {
-                    self.env_parsing_state = EnvParsingState::SquareBracketEquationEnv;
-                } else if com == "\\]" {
-                    return false;
-                }
-                true
+
+        if let Token::TexCommand(com, _) = token {
+            if com == "\\]" {
+                return false;
             }
-            _ => false,
+
+            if com == "\\begin" {
+                self.env_parsing_state = EnvParsingState::BeginOpeningCurly;
+            } else if com == "\\[" {
+                self.env_parsing_state = EnvParsingState::SquareBracketEquationEnv;
+            }
+
+            return true;
         }
+
+        false
     }
 
-    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(
+        &mut self,
+        tokens: &[Token],
+        cursor: usize,
+        bracket_depths: &BrackDepths,
+        _start_bracket_depths: &BrackDepths,
+    ) -> bool {
         let token = &tokens[cursor];
         let next_token_no_white_space =
             &crate::utils::move_past_whitespace(tokens, cursor + 1).unwrap_or(Token::Newline);

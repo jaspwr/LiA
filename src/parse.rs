@@ -74,6 +74,7 @@ pub fn node_list(
     let mut indentation = 0;
     let mut range_started = 0;
     let mut indentation_type: Option<IndentationType> = None;
+    let mut bracket_depths_at_start_of_module = BrackDepths::default();
 
     let mut i = start;
 
@@ -91,7 +92,12 @@ pub fn node_list(
         count_indentation(&tokens, i, &mut indentation, &mut indentation_type);
 
         if let Some(m) = in_parser_module {
-            if node_parsers[m].is_closer(tokens, i, &bracket_depths) {
+            if node_parsers[m].is_closer(
+                tokens,
+                i,
+                &bracket_depths,
+                &bracket_depths_at_start_of_module,
+            ) {
                 let (nodes, section) = node_parsers[m].parse(
                     tokens,
                     range_started,
@@ -113,6 +119,7 @@ pub fn node_list(
                 if (node_parsers[j]).is_opener(tokens, i, indentation as i32, other_doc_locations) {
                     in_parser_module = Some(j);
                     range_started = i;
+                    bracket_depths_at_start_of_module = bracket_depths;
                     continue 'outer;
                 }
             }
@@ -223,7 +230,13 @@ pub trait NodeParser {
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool;
-    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool;
+    fn is_closer(
+        &mut self,
+        tokens: &[Token],
+        cursor: usize,
+        bracket_depths: &BrackDepths,
+        start_bracket_depths: &BrackDepths,
+    ) -> bool;
     fn parse(
         &mut self,
         tokens: &[Token],

@@ -59,7 +59,13 @@ impl NodeParser for LiaVariableParser {
         }
     }
 
-    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(
+        &mut self,
+        tokens: &[Token],
+        cursor: usize,
+        bracket_depths: &BrackDepths,
+        start_bracket_depths: &BrackDepths,
+    ) -> bool {
         let token = &tokens[cursor];
         let next_token_no_white_space =
             &crate::utils::move_past_whitespace(tokens, cursor + 1).unwrap_or(Token::Newline);

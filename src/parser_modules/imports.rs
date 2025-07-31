@@ -8,9 +8,7 @@ use crate::tokenize::TokenList;
 use crate::utils::{delta_bracket_depth, parse_args};
 
 #[derive(Default)]
-pub struct LiaUseParser {
-    curly_depth: i32,
-}
+pub struct LiaUseParser {}
 
 impl NodeParser for LiaUseParser {
     fn is_opener(
@@ -20,35 +18,18 @@ impl NodeParser for LiaUseParser {
         _identation: i32,
         _other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
-        self.curly_depth = -1;
         match &tokens[cursor] {
             Token::LiaKeyword(k, _) => k == "use",
             _ => false,
         }
     }
 
-    // fn is_closer(
-    //     &mut self,
-    //     token: &Token,
-    //     next_token: &Token,
-    //     next_token_no_white_space: &Token,
-    //     bracket_depths: &BrackDepths,
-    // ) -> bool {
-    //     if self.curly_depth == -1 {
-    //         self.curly_depth = bracket_depths.curly;
-    //     }
-    //     match token {
-    //         Token::Newline => bracket_depths.curly == self.curly_depth,
-    //         _ => false,
-    //     }
-    // }
-
     fn parse(
         &mut self,
         tokens: &[Token],
         range_start: usize,
         range_end: usize,
-        indentation_type: Option<IndentationType>,
+        _indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
         let tokens = &tokens[range_start..=range_end];
@@ -60,7 +41,7 @@ impl NodeParser for LiaUseParser {
         imports.push(parse_to_args(
             tokens,
             1,
-            self.curly_depth,
+            // self.curly_depth,
             other_doc_locations,
         )?);
         let mut start = 1;
@@ -70,7 +51,7 @@ impl NodeParser for LiaUseParser {
                     imports.push(parse_to_args(
                         tokens,
                         start + 1,
-                        self.curly_depth,
+                        // self.curly_depth,
                         other_doc_locations,
                     )?);
                 }
@@ -91,14 +72,17 @@ impl NodeParser for LiaUseParser {
         Ok((ret, DocSection::Imports))
     }
 
-    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(
+        &mut self,
+        tokens: &[Token],
+        cursor: usize,
+        bracket_depths: &BrackDepths,
+        start_bracket_depths: &BrackDepths,
+    ) -> bool {
         let token = &tokens[cursor];
 
-        if self.curly_depth == -1 {
-            self.curly_depth = bracket_depths.curly;
-        }
         match token {
-            Token::Newline => bracket_depths.curly == self.curly_depth,
+            Token::Newline => bracket_depths.curly == start_bracket_depths.curly,
             _ => false,
         }
     }
@@ -107,7 +91,7 @@ impl NodeParser for LiaUseParser {
 fn parse_to_args(
     tokens: TokenList,
     start: usize,
-    curly_depth: i32,
+    // curly_depth: i32,
     other_doc_locations: &mut CompilerGlobals,
 ) -> Result<ArgList, String> {
     let len = tokens.len();
@@ -127,7 +111,7 @@ fn parse_to_args(
     let mut end = start;
     while end < len {
         bracket_depth += delta_bracket_depth(&tokens[end]);
-        if bracket_depth.curly == curly_depth && bracket_depth.square == 0 {
+        if bracket_depth.curly == 0 && bracket_depth.square == 0 {
             if end + 1 >= len {
                 break;
             }

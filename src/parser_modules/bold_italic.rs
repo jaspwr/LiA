@@ -12,7 +12,7 @@ enum BOrI {
 
 #[derive(Default)]
 pub struct BoldItalic {
-    start: bool,
+    start: Option<usize>,
     end: bool,
     b_or_i: Option<BOrI>,
 }
@@ -22,51 +22,52 @@ impl NodeParser for BoldItalic {
         &mut self,
         tokens: &[Token],
         cursor: usize,
-        identation: i32,
-        other_doc_locations: &mut CompilerGlobals,
+        _identation: i32,
+        _other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
         let token = &tokens[cursor];
 
-        self.start = true;
         self.b_or_i = None;
         if self.end {
             self.end = false;
             return false;
         }
-        match token {
-            Token::Misc(text, _) => {
-                if text.starts_with("**") {
-                    if text.starts_with("***") {
-                        self.b_or_i = Some(BOrI::Bold);
-                    } else {
-                        self.b_or_i = Some(BOrI::Italic);
-                    }
-                    true
+
+        if let Token::Misc(text, _) = token {
+            if text.starts_with("**") {
+                if text.starts_with("***") {
+                    self.b_or_i = Some(BOrI::Bold);
                 } else {
-                    false
+                    self.b_or_i = Some(BOrI::Italic);
                 }
+
+                self.start = Some(cursor);
+
+                return true;
             }
-            _ => false,
         }
+
+        false
     }
 
-    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(
+        &mut self,
+        tokens: &[Token],
+        cursor: usize,
+        _bracket_depths: &BrackDepths,
+        _start_bracket_depths: &BrackDepths,
+    ) -> bool {
+        if self.start == Some(cursor) {
+            return false;
+        }
+
         let token = &tokens[cursor];
 
-        let mut ret = false;
-        if !self.start {
-            match token {
-                Token::Misc(t, loc) => {
-                    ret = t.starts_with('*');
-                }
-                Token::Newline => {
-                    ret = true;
-                }
-                _ => {}
-            }
+        match token {
+            Token::Misc(t, _) => t.starts_with('*'),
+            Token::Newline => true,
+            _ => false,
         }
-        self.start = false;
-        ret
     }
 
     fn parse(
@@ -74,7 +75,7 @@ impl NodeParser for BoldItalic {
         tokens: &[Token],
         range_start: usize,
         range_end: usize,
-        indentation_type: Option<IndentationType>,
+        _indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
         let tokens = &tokens[range_start..=range_end];

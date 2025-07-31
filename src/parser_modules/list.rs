@@ -10,7 +10,6 @@ use crate::utils::{count_indentation, delta_bracket_depth, format_error_string};
 #[derive(Default)]
 pub struct LiaMardownListParser {
     initial_indentation_depth: usize,
-    curly_depth: i32,
 }
 
 #[allow(unused)]
@@ -23,30 +22,29 @@ impl NodeParser for LiaMardownListParser {
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
         let token = &tokens[cursor];
-        self.curly_depth = -1;
 
-        match token {
-            Token::LiaMarkDown(text, _) => {
-                if text == "*" {
-                    self.initial_indentation_depth = identation as usize;
-                    true
-                } else {
-                    false
-                }
+        if let Token::LiaMarkDown(text, _) = token {
+            if text == "*" {
+                self.initial_indentation_depth = identation as usize;
+                return true;
             }
-            _ => false,
         }
+
+        false
     }
 
-    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(
+        &mut self,
+        tokens: &[Token],
+        cursor: usize,
+        bracket_depths: &BrackDepths,
+        start_bracket_depths: &BrackDepths,
+    ) -> bool {
         let token = &tokens[cursor];
         let next_token_no_white_space =
             &crate::utils::move_past_whitespace(tokens, cursor + 1).unwrap_or(Token::Newline);
 
-        if self.curly_depth == -1 {
-            self.curly_depth = bracket_depths.curly;
-        }
-        bracket_depths.curly == self.curly_depth
+        bracket_depths.curly == start_bracket_depths.curly
             && match token {
                 Token::Newline => match next_token_no_white_space {
                     Token::LiaMarkDown(text, _) => text != "*",

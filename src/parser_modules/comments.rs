@@ -13,8 +13,8 @@ impl NodeParser for Comment {
         &mut self,
         tokens: &[Token],
         cursor: usize,
-        identation: i32,
-        other_doc_locations: &mut CompilerGlobals,
+        _identation: i32,
+        _other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
         let token = &tokens[cursor];
 
@@ -24,7 +24,13 @@ impl NodeParser for Comment {
         }
     }
 
-    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(
+        &mut self,
+        tokens: &[Token],
+        cursor: usize,
+        _bracket_depths: &BrackDepths,
+        _start_bracket_depths: &BrackDepths,
+    ) -> bool {
         let token = &tokens[cursor];
 
         match token {

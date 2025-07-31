@@ -58,7 +58,7 @@ pub fn parse_args(
         if bracket_depths.curly == 0 && bracket_depths.square == 0 && arg_type.is_some() {
             ret.push(Arg {
                 arg_type: arg_type.unwrap(),
-                arg: node_list(tokens.clone(), arg_start, i, other_doc_locations)?,
+                arg: node_list(tokens, arg_start, i, other_doc_locations)?,
             });
             arg_type = None;
         }
@@ -149,9 +149,6 @@ pub fn hash_file(path: &String) -> String {
 }
 
 pub fn indent(string: String, indentation: usize, indentation_type: IndentationType) -> String {
-    // // HACK: remove this for now
-    // return string;
-
     let mut ret = String::new();
     for line in string.lines() {
         // Remove random single leading space.

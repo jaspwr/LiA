@@ -51,8 +51,6 @@ impl NodeParser for LiaEnvParser {
     ) -> ParseResult {
         let tokens = &tokens[range_start..=range_end];
 
-        // println!("{:?}", tokens);
-
         let mut command_pos = 1;
         let len = tokens.len();
         while command_pos < len {

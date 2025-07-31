@@ -102,7 +102,7 @@ impl NodeParser for TexCommandParser {
                         _ => true,
                     }
                     && match next_token_no_white_space {
-                        Token::Misc(t, _) => {
+                        Token::Misc(_, _) => {
                             // if t == "=" {
                             //     // Needs to consume rest of line
                             //     self.is_dec = true;
@@ -171,7 +171,7 @@ impl NodeParser for TexCommandParser {
         tokens: &[Token],
         range_start: usize,
         range_end: usize,
-        indentation_type: Option<IndentationType>,
+        _indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
         let tokens = &tokens[range_start..=range_end];

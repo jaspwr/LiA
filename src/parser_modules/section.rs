@@ -8,26 +8,32 @@ use crate::tokenize::TokenList;
 use crate::utils::format_error_string;
 
 #[derive(Default)]
-pub struct LiaMarkDownSections {
-}
+pub struct LiaMarkDownSections {}
 
 impl NodeParser for LiaMarkDownSections {
     fn is_opener(
         &mut self,
         tokens: &[Token],
         cursor: usize,
-        identation: i32,
-        other_doc_locations: &mut CompilerGlobals,
+        _identation: i32,
+        _other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
-        let token = &tokens[cursor];
-
-        match token {
-            Token::LiaMarkDown(text, _) => text.starts_with("#"),
-            _ => false,
+        if let Token::LiaMarkDown(text, _) = &tokens[cursor] {
+            if text.starts_with("#") {
+                return true;
+            }
         }
+
+        false
     }
 
-    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths, start_bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(
+        &mut self,
+        tokens: &[Token],
+        cursor: usize,
+        bracket_depths: &BrackDepths,
+        start_bracket_depths: &BrackDepths,
+    ) -> bool {
         let token = &tokens[cursor];
         match token {
             Token::Newline => bracket_depths.curly == start_bracket_depths.curly,
@@ -40,7 +46,7 @@ impl NodeParser for LiaMarkDownSections {
         tokens: &[Token],
         range_start: usize,
         range_end: usize,
-        indentation_type: Option<IndentationType>,
+        _indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
         let tokens = &tokens[range_start..=range_end];
@@ -92,5 +98,5 @@ fn rest_of_line(
             break;
         }
     }
-    node_list(tokens.clone(), start, len - 1, other_doc_locations)
+    node_list(tokens, start, len - 1, other_doc_locations)
 }

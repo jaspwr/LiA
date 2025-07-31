@@ -11,7 +11,6 @@ use crate::utils::{count_indentation, delta_bracket_depth, format_error_string};
 pub struct LiaMardownEnumListParser {
     initial_indentation_depth: usize,
     not_start_of_line: bool,
-    curly_depth: i32,
 }
 
 impl NodeParser for LiaMardownEnumListParser {
@@ -24,7 +23,6 @@ impl NodeParser for LiaMardownEnumListParser {
     ) -> bool {
         let token = &tokens[cursor];
 
-        self.curly_depth = -1;
         if !other_doc_locations
             .feature_status_list
             .enumerated_lists
@@ -56,18 +54,21 @@ impl NodeParser for LiaMardownEnumListParser {
         }
     }
 
-    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths, start_bracket_depths: &BrackDepths) -> bool {
+    fn is_closer(
+        &mut self,
+        tokens: &[Token],
+        cursor: usize,
+        bracket_depths: &BrackDepths,
+        start_bracket_depths: &BrackDepths,
+    ) -> bool {
         let token = &tokens[cursor];
         let next_token_no_white_space =
             &crate::utils::move_past_whitespace(tokens, cursor + 1).unwrap_or(Token::Newline);
 
-        if self.curly_depth == -1 {
-            self.curly_depth = bracket_depths.curly;
-        }
-        bracket_depths.curly == self.curly_depth
+        bracket_depths.curly == start_bracket_depths.curly
             && match token {
                 Token::Newline => match next_token_no_white_space {
-                    Token::Misc(text, _) => !is_list_number(next_token_no_white_space.stringify()),
+                    Token::Misc(_, _) => !is_list_number(next_token_no_white_space.stringify()),
                     _ => true,
                 },
                 _ => false,

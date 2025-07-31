@@ -16,8 +16,8 @@ impl NodeParser for InlineCode {
         &mut self,
         tokens: &[Token],
         cursor: usize,
-        identation: i32,
-        other_doc_locations: &mut CompilerGlobals,
+        _identation: i32,
+        _other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
         let token = &tokens[cursor];
 
@@ -54,8 +54,8 @@ impl NodeParser for InlineCode {
         tokens: &[Token],
         range_start: usize,
         range_end: usize,
-        indentation_type: Option<IndentationType>,
-        other_doc_locations: &mut CompilerGlobals,
+        _indentation_type: Option<IndentationType>,
+        _other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
         let tokens = &tokens[range_start + 1..range_end];
 

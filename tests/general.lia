@@ -1,3 +1,25 @@
+\documentclass{article}
+
+use [margin=0.6in]geometry
+use [utf8]inputenc
+
+use amsmath, graphicx, float, multicol, keystroke
+
+\graphicspath{ {./images}}
+\setlength{\parindent}{0cm}
+\parskip=7pt plus 1pt
+
+\newcounter{pl}
+@pl = (img, caption) => {
+    \refstepcounter{pl}
+    \label{fig:@img}
+    env center {
+        \includegraphics[width=0.6\textwidth]{@img}
+
+        **Figure \thepl: @caption**
+}
+}
+
 use somepack🐱, [🐱thing1]{thing2}otherpackage
 
 # Section

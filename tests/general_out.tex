@@ -1,8 +1,25 @@
+\documentclass{article}
+\usepackage[margin=0.6in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{multicol}
+\usepackage{keystroke}
 \usepackage{somepack🐱}
 \usepackage[🐱thing1]{thing2}{otherpackage}
 \documentclass{xyz}
 
 
+\newcommand{\pl}[2]{
+    \refstepcounter{pl}
+    \label{fig:#1}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{#1}
+
+        \textit{Figure \thepl: #2}
+    \end{center}
+}
 \newcommand{\fo🐱o}{bar🐱}
 \newcommand{\x}{{
  y
@@ -13,6 +30,13 @@
 
 
 \begin{document}
+    \graphicspath{{./images}}
+    \setlength{\parindent}{0cm}
+    \parskip=7pt plus 1pt
+
+    \newcounter{pl}
+
+
     \section{Section}
     Test test test test $f = \frac{1}{\sqrt{2🐱}}$ test test. \a, \🐱b ect.
 

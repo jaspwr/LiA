@@ -109,18 +109,30 @@ fn parse_to_args(
     };
 
     let mut end = start;
+
     while end < len {
         bracket_depth += delta_bracket_depth(&tokens[end]);
         if bracket_depth.curly == 0 && bracket_depth.square == 0 {
+            if end + 1 >= len {
+                break;
+            }
             if let Token::Misc(s, _) = &tokens[end + 1] {
-                if s != "[" && s != "{" {
+                if s == "[" || s == "{" {
+                    end += 1;
+                    continue;
+                } else {
                     end += 1;
                     break;
                 }
+            } else {
+                end += 1;
+                break;
             }
+        } else {
+            end += 1;
         }
-        end += 1;
     }
+
     let mut args: ArgList = parse_args(&tokens, start, end, other_doc_locations)?;
     if end + 1 > len {
         panic!("No package name");

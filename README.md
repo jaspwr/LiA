@@ -12,7 +12,7 @@
     <img src="https://img.shields.io/aur/version/lia-git" alt="build">
 </a>
 
-This project is in development (expect bugs). This is a superset of TeX that extends its syntax adding new several new features. These added features are just designed to make LaTeX code less verbose and faster to write but also just catered more towards my personal preference.
+This is a personal tool that I only update when I need something; it is not in active development. LiA is a superset of TeX that extends its syntax adding new several new features. These added features are just designed to make LaTeX code less verbose and faster to write but also just catered more towards my personal preference.
 
 > For a more detailed explanation of the features see the [documentation](docs.md).
 

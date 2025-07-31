@@ -59,11 +59,14 @@ a ###text
 1 . this should not be a list
                 1. this should
 
+a `bleh`
 \documentclass{xyz}
 
+`bleh`
 * {
     * {
-        asd
+        asd 
+`bleh`
     }
 }
 
@@ -102,3 +105,8 @@ a ###text
     ajskldjasld
 }
     1. askljdl
+
+env verbatim {
+    indended
+                indended
+}

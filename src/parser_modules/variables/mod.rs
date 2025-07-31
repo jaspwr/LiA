@@ -2,11 +2,9 @@ use std::rc::Rc;
 
 use crate::{
     bracket_depth::BrackDepths,
-    feature_matrix::get_status_list,
     document::{Arg, ArgList, ArgType, DocSection, Node, NodeList, TexCommand, Text},
-    parse::{
-        node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
-    },
+    feature_matrix::get_status_list,
+    parse::{node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult},
     token::*,
     tokenize::TokenList,
     utils::{count_whitespace, delta_bracket_depth, is_bracket, strip_all_whitespace, untokenise},
@@ -45,10 +43,12 @@ enum StatmentType {
 impl NodeParser for LiaVariableParser {
     fn is_opener(
         &mut self,
-        token: &Token,
+        tokens: &[Token],
+        cursor: usize,
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        let token = &tokens[cursor];
         self.statement_type = None;
         self.consuming_rest_of_line = false;
         self.trailing_whitespace = 0;
@@ -59,13 +59,11 @@ impl NodeParser for LiaVariableParser {
         }
     }
 
-    fn is_closer(
-        &mut self,
-        token: &Token,
-        next_token: &Token,
-        next_token_no_white_space: &Token,
-        bracket_depths: &BrackDepths,
-    ) -> bool {
+    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+        let token = &tokens[cursor];
+        let next_token_no_white_space = &crate::utils::move_past_whitespace(tokens, cursor + 1).unwrap_or(Token::Newline);
+        let next_token = &tokens[cursor + 1];
+
         if self.curly_depth == -1 {
             self.curly_depth = bracket_depths.curly;
         }
@@ -127,10 +125,14 @@ impl NodeParser for LiaVariableParser {
 
     fn parse(
         &mut self,
-        tokens: TokenList,
+        tokens: &[Token],
+        range_start: usize,
+        range_end: usize,
         indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
+        let tokens = &tokens[range_start..=range_end];
+
         let command = match &tokens[0] {
             Token::LiaVariable(command, loc) => {
                     let command = &command[1..];
@@ -214,7 +216,7 @@ fn split_call_args(
     function: Option<Function>,
 ) -> Result<Vec<Arg>, String> {
     let mut args: ArgList = Vec::new();
-    let mut tokens_buffer: TokenList = Vec::new();
+    let mut tokens_buffer: Vec<Token> = Vec::new();
     let mut str_args: Vec<Token> = Vec::new();
     for i in start..end {
         match &tokens[i] {
@@ -330,14 +332,14 @@ fn append_arg(
     tokens_buffer: &Vec<Token>,
     len: usize,
     other_doc_locations: &mut CompilerGlobals,
-    tokens: &Vec<Token>,
+    tokens: TokenList,
     str_args: &mut Vec<Token>,
 ) -> Result<(), String> {
     args.push(Arg {
         arg_type: ArgType::Curly,
-        arg: node_list(tokens_buffer.clone(), 0, len, other_doc_locations)?,
+        arg: node_list(&tokens_buffer, 0, len, other_doc_locations)?,
     });
-    let mut ws = count_whitespace(tokens, 0);
+    let mut ws = count_whitespace(&tokens, 0);
     if ws > len - 1 {
         ws = len - 1
     }
@@ -387,10 +389,10 @@ fn parse_var_declaration(
             }
             Some(arrow_pos) => {
                 let spl = tokens.split_at(arrow_pos);
-                let mut lia_variables: Vec<LiaVarName> = parse_fn_declaration_lhs(spl.0.to_vec())?;
+                let mut lia_variables: Vec<LiaVarName> = parse_fn_declaration_lhs(spl.0)?;
 
                 let function_inner: NodeList = parse_fn_declaration_rhs(
-                    spl.1[0..(spl.1.len() - trailing_whitespace)].to_vec(),
+                    &spl.1[0..(spl.1.len() - trailing_whitespace)],
                     &mut lia_variables,
                     other_doc_locations,
                 )?;
@@ -454,7 +456,7 @@ fn const_declaration_args(
     ret.push(Arg {
         arg_type: ArgType::Curly,
         arg: node_list(
-            tokens.to_vec(),
+            tokens,
             content_pos,
             if terminated_by_newline {
                 tokens.len() - 1
@@ -479,7 +481,7 @@ fn parse_fn_declaration_lhs(tokens: TokenList) -> Result<Vec<LiaVarName>, String
         let t = &tokens[i];
         brack_depth += delta_bracket_depth(&t);
         let mut type_annotation = "Any".to_string();
-        match extract_type_annotation(&tokens, i) {
+        match extract_type_annotation(tokens, i) {
             None => {}
             Some((ta, s)) => {
                 type_annotation = ta;
@@ -510,7 +512,7 @@ fn parse_fn_declaration_lhs(tokens: TokenList) -> Result<Vec<LiaVarName>, String
     Ok(ret)
 }
 
-fn extract_type_annotation(tokens: &Vec<Token>, i: usize) -> Option<(String, usize)> {
+fn extract_type_annotation(tokens: TokenList, i: usize) -> Option<(String, usize)> {
     let ws = count_whitespace(tokens, i) + i;
     if let Token::Misc(t, _) = &tokens[if ws < tokens.len() {
         ws
@@ -541,10 +543,10 @@ fn parse_fn_declaration_rhs(
     let mut in_string_literal = false;
     let mut string_literal_buffer = String::new();
     let mut brack_depth = BrackDepths::default();
-    let mut at_buf: TokenList = Vec::new();
+    let mut at_buf: Vec<Token> = Vec::new();
     let mut errors: Vec<String> = Vec::new();
     let mut did_error = false;
-    let tokens: TokenList = tokens
+    let tokens: Vec<Token> = tokens
         .clone()
         .into_iter()
         .filter_map(|t| -> Option<Token> {
@@ -556,7 +558,7 @@ fn parse_fn_declaration_rhs(
                             if t.ends_with('"') {
                                 in_string_literal = false;
                                 string_literal_buffer.push_str(t);
-                                at_buf.push(Token::Misc(string_literal_buffer.clone(), loc));
+                                at_buf.push(Token::Misc(string_literal_buffer.clone(), *loc));
                                 string_literal_buffer = String::new();
                             } else {
                                 string_literal_buffer.push_str(t.as_str());
@@ -591,10 +593,10 @@ fn parse_fn_declaration_rhs(
                                     },
                                 ));
                                 at_buf = Vec::new();
-                                Some(Token::Misc(format! {"#{}", lia_variables.len()}, loc))
+                                Some(Token::Misc(format! {"#{}", lia_variables.len()}, *loc))
                             } else {
                                 if !(t == "(" && brack_depth.round == 1) {
-                                    at_buf.push(Token::Misc(t, loc));
+                                    at_buf.push(Token::Misc(t.clone(), *loc));
                                 }
                                 None
                             }
@@ -611,12 +613,12 @@ fn parse_fn_declaration_rhs(
                     }
                     for i in 0..lia_variables.len() {
                         if lia_variables[i].matches_name(&var[1..]) {
-                            return Some(Token::Misc(format! {"#{}", i + 1}, loc));
+                            return Some(Token::Misc(format! {"#{}", i + 1}, *loc));
                         }
                     }
-                    Some(Token::LiaVariable(var, loc))
+                    Some(Token::LiaVariable(var.clone(), *loc))
                 }
-                _ => Some(t),
+                _ => Some(t.clone()),
             }
         })
         .collect();
@@ -636,5 +638,5 @@ fn parse_fn_declaration_rhs(
     }
 
     let len = tokens.len();
-    node_list(tokens, start, len - 1, other_doc_locations)
+    node_list(&tokens, start, len - 1, other_doc_locations)
 }

@@ -60,13 +60,15 @@ fn test_compilation_result(input_path: String, output_path: String, correct_outp
     };
     match compile(job.clone()) {
         Ok(_) => {
-            let output = load_utf8_file(&job.output_path).unwrap();
-            let correct_output = load_utf8_file(&correct_output_path).unwrap();
+            let output = load_utf8_file(&job.output_path).unwrap().replace("\r", "");
+            let correct_output = load_utf8_file(&correct_output_path)
+                .unwrap()
+                .replace("\r", "");
             remove_file(job.output_path).unwrap();
             if output != correct_output {
                 print_diff(&output, &correct_output, " ");
                 panic!("Output is not correct.");
-            } 
+            }
         }
         Err(e) => {
             panic!("{}", format! {"Compiler Error: {}", e})

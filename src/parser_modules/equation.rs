@@ -4,9 +4,7 @@ use crate::ast::Ast;
 use crate::at_expression::AtExpToken;
 use crate::bracket_depth::BrackDepths;
 use crate::document::{DocSection, Node, TexEnvironment, Text};
-use crate::parse::{
-    node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
-};
+use crate::parse::{node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult};
 use crate::token::*;
 use crate::tokenize::TokenList;
 use crate::utils::format_error_string;
@@ -24,10 +22,13 @@ static OPERATORS_AND_KEYWORDS: [&str; 15] = [
 impl NodeParser for LiaEquation {
     fn is_opener(
         &mut self,
-        token: &Token,
+        tokens: &[Token],
+        cursor: usize,
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        let token = &tokens[cursor];
+
         self.curly_depth = -1;
         match token {
             Token::Misc(k, _) => k == "eq",
@@ -35,13 +36,9 @@ impl NodeParser for LiaEquation {
         }
     }
 
-    fn is_closer(
-        &mut self,
-        token: &Token,
-        next_token: &Token,
-        next_token_no_white_space: &Token,
-        bracket_depths: &BrackDepths,
-    ) -> bool {
+    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+        let token = &tokens[cursor];
+
         if self.curly_depth == -1 {
             self.curly_depth = bracket_depths.curly;
         }
@@ -53,10 +50,14 @@ impl NodeParser for LiaEquation {
 
     fn parse(
         &mut self,
-        tokens: TokenList,
+        tokens: &[Token],
+        range_start: usize,
+        range_end: usize,
         indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
+        let tokens = &tokens[range_start..=range_end];
+
         let mut asterisk = false;
         let mut open_pos = 1;
         let len = tokens.len();

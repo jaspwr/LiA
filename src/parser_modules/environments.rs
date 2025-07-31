@@ -1,10 +1,8 @@
 use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
-use crate::document::{DocSection, TexEnvironment};
-use crate::parse::{
-    node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
-};
+use crate::document::{DocSection, TexEnvironment, Text};
+use crate::parse::{node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult};
 use crate::token::*;
 use crate::tokenize::TokenList;
 use crate::utils::format_error_string;
@@ -18,10 +16,13 @@ pub struct LiaEnvParser {
 impl NodeParser for LiaEnvParser {
     fn is_opener(
         &mut self,
-        token: &Token,
+        tokens: &[Token],
+        cursor: usize,
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        let token = &tokens[cursor];
+
         self.curly_depth = -1;
         match token {
             Token::LiaKeyword(k, _) => k == "env",
@@ -29,16 +30,15 @@ impl NodeParser for LiaEnvParser {
         }
     }
 
-    fn is_closer(
-        &mut self,
-        token: &Token,
-        next_token: &Token,
-        next_token_no_white_space: &Token,
-        bracket_depths: &BrackDepths,
-    ) -> bool {
+    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+        let token = &tokens[cursor];
+
         if self.curly_depth == -1 {
             self.curly_depth = bracket_depths.curly;
         }
+    
+        // println!("       {:?} {}", token, bracket_depths.curly);
+
         match token {
             Token::Misc(t, _) => t == "}" && bracket_depths.curly == self.curly_depth,
             _ => false,
@@ -47,10 +47,16 @@ impl NodeParser for LiaEnvParser {
 
     fn parse(
         &mut self,
-        tokens: TokenList,
+        tokens: &[Token],
+        range_start: usize,
+        range_end: usize,
         indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
+        let tokens = &tokens[range_start..=range_end];
+
+        // println!("{:?}", tokens);
+
         let mut command_pos = 1;
         let len = tokens.len();
         while command_pos < len {
@@ -88,11 +94,33 @@ impl NodeParser for LiaEnvParser {
             }
         }
         command_pos += 1;
+
+        if command == "verbatim" {
+            return Ok((
+                vec![Rc::new(TexEnvironment {
+                    name: command,
+                    args: vec![],
+                    children: vec![Rc::new(Text {
+                        text: tokens
+                            .iter()
+                            .skip(command_pos)
+                            .take(len - 2)
+                            .map(Token::stringify)
+                            .collect::<Vec<_>>()
+                            .join(""),
+                    })],
+                })],
+                DocSection::Document,
+            ));
+        }
+
         let children = node_list(tokens, command_pos, len - 1, other_doc_locations)?;
+
         if command == "document" {
             // LiA adds the document macro implicitly, ignore existing document macro.
             return Ok((children, DocSection::Imports));
         }
+
         Ok((
             vec![Rc::new(TexEnvironment {
                 name: command,

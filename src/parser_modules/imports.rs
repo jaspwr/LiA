@@ -12,43 +12,47 @@ pub struct LiaUseParser {
     curly_depth: i32,
 }
 
-#[allow(unused)]
 impl NodeParser for LiaUseParser {
     fn is_opener(
         &mut self,
-        token: &Token,
-        identation: i32,
-        other_doc_locations: &mut CompilerGlobals,
+        tokens: &[Token],
+        cursor: usize,
+        _identation: i32,
+        _other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
         self.curly_depth = -1;
-        match token {
+        match &tokens[cursor] {
             Token::LiaKeyword(k, _) => k == "use",
             _ => false,
         }
     }
 
-    fn is_closer(
-        &mut self,
-        token: &Token,
-        next_token: &Token,
-        next_token_no_white_space: &Token,
-        bracket_depths: &BrackDepths,
-    ) -> bool {
-        if self.curly_depth == -1 {
-            self.curly_depth = bracket_depths.curly;
-        }
-        match token {
-            Token::Newline => bracket_depths.curly == self.curly_depth,
-            _ => false,
-        }
-    }
+    // fn is_closer(
+    //     &mut self,
+    //     token: &Token,
+    //     next_token: &Token,
+    //     next_token_no_white_space: &Token,
+    //     bracket_depths: &BrackDepths,
+    // ) -> bool {
+    //     if self.curly_depth == -1 {
+    //         self.curly_depth = bracket_depths.curly;
+    //     }
+    //     match token {
+    //         Token::Newline => bracket_depths.curly == self.curly_depth,
+    //         _ => false,
+    //     }
+    // }
 
     fn parse(
         &mut self,
-        tokens: TokenList,
+        tokens: &[Token],
+        range_start: usize,
+        range_end: usize,
         indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
+        let tokens = &tokens[range_start..=range_end];
+
         let mut imports: Vec<ArgList> = Vec::new();
 
         let len = tokens.len();
@@ -88,6 +92,18 @@ impl NodeParser for LiaUseParser {
             }));
         });
         Ok((ret, DocSection::Imports))
+    }
+
+    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+        let token = &tokens[cursor];
+            
+        if self.curly_depth == -1 {
+            self.curly_depth = bracket_depths.curly;
+        }
+        match token {
+            Token::Newline => bracket_depths.curly == self.curly_depth,
+            _ => false,
+        }
     }
 }
 

@@ -18,14 +18,16 @@ pub struct BoldItalic {
     b_or_i: Option<BOrI>,
 }
 
-#[allow(unused)]
 impl NodeParser for BoldItalic {
     fn is_opener(
         &mut self,
-        token: &Token,
+        tokens: &[Token],
+        cursor: usize,
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        let token = &tokens[cursor];
+
         self.start = true;
         self.b_or_i = None;
         if self.end {
@@ -49,13 +51,9 @@ impl NodeParser for BoldItalic {
         }
     }
 
-    fn is_closer(
-        &mut self,
-        token: &Token,
-        next_token: &Token,
-        next_token_no_white_space: &Token,
-        bracket_depths: &BrackDepths,
-    ) -> bool {
+    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+        let token = &tokens[cursor];
+
         let mut ret = false;
         if !self.start {
             match token {
@@ -74,10 +72,14 @@ impl NodeParser for BoldItalic {
 
     fn parse(
         &mut self,
-        tokens: TokenList,
+        tokens: &[Token],
+        range_start: usize,
+        range_end: usize,
         indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
+        let tokens = &tokens[range_start..=range_end];
+
         self.end = true;
         let len = tokens.len();
         Ok((

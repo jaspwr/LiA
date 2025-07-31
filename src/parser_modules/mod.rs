@@ -8,3 +8,4 @@ pub mod list;
 pub mod section;
 pub mod tex_command;
 pub mod variables;
+pub mod inline_code;

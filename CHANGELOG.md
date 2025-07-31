@@ -1,2 +1,3 @@
 # Changelog
-* Allowed escaping of `@`
+* Keep formatting in verbatim env
+* Backticks for `texttt`

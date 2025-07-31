@@ -12,15 +12,15 @@ fn classify_char(c: &char) -> CharGroup {
     match c {
         ' ' | '\t' | '\n' | '\r' | '\x0C' | '\x0B' => CharGroup::Whitespace,
         '(' | ')' | '{' | '}' | '[' | ']' => CharGroup::Bracket,
-        '=' | '>' | ',' | '#' | '*' | ':' | '%' | '<' | '~' | '!' | ';' | '+' | '-' | '/' | '^'
+        '=' | '>' | ',' | '#' | '*' | ':' | '%' | '<' | '~' | '!' | ';' | '+' | '-' | '/' | '^' | '`'
         | '_' | '$' => CharGroup::Symbol,
         _ => CharGroup::String,
     }
 }
 
-pub type TokenList = Vec<Token>;
+pub type TokenList<'a> = &'a [Token];
 
-pub fn to_tokens(input_lia: String) -> TokenList {
+pub fn to_tokens(input_lia: String) -> Vec<Token> {
     let mut ret = Vec::<Token>::new();
     let mut current_token = String::new();
     let mut pre_char_group = CharGroup::Whitespace;

@@ -9,27 +9,25 @@ use crate::tokenize::TokenList;
 #[derive(Default)]
 pub struct Comment {}
 
-#[allow(unused)]
 impl NodeParser for Comment {
     fn is_opener(
         &mut self,
-        token: &Token,
+        tokens: &[Token],
+        cursor: usize,
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        let token = &tokens[cursor];
+
         match token {
             Token::Misc(text, _) => text == "%",
             _ => false,
         }
     }
 
-    fn is_closer(
-        &mut self,
-        token: &Token,
-        next_token: &Token,
-        next_token_no_white_space: &Token,
-        bracket_depths: &BrackDepths,
-    ) -> bool {
+    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+        let token = &tokens[cursor];
+
         match token {
             Token::Newline => true,
             _ => false,
@@ -38,9 +36,11 @@ impl NodeParser for Comment {
 
     fn parse(
         &mut self,
-        tokens: TokenList,
-        indentation_type: Option<IndentationType>,
-        other_doc_locations: &mut CompilerGlobals,
+        _tokens: &[Token],
+        _range_start: usize,
+        _range_end: usize,
+        _indentation_type: Option<IndentationType>,
+        _other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
         Ok((
             vec![Rc::new(Text {

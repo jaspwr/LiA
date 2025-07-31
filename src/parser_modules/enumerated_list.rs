@@ -2,9 +2,7 @@ use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
 use crate::document::{DocSection, Node, TexEnvironment, Text};
-use crate::parse::{
-    node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
-};
+use crate::parse::{node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult};
 use crate::token::*;
 use crate::tokenize::TokenList;
 use crate::utils::{count_indentation, delta_bracket_depth, format_error_string};
@@ -16,14 +14,16 @@ pub struct LiaMardownEnumListParser {
     curly_depth: i32,
 }
 
-#[allow(unused)]
 impl NodeParser for LiaMardownEnumListParser {
     fn is_opener(
         &mut self,
-        token: &Token,
+        tokens: &[Token],
+        cursor: usize,
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        let token = &tokens[cursor];
+
         self.curly_depth = -1;
         if !other_doc_locations
             .feature_status_list
@@ -36,7 +36,7 @@ impl NodeParser for LiaMardownEnumListParser {
             self.not_start_of_line = false;
             return false;
         } else {
-            if (!self.not_start_of_line) {
+            if !self.not_start_of_line {
                 if let Token::Whitespace(_) = token {
                 } else {
                     self.not_start_of_line = true;
@@ -58,13 +58,11 @@ impl NodeParser for LiaMardownEnumListParser {
         }
     }
 
-    fn is_closer(
-        &mut self,
-        token: &Token,
-        next_token: &Token,
-        next_token_no_white_space: &Token,
-        bracket_depths: &BrackDepths,
-    ) -> bool {
+    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+        let token = &tokens[cursor];
+        let next_token_no_white_space =
+            &crate::utils::move_past_whitespace(tokens, cursor + 1).unwrap_or(Token::Newline);
+
         if self.curly_depth == -1 {
             self.curly_depth = bracket_depths.curly;
         }
@@ -80,15 +78,19 @@ impl NodeParser for LiaMardownEnumListParser {
 
     fn parse(
         &mut self,
-        tokens: TokenList,
+        tokens: &[Token],
+        range_start: usize,
+        range_end: usize,
         indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
+        let tokens = &tokens[range_start..=range_end];
+
         let mut indentation: usize = self.initial_indentation_depth;
         let mut indentation_type = indentation_type;
         let mut pre_indentation = self.initial_indentation_depth;
         let mut item_count = 0;
-        let mut inner_nodes: TokenList = vec![Token::Newline];
+        let mut inner_nodes: Vec<Token> = vec![Token::Newline];
         let mut brack_depth = BrackDepths::default();
         for i in 0..tokens.len() {
             brack_depth += delta_bracket_depth(&tokens[i]);
@@ -105,7 +107,7 @@ impl NodeParser for LiaMardownEnumListParser {
                             loc,
                             &mut inner_nodes,
                             i,
-                            &tokens,
+                            tokens,
                         ) {
                             return value;
                         }
@@ -127,12 +129,7 @@ impl NodeParser for LiaMardownEnumListParser {
                 Rc::new(TexEnvironment {
                     name: "enumerate".to_string(),
                     args: vec![],
-                    children: node_list(
-                        inner_nodes.clone(),
-                        0,
-                        inner_nodes.len(),
-                        other_doc_locations,
-                    )?,
+                    children: node_list(&inner_nodes, 0, inner_nodes.len(), other_doc_locations)?,
                 }),
                 Rc::new(Text {
                     text: "\n".to_string(),
@@ -150,7 +147,7 @@ fn list_item(
     loc: &Location,
     inner_nodes: &mut Vec<Token>,
     i: usize,
-    tokens: &Vec<Token>,
+    tokens: TokenList,
 ) -> Option<Result<(Vec<Rc<dyn Node>>, DocSection), String>> {
     *item_count += 1;
     if indentation > *pre_indentation {

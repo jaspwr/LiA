@@ -2,9 +2,7 @@ use std::rc::Rc;
 
 use crate::bracket_depth::BrackDepths;
 use crate::document::{DocSection, Node, TexCommand, TexEnvironment, Text};
-use crate::parse::{
-    node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult,
-};
+use crate::parse::{node_list, CompilerGlobals, IndentationType, NodeParser, ParseResult};
 use crate::token::*;
 use crate::tokenize::TokenList;
 use crate::utils::parse_args;
@@ -32,14 +30,16 @@ pub struct TexCommandParser {
     next: bool,
 }
 
-#[allow(unused)]
 impl NodeParser for TexCommandParser {
     fn is_opener(
         &mut self,
-        token: &Token,
+        tokens: &[Token],
+        cursor: usize,
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        let token = &tokens[cursor];
+
         self.env_parsing_state = EnvParsingState::NotEnv;
         self.env_depth = 0;
         self.curly_depth = -1;
@@ -60,13 +60,12 @@ impl NodeParser for TexCommandParser {
         }
     }
 
-    fn is_closer(
-        &mut self,
-        token: &Token,
-        next_token: &Token,
-        next_token_no_white_space: &Token,
-        bracket_depths: &BrackDepths,
-    ) -> bool {
+    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+        let token = &tokens[cursor];
+        let next_token_no_white_space =
+            &crate::utils::move_past_whitespace(tokens, cursor + 1).unwrap_or(Token::Newline);
+        let next_token = &tokens.get(cursor + 1).unwrap_or(&Token::Newline);
+
         if self.curly_depth == -1 {
             self.curly_depth = bracket_depths.curly;
         }
@@ -173,13 +172,17 @@ impl NodeParser for TexCommandParser {
 
     fn parse(
         &mut self,
-        tokens: TokenList,
+        tokens: &[Token],
+        range_start: usize,
+        range_end: usize,
         indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
+        let tokens = &tokens[range_start..=range_end];
+
         if self.env_parsing_state != EnvParsingState::NotEnv {
             // For environments
-            return self.parse_as_env(&tokens, other_doc_locations);
+            return self.parse_as_env(tokens, other_doc_locations);
         }
         self.parse_as_regular_tex_command(tokens, other_doc_locations)
     }
@@ -188,7 +191,7 @@ impl NodeParser for TexCommandParser {
 impl TexCommandParser {
     fn parse_as_env(
         &mut self,
-        tokens: &Vec<Token>,
+        tokens: &[Token],
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
         let edge_size = if self.env_parsing_state == EnvParsingState::SquareBracketEquationEnv {
@@ -219,7 +222,7 @@ impl TexCommandParser {
 
     fn parse_as_regular_tex_command(
         &mut self,
-        tokens: Vec<Token>,
+        tokens: &[Token],
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
         let command = match &tokens[0] {
@@ -242,7 +245,7 @@ impl TexCommandParser {
                 args: vec![],
             }) as Rc<dyn Node>];
             v.extend(node_list(
-                tokens.clone(),
+                tokens,
                 1,
                 tokens.len(),
                 other_doc_locations,

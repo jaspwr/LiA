@@ -7,7 +7,7 @@ use crate::parse::{
 };
 use crate::token::*;
 use crate::tokenize::TokenList;
-use crate::utils::{count_indentation, delta_bracket_depth, format_error_string};
+use crate::utils::{count_indentation, delta_bracket_depth, format_error_string, move_past_whitespace};
 
 #[derive(Default)]
 pub struct LiaMardownListParser {
@@ -19,11 +19,15 @@ pub struct LiaMardownListParser {
 impl NodeParser for LiaMardownListParser {
     fn is_opener(
         &mut self,
-        token: &Token,
+        tokens: &[Token],
+        cursor: usize,
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+
+        let token = &tokens[cursor];
         self.curly_depth = -1;
+
         match token {
             Token::LiaMarkDown(text, _) => {
                 if text == "*" {
@@ -37,13 +41,10 @@ impl NodeParser for LiaMardownListParser {
         }
     }
 
-    fn is_closer(
-        &mut self,
-        token: &Token,
-        next_token: &Token,
-        next_token_no_white_space: &Token,
-        bracket_depths: &BrackDepths,
-    ) -> bool {
+    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+        let token = &tokens[cursor];
+        let next_token_no_white_space = &crate::utils::move_past_whitespace(tokens, cursor + 1).unwrap_or(Token::Newline);
+
         if self.curly_depth == -1 {
             self.curly_depth = bracket_depths.curly;
         }
@@ -59,15 +60,19 @@ impl NodeParser for LiaMardownListParser {
 
     fn parse(
         &mut self,
-        tokens: TokenList,
+        tokens: &[Token],
+        range_start: usize,
+        range_end: usize,
         indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
+        let tokens = &tokens[range_start..=range_end];
+
         let mut indentation: usize = self.initial_indentation_depth;
         let mut indentation_type = indentation_type;
         let mut pre_indentation = self.initial_indentation_depth;
         let mut item_count = 0;
-        let mut inner_nodes: TokenList = vec![Token::Newline];
+        let mut inner_nodes: Vec<Token> = vec![Token::Newline];
         let mut brack_depth = BrackDepths::default();
         for i in 0..tokens.len() {
             brack_depth += delta_bracket_depth(&tokens[i]);
@@ -107,7 +112,7 @@ impl NodeParser for LiaMardownListParser {
                     name: "itemize".to_string(),
                     args: vec![],
                     children: node_list(
-                        inner_nodes.clone(),
+                        &inner_nodes,
                         0,
                         inner_nodes.len(),
                         other_doc_locations,
@@ -129,7 +134,7 @@ fn list_item(
     loc: &Location,
     inner_nodes: &mut Vec<Token>,
     i: usize,
-    tokens: &Vec<Token>,
+    tokens: &TokenList,
 ) -> Option<Result<(Vec<Rc<dyn Node>>, DocSection), String>> {
     *item_count += 1;
     if indentation > *pre_indentation {

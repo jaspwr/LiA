@@ -12,14 +12,16 @@ pub struct LiaMarkDownSections {
     curly_depth: i32,
 }
 
-#[allow(unused)]
 impl NodeParser for LiaMarkDownSections {
     fn is_opener(
         &mut self,
-        token: &Token,
+        tokens: &[Token],
+        cursor: usize,
         identation: i32,
         other_doc_locations: &mut CompilerGlobals,
     ) -> bool {
+        let token = &tokens[cursor];
+
         self.curly_depth = -1;
         match token {
             Token::LiaMarkDown(text, _) => text.starts_with("#"),
@@ -27,13 +29,8 @@ impl NodeParser for LiaMarkDownSections {
         }
     }
 
-    fn is_closer(
-        &mut self,
-        token: &Token,
-        next_token: &Token,
-        next_token_no_white_space: &Token,
-        bracket_depths: &BrackDepths,
-    ) -> bool {
+    fn is_closer(&mut self, tokens: &[Token], cursor: usize, bracket_depths: &BrackDepths) -> bool {
+        let token = &tokens[cursor];
         if self.curly_depth == -1 {
             self.curly_depth = bracket_depths.curly;
         }
@@ -45,10 +42,14 @@ impl NodeParser for LiaMarkDownSections {
 
     fn parse(
         &mut self,
-        tokens: TokenList,
+        tokens: &[Token],
+        range_start: usize,
+        range_end: usize,
         indentation_type: Option<IndentationType>,
         other_doc_locations: &mut CompilerGlobals,
     ) -> ParseResult {
+        let tokens = &tokens[range_start..=range_end];
+
         let command = match &tokens[0] {
             Token::LiaMarkDown(hash, loc) => {
                 match hash.as_str() {

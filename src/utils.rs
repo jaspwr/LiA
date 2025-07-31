@@ -88,7 +88,7 @@ pub fn delta_bracket_depth(token: &Token) -> BrackDepths {
     bracket_depths
 }
 
-pub fn count_whitespace(tokens: &TokenList, start: usize) -> usize {
+pub fn count_whitespace(tokens: TokenList, start: usize) -> usize {
     //let mut count = 0;
     let mut count = 1;
     let len = tokens.len();
@@ -153,6 +153,9 @@ pub fn hash_file(path: &String) -> String {
 }
 
 pub fn indent(string: String, indentation: usize, indentation_type: IndentationType) -> String {
+    // // HACK: remove this for now
+    // return string;
+
     let mut ret = String::new();
     for line in string.lines() {
         // Remove random single leading space.
@@ -204,7 +207,7 @@ pub fn strip_tailing_whitespace_and_newlines(string: String) -> String {
     string[..string.len() - white_space_count].to_string()
 }
 
-pub fn untokenise(tokens: &TokenList) -> String {
+pub fn untokenise(tokens: TokenList) -> String {
     let mut ret = String::new();
     for token in tokens {
         ret.push_str(token.stringify().as_str());
@@ -220,4 +223,11 @@ pub fn strip_all_whitespace(string: &str) -> String {
         }
     }
     ret
+}
+
+pub fn move_past_whitespace(tokens: TokenList, mut start: usize) -> Option<Token> {
+    while let Token::Whitespace(_) = &tokens.get(start)? {
+        start += 1;
+    }
+    tokens.get(start).cloned()
 }

@@ -57,6 +57,7 @@ fn test_compilation_result(input_path: String, output_path: String, correct_outp
         debug_printing: false,
         chained_command: None,
         pdflatex: false,
+        html: false,
     };
     match compile(job.clone()) {
         Ok(_) => {

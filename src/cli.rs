@@ -26,6 +26,10 @@ fn parse_flag(flag: &str) -> Result<Flag, String> {
             job.pdflatex = true;
             ShouldContinue::Continues
         }))),
+        "--html" => Ok(Flag::OnlySelf(Rc::new(|job: &mut Job| -> ShouldContinue {
+            job.html = true;
+            ShouldContinue::Continues
+        }))),
         "--watch" | "-w" => Ok(Flag::OnlySelf(Rc::new(|job: &mut Job| -> ShouldContinue {
             job.watches = true;
             println!("Watching \"{}\" for new changes...", job.input_path.clone());

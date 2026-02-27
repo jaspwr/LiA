@@ -14,6 +14,7 @@ pub struct Job {
     pub watches: bool,
     pub debug_printing: bool,
     pub pdflatex: bool,
+    pub html: bool,
 }
 
 pub fn compile(job: Job) -> Result<(), String> {
@@ -72,7 +73,12 @@ fn wait_for_child(child: &mut Result<std::process::Child, std::io::Error>) -> bo
 
 pub fn run_compiler(lia_file: String, job: Job) -> Result<String, String> {
     let tokens = tokenize::to_tokens(lia_file);
+    let html = job.html;
     let doc = parse::parse(&tokens, job)?;
-    let output = doc.codegen();
+    let output = if html {
+        doc.codegen_html()
+    } else {
+        doc.codegen()
+    };
     Ok(output)
 }

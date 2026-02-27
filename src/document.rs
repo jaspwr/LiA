@@ -33,6 +33,7 @@ pub struct TexEnvironment {
 
 pub trait Node {
     fn codegen(&self) -> String;
+    fn codegen_html(&self) -> String;
 }
 
 pub enum ArgType {
